@@ -4,9 +4,11 @@
 💾 Local mode - using SQLite database
 ✅ Database initialized
 🎨 Decor database initialized
-🤖 Agent 'Claw' initialized
-   Mood: sleepy
-   Activity: napping
+🏠 Layered room database initialized
+🤖 Agent 'Celest' initialized
+   Mood: calm
+   Activity: making_tea
+   Room: living_room
 🧠 Memory system initialized
 🔧 Tool framework initialized
 🤖 Agent system initialized
@@ -38,29 +40,13 @@
   POST /api/decor/move           - Move an item
   GET  /api/decor/themes         - Get room themes
 
+
+🏗️  Layered Room Endpoints:
+  GET  /api/room/layers            - Get full room state
+  POST /api/room/layer/:type       - Update layer (floor/wall/window)
+  GET  /api/room/items             - Get items in room
+  POST /api/room/item              - Place item on layer
+  POST /api/room/item/:id/move     - Move item
+  DELETE /api/room/item/:id        - Remove item
+
 🤖 Agent presence loop starting...
-🤖 Mood changed: sleepy → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
