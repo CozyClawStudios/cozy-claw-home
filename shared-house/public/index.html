@@ -605,11 +605,9 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 30%);
+            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 20%);
             padding: 20px;
-            padding-bottom: 25px;
             z-index: 20;
-            min-height: 100px;
         }
 
         .chat-input-wrapper {
@@ -618,8 +616,6 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            flex-shrink: 0;
-            height: 50px;
         }
 
         .chat-input {
@@ -1135,34 +1131,20 @@
         /* Welcome Sticky Note */
         .welcome-note {
             position: absolute;
-            bottom: 10%;
+            top: 15%;
             right: 5%;
-            width: 150px;
-            min-height: 120px;
+            width: 180px;
+            min-height: 150px;
             background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
             color: #1a1a2e;
-            padding: 15px;
+            padding: 20px;
             border-radius: 5px;
             box-shadow: 
                 3px 3px 10px rgba(0,0,0,0.3),
                 inset 0 -20px 20px -20px rgba(0,0,0,0.1);
-            transform: rotate(2deg);
+            transform: rotate(3deg);
             z-index: 5;
             font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
-            animation: fade-in 0.5s ease;
-        }
-
-        @keyframes fade-in {
-            from { opacity: 0; transform: rotate(2deg) translateY(10px); }
-            to { opacity: 1; transform: rotate(2deg) translateY(0); }
-        }
-
-        .welcome-note.hiding {
-            animation: fade-out 0.5s ease forwards;
-        }
-
-        @keyframes fade-out {
-            to { opacity: 0; transform: rotate(2deg) translateY(-10px); }
         }
 
         .welcome-note::before {
@@ -1290,27 +1272,13 @@
 
             <!-- Welcome Sticky Note -->
             <div class="welcome-note" id="welcomeNote">
-                <button class="close-note" onclick="closeWelcomeNote()" title="Close">×</button>
-                <h3 style="font-size: 0.9rem; margin-bottom: 8px; color: #92400e;">Welcome Home! 🏠</h3>
-                <p style="font-size: 0.8rem; line-height: 1.4; color: #78350f;">Chat with Celest and decorate your room!</p>
-                <p style="margin-top: 8px; font-size: 0.7rem; color: #92400e;">Click 🎨 to decorate</p>
+                <button class="close-note" onclick="document.getElementById('welcomeNote').style.display='none'">×</button>
+                <h3>Welcome Home! 🏠</h3>
+                <p>This is your cozy space. Chat with Celest, decorate the room, and make it yours!</p>
+                <p style="margin-top: 10px; font-size: 0.75rem;">Click 🎨 to decorate</p>
             </div>
 
-            <!-- Furniture - Improved Layout -->
-            <div class="furniture sofa" id="sofa" style="left: 10%; bottom: 25%;"></div>
-            <div class="furniture desk" id="desk" style="right: 8%; bottom: 25%;">
-                <div class="laptop" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 1.5rem;">💻</div>
-            </div>
-            <div class="furniture chair" id="chair" style="right: 18%; bottom: 27%;"></div>
-            <div class="furniture plant" id="plant" style="left: 2%; bottom: 22%;">
-                <div class="plant-leaves"></div>
-                <div class="plant-pot"></div>
-            </div>
-            <div class="furniture lamp" id="lamp" style="left: 35%; bottom: 35%;">
-                <div class="lamp-shade"></div>
-                <div class="lamp-pole"></div>
-                <div class="lamp-base"></div>
-            </div>
+            <!-- Furniture - Will be placed dynamically via layer system -->
 
             <!-- The Agent -->
             <div class="agent-container" id="agentContainer">
@@ -1413,8 +1381,6 @@
         </div>
     </div>
 
-    <script src="room-renderer.js"></script>
-    <script src="layer-panel.js"></script>
     <script src="game.js"></script>
 </body>
 </html>
