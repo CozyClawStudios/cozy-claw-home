@@ -602,11 +602,11 @@
         /* Chat Interface */
         .chat-container {
             position: fixed;
-            bottom: 0;
+            bottom: 50px;
             left: 0;
             right: 0;
-            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 20%);
-            padding: 20px;
+            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 30%);
+            padding: 20px 20px 10px;
             z-index: 20;
         }
 
@@ -692,13 +692,14 @@
         /* Message history */
         .message-history {
             max-width: 600px;
-            margin: 0 auto 15px;
-            max-height: 200px;
+            margin: 0 auto 80px;
+            max-height: 35vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding: 0 10px;
+            gap: 8px;
+            padding: 10px;
+            scroll-behavior: smooth;
         }
 
         .message {
