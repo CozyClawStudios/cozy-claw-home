@@ -1046,6 +1046,7 @@
             <span class="status-dot" title="Agent is online"></span>
         </div>
         <div class="header-actions">
+            <button class="btn-icon" onclick="decorPanel.open()" title="Decorate">🎨</button>
             <button class="btn-icon" onclick="toggleMemoryBook()" title="Memory Book">📖</button>
             <button class="btn-icon" onclick="toggleNotesPanel()" title="Notes">📝</button>
             <button class="btn-icon" onclick="toggleToolsPanel()" title="Tools">🔧</button>
@@ -1251,6 +1252,7 @@
     </div>
     
     <script src="/socket.io/socket.io.js"></script>
+    <script src="decor-panel.js"></script>
     <script>
         // Socket connection
         const socket = io();
