@@ -576,6 +576,8 @@
             transition: all 0.3s ease;
             pointer-events: none;
             z-index: 10;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .thought-bubble.visible {
@@ -700,6 +702,7 @@
             gap: 8px;
             padding: 10px;
             scroll-behavior: smooth;
+            width: 100%;
         }
 
         .message {
@@ -708,6 +711,9 @@
             max-width: 80%;
             font-size: 0.95rem;
             animation: message-in 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
 
         @keyframes message-in {

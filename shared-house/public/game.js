@@ -804,28 +804,6 @@ function aiInteractWithItem(itemEmoji) {
     }
     return false;
 }
-    const themeNames = {
-        'cozy': '🏠 Cozy Room',
-        'modern': '🏢 Modern Room',
-        'nature': '🌿 Nature Room',
-        'futuristic': '🚀 Future Room'
-    };
-    if (roomLabel) {
-        roomLabel.textContent = themeNames[themeName] || '🏠 Living Room';
-    }
-    
-    // Save theme preference
-    localStorage.setItem('roomTheme', themeName);
-    
-    // Celest reacts to theme change
-    const reactions = {
-        'cozy': 'So warm and cozy! I love it! 🥰',
-        'modern': 'Very sleek and modern! Nice choice! ✨',
-        'nature': 'Bringing the outdoors in! I feel refreshed! 🌿',
-        'futuristic': 'Whoa, feels like we\'re in space! 🚀'
-    };
-    addMessage('Celest', reactions[themeName] || 'Looking good! ✨', true);
-}
 
 // Load saved theme on page load
 function loadRoomTheme() {
