@@ -9,12 +9,12 @@
 ✅ Database initialized
 🎨 Decor database initialized
 🤖 Agent 'Claw' initialized
-   Mood: content
-   Activity: relaxing
+   Mood: focused
+   Activity: working
 🧠 Memory system initialized
 🔧 Tool framework initialized
 🤖 Agent system initialized
-📬 Message queue initialized: /home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/memory/message-queue
+📬 Message queue initialized: /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/memory/message-queue
 👁️  Watching message queue...
 🌉 ClawBot Bridge initialized
 
@@ -43,17 +43,3 @@
   GET  /api/decor/themes         - Get room themes
 
 🤖 Agent presence loop starting...
-🔌 Bridge: Client connected: IeIRyg4YN3JCFEInAAAB
-🤖 Mood changed: content → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🔌 Bridge: Client disconnected: IeIRyg4YN3JCFEInAAAB
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)
-🤖 Mood changed: sleepy → sleepy (activity)

@@ -389,7 +389,19 @@ const decorPanel = {
                 { emoji: '🕯️', name: 'Candle' },
                 { emoji: '🧸', name: 'Teddy' },
                 { emoji: '🎸', name: 'Guitar' },
-                { emoji: '🏺', name: 'Vase' }
+                { emoji: '🏺', name: 'Vase' },
+                { emoji: '🛏️', name: 'Bed' },
+                { emoji: '📺', name: 'TV' },
+                { emoji: '💻', name: 'Computer' },
+                { emoji: '🪑', name: 'Chair' },
+                { emoji: '📦', name: 'Box' },
+                { emoji: '🏵️', name: 'Flower' },
+                { emoji: '⏰', name: 'Clock' },
+                { emoji: '📷', name: 'Camera' },
+                { emoji: '🎮', name: 'Gamepad' },
+                { emoji: '📻', name: 'Radio' },
+                { emoji: '🍕', name: 'Pizza' },
+                { emoji: '🍹', name: 'Drink' }
             ];
             
             panel.innerHTML = `
@@ -415,6 +427,16 @@ const decorPanel = {
                 </div>
                 <div style="margin-top: 20px; padding: 15px; background: rgba(255,154,158,0.1); border-radius: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
                     💡 Click an item to place it in your room!
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3 style="color: #ff9a9e; font-size: 1rem; margin-bottom: 12px;">🎨 Room Style</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <button onclick="setRoomTheme('cozy')" style="background: #3a3a55; border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🏠 Cozy</button>
+                        <button onclick="setRoomTheme('modern')" style="background: #2a2a3a; border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🏢 Modern</button>
+                        <button onclick="setRoomTheme('nature')" style="background: #2d3d2d; border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🌿 Nature</button>
+                        <button onclick="setRoomTheme('futuristic')" style="background: #0d0d1a; border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🚀 Future</button>
+                    </div>
                 </div>
             `;
             
@@ -493,10 +515,55 @@ const decorPanel = {
     }
 };
 
+// ==================== ROOM THEME FUNCTIONS ====================
+
+function setRoomTheme(themeName) {
+    const room = document.querySelector('.room');
+    const roomLabel = document.getElementById('roomLabel');
+    
+    // Remove existing theme classes
+    room.classList.remove('theme-cozy', 'theme-modern', 'theme-nature', 'theme-futuristic');
+    
+    // Add new theme class
+    room.classList.add(`theme-${themeName}`);
+    
+    // Update room label
+    const themeNames = {
+        'cozy': '🏠 Cozy Room',
+        'modern': '🏢 Modern Room',
+        'nature': '🌿 Nature Room',
+        'futuristic': '🚀 Future Room'
+    };
+    if (roomLabel) {
+        roomLabel.textContent = themeNames[themeName] || '🏠 Living Room';
+    }
+    
+    // Save theme preference
+    localStorage.setItem('roomTheme', themeName);
+    
+    // Celest reacts to theme change
+    const reactions = {
+        'cozy': 'So warm and cozy! I love it! 🥰',
+        'modern': 'Very sleek and modern! Nice choice! ✨',
+        'nature': 'Bringing the outdoors in! I feel refreshed! 🌿',
+        'futuristic': 'Whoa, feels like we\'re in space! 🚀'
+    };
+    addMessage('Celest', reactions[themeName] || 'Looking good! ✨', true);
+}
+
+// Load saved theme on page load
+function loadRoomTheme() {
+    const savedTheme = localStorage.getItem('roomTheme');
+    if (savedTheme) {
+        setRoomTheme(savedTheme);
+    }
+}
+
 // ==================== INITIALIZATION ====================
 
 function init() {
     loadSettings();
+    loadRoomTheme();
     updateMemoryCount();
     
     console.log('🏠 Cozy Claw Home initialized');
