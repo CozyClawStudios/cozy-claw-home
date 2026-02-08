@@ -47,9 +47,28 @@ class RoomRenderer {
             return;
         }
 
+        // Hide old furniture elements that conflict with layer system
+        this.hideLegacyFurniture();
+        
         this.setupLayers();
         this.applyStyles();
         console.log('🏠 RoomRenderer initialized');
+    }
+
+    hideLegacyFurniture() {
+        // Hide the old static furniture so layers work properly
+        const legacyIds = ['sofa', 'desk', 'chair', 'plant', 'lamp'];
+        legacyIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        
+        // Also hide the old welcome note if it exists
+        const note = document.getElementById('welcomeNote');
+        if (note) {
+            // Keep note visible but ensure it's above layers
+            note.style.zIndex = '50';
+        }
     }
 
     setupLayers() {

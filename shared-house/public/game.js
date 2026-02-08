@@ -38,6 +38,21 @@ function enterHouse() {
             startTutorialHighlight();
         }, 1500);
     }
+    
+    // Auto-dismiss welcome note after 5 seconds
+    setTimeout(() => {
+        closeWelcomeNote();
+    }, 5000);
+}
+
+function closeWelcomeNote() {
+    const note = document.getElementById('welcomeNote');
+    if (note && note.style.display !== 'none') {
+        note.classList.add('hiding');
+        setTimeout(() => {
+            note.style.display = 'none';
+        }, 500);
+    }
 }
 
 function showWelcomeMessage() {
@@ -584,6 +599,7 @@ document.addEventListener('DOMContentLoaded', init);
 // ==================== EXPORTS ====================
 window.app = app;
 window.enterHouse = enterHouse;
+window.closeWelcomeNote = closeWelcomeNote;
 window.sendMessage = sendMessage;
 window.handleKeyPress = handleKeyPress;
 window.toggleVoice = toggleVoice;
