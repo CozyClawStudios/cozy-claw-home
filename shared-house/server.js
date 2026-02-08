@@ -1,13 +1,21 @@
 /**
- * Companion House - Personal AI Agent Platform
+ * Cozy Claw Home v4.0 - Personal AI Companion Platform
  * A cozy home where your AI companion lives 24/7
  * 
+ * v4.0 FEATURES:
+ * - Avatar system with 6 unique characters
+ * - Sticky notes system
+ * - Daily memory tracking
+ * - Natural dialogue engine
+ * - ClawBot integration
+ * - Visual activity system
+ * - Local-first architecture
+ * 
  * CORE PHILOSOPHY:
- * - Not a game, but a companion
- * - Agent has persistent memory and personality
- * - Integrates with real-world tools (calendar, trading, weather)
- * - Visual representation of agent's activities
- * - Agent initiates conversations based on context
+ * - Local-first: No cloud dependencies required
+ * - Companion-focused: Not a game, but a friend
+ * - Persistent memory and personality
+ * - Optional ClawBot integration
  */
 
 const express = require('express');
@@ -18,53 +26,66 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
+const fs = require('fs');
 
 // Agent modules
 const AgentCore = require('./agent/core');
 const AgentMemory = require('./agent/memory');
 const ToolFramework = require('./agent/tools');
 
+// Load config
+const CONFIG = loadConfig();
+
 const app = express();
 const server = http.createServer(app);
 
-// ==================== CONFIGURATION ====================
+function loadConfig() {
+    const configPath = path.join(__dirname, 'config.json');
+    const defaultConfig = {
+        PORT: process.env.PORT || 3000,
+        DB_PATH: process.env.DB_PATH || path.join(__dirname, 'memory', 'agent_memory.db'),
+        JWT_SECRET: process.env.JWT_SECRET || 'companion-secret-change-in-production',
+        AGENT_LOOP_INTERVAL: 5000,
+        AGENT_PRESENCE_ENABLED: true,
+        DAILY_CHECKIN_ENABLED: true,
+        DAILY_CHECKIN_TIME: '20:00',
+        USE_CLAWBOT_PERSONALITY: false,
+        CLAWBOT_WS_URL: process.env.CLAWBOT_WS_URL || 'ws://localhost:8080/clawbot',
+        CLAWBOT_API_KEY: process.env.CLAWBOT_API_KEY || '',
+        DEPLOYMENT_MODE: process.env.DEPLOYMENT_MODE || 'local',
+        FIRST_RUN: true
+    };
+    
+    if (fs.existsSync(configPath)) {
+        try {
+            const userConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            return { ...defaultConfig, ...userConfig };
+        } catch (err) {
+            console.warn('Failed to load config.json, using defaults');
+        }
+    }
+    
+    // Save default config
+    fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2));
+    return defaultConfig;
+}
 
-const CONFIG = {
-    PORT: process.env.PORT || 3000,
-    DB_PATH: process.env.DB_PATH || path.join(__dirname, 'memory', 'agent_memory.db'),
-    JWT_SECRET: process.env.JWT_SECRET || 'companion-secret-change-in-production',
-    AGENT_LOOP_INTERVAL: 5000, // 5 seconds
-    AGENT_PRESENCE_ENABLED: true,
-    
-    // Deployment mode: 'local' | 'hosted'
-    DEPLOYMENT_MODE: process.env.DEPLOYMENT_MODE || 'local',
-    
-    // For hosted mode
-    CLOUD_DB_URL: process.env.CLOUD_DB_URL,
-    SUBSCRIPTION_TIER: process.env.SUBSCRIPTION_TIER || 'free'
-};
+function saveConfig() {
+    const configPath = path.join(__dirname, 'config.json');
+    fs.writeFileSync(configPath, JSON.stringify(CONFIG, null, 2));
+}
 
 // ==================== DATABASE SETUP ====================
 
 class Database {
     constructor() {
         this.db = null;
-        this.mode = CONFIG.DEPLOYMENT_MODE;
     }
     
     async init() {
-        if (this.mode === 'hosted' && CONFIG.CLOUD_DB_URL) {
-            // Hosted mode - would connect to cloud database
-            console.log('☁️  Hosted mode - connecting to cloud database...');
-            // Implementation depends on cloud provider (PostgreSQL, MongoDB, etc.)
-            throw new Error('Hosted mode not yet implemented. Use local mode.');
-        }
-        
-        // Local SQLite mode
-        console.log('💾 Local mode - using SQLite database');
+        console.log('💾 Initializing database...');
         
         // Ensure memory directory exists
-        const fs = require('fs');
         const memoryDir = path.dirname(CONFIG.DB_PATH);
         if (!fs.existsSync(memoryDir)) {
             fs.mkdirSync(memoryDir, { recursive: true });
@@ -89,8 +110,10 @@ class Database {
                 mood TEXT DEFAULT 'content',
                 activity TEXT DEFAULT 'relaxing',
                 location TEXT DEFAULT 'sofa',
+                avatar_key TEXT DEFAULT 'robot',
                 last_wakeup TEXT,
                 last_sleep TEXT,
+                last_session_end TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
@@ -98,35 +121,71 @@ class Database {
             -- User profile and preferences
             CREATE TABLE IF NOT EXISTS user_profile (
                 id INTEGER PRIMARY KEY,
-                name TEXT,
+                name TEXT DEFAULT 'Friend',
                 timezone TEXT DEFAULT 'UTC',
                 wake_time TEXT DEFAULT '08:00',
                 sleep_time TEXT DEFAULT '23:00',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
             
-            -- Long-term memories about user
+            -- User preferences (key-value)
+            CREATE TABLE IF NOT EXISTS user_preferences (
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                avatar_key TEXT
+            );
+            
+            -- Long-term memories
             CREATE TABLE IF NOT EXISTS memories (
                 id TEXT PRIMARY KEY,
-                type TEXT NOT NULL, -- 'fact', 'preference', 'routine', 'event', 'conversation'
+                type TEXT NOT NULL,
                 content TEXT NOT NULL,
-                importance REAL DEFAULT 1.0, -- 0.0 to 10.0
-                confidence REAL DEFAULT 1.0, -- 0.0 to 1.0
-                context TEXT, -- JSON with additional context
-                source TEXT, -- 'user_told', 'inferred', 'tool_data'
+                importance REAL DEFAULT 1.0,
+                confidence REAL DEFAULT 1.0,
+                context TEXT,
+                source TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 last_accessed TEXT,
                 access_count INTEGER DEFAULT 0
+            );
+            
+            -- Sticky notes
+            CREATE TABLE IF NOT EXISTS sticky_notes (
+                id TEXT PRIMARY KEY,
+                type TEXT NOT NULL,
+                content TEXT NOT NULL,
+                location TEXT DEFAULT 'wall',
+                status TEXT DEFAULT 'active',
+                importance INTEGER DEFAULT 5,
+                color TEXT DEFAULT '#ffeb3b',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                read_at TEXT,
+                archived_at TEXT,
+                expires_at TEXT
+            );
+            
+            -- Daily memories
+            CREATE TABLE IF NOT EXISTS daily_memories (
+                id TEXT PRIMARY KEY,
+                date TEXT UNIQUE NOT NULL,
+                mood TEXT,
+                day_rating INTEGER,
+                events TEXT,
+                people_mentioned TEXT,
+                stress_level INTEGER,
+                highlights TEXT,
+                conversation_summary TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
             
             -- Conversation history
             CREATE TABLE IF NOT EXISTS conversations (
                 id TEXT PRIMARY KEY,
                 timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-                role TEXT NOT NULL, -- 'user', 'agent', 'system'
+                role TEXT NOT NULL,
                 content TEXT NOT NULL,
-                context TEXT, -- JSON with tool results, mood, etc.
-                sentiment REAL -- -1.0 to 1.0
+                context TEXT,
+                sentiment REAL
             );
             
             -- Agent activities log
@@ -137,18 +196,18 @@ class Database {
                 mood TEXT,
                 started_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 ended_at TEXT,
-                triggered_by TEXT -- 'routine', 'user_action', 'tool_alert', 'random'
+                triggered_by TEXT
             );
             
             -- Tool integrations
             CREATE TABLE IF NOT EXISTS tools (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
-                type TEXT NOT NULL, -- 'trading', 'calendar', 'weather', 'news'
-                config TEXT, -- JSON with API keys, settings
-                enabled BOOLEAN DEFAULT 1,
+                type TEXT NOT NULL,
+                config TEXT,
+                enabled BOOLEAN DEFAULT 0,
                 last_check TEXT,
-                check_interval INTEGER DEFAULT 300 -- seconds
+                check_interval INTEGER DEFAULT 300
             );
             
             -- Tool data cache
@@ -156,12 +215,12 @@ class Database {
                 id INTEGER PRIMARY KEY,
                 tool_id TEXT,
                 data_type TEXT,
-                data TEXT, -- JSON
+                data TEXT,
                 fetched_at TEXT DEFAULT CURRENT_TIMESTAMP,
                 expires_at TEXT
             );
             
-            -- Decor and personalization
+            -- Room decor
             CREATE TABLE IF NOT EXISTS room_decor (
                 id INTEGER PRIMARY KEY,
                 item_type TEXT NOT NULL,
@@ -172,11 +231,13 @@ class Database {
                 unlocked_at TEXT DEFAULT CURRENT_TIMESTAMP
             );
             
-            -- Create indexes
+            -- Indexes
             CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(type);
             CREATE INDEX IF NOT EXISTS idx_memories_importance ON memories(importance DESC);
             CREATE INDEX IF NOT EXISTS idx_conversations_time ON conversations(timestamp);
             CREATE INDEX IF NOT EXISTS idx_activity_log_time ON activity_log(started_at);
+            CREATE INDEX IF NOT EXISTS idx_notes_status ON sticky_notes(status);
+            CREATE INDEX IF NOT EXISTS idx_daily_date ON daily_memories(date);
         `;
         
         const statements = schema.split(';').filter(s => s.trim());
@@ -184,10 +245,8 @@ class Database {
             await this.run(statement);
         }
         
-        // Initialize default agent state if not exists
-        await this.run(`INSERT OR IGNORE INTO agent_state (id, mood, activity, location) VALUES (1, 'content', 'relaxing', 'sofa')`);
-        
-        // Initialize default user profile if not exists
+        // Initialize default data if not exists
+        await this.run(`INSERT OR IGNORE INTO agent_state (id, mood, activity, location, avatar_key) VALUES (1, 'content', 'relaxing', 'sofa', 'robot')`);
         await this.run(`INSERT OR IGNORE INTO user_profile (id, name) VALUES (1, 'Friend')`);
     }
     
@@ -235,7 +294,6 @@ const io = new Server(server, {
     pingInterval: 25000
 });
 
-// Track connected clients
 const clients = new Map();
 
 io.on('connection', (socket) => {
@@ -254,14 +312,44 @@ io.on('connection', (socket) => {
         socket.emit('memory:stats', stats);
     });
     
+    // Send active notes
+    agentMemory.getDisplayNotes().then(notes => {
+        socket.emit('notes:list', notes);
+    });
+    
     // Handle user chat
     socket.on('user:message', async (data) => {
-        const response = await agentCore.handleUserMessage(data.message, {
-            clientId: socket.id
-        });
+        let response;
+        
+        // Check if ClawBot should handle this
+        if (CONFIG.USE_CLAWBOT_PERSONALITY && toolFramework.isClawBotAvailable()) {
+            const clawbotResult = await toolFramework.queryClawBot(data.message, {
+                clientId: socket.id,
+                agentState: agentCore.getState()
+            });
+            
+            if (clawbotResult.success) {
+                response = {
+                    text: clawbotResult.response.text,
+                    mood: clawbotResult.response.mood || agentCore.state.mood,
+                    activity: agentCore.state.activity,
+                    fromClawBot: true
+                };
+            } else {
+                // Fallback to local
+                response = await agentCore.handleUserMessage(data.message, {
+                    clientId: socket.id
+                });
+            }
+        } else {
+            response = await agentCore.handleUserMessage(data.message, {
+                clientId: socket.id
+            });
+        }
+        
         socket.emit('agent:message', response);
         
-        // Broadcast to all clients so they see agent activity
+        // Broadcast activity
         io.emit('agent:activity', {
             type: 'talking',
             message: response.text.substring(0, 100) + (response.text.length > 100 ? '...' : '')
@@ -278,32 +366,110 @@ io.on('connection', (socket) => {
         });
     });
     
-    // Handle requesting memory info
+    // Handle agent movement
+    socket.on('agent:move', async (data) => {
+        const { location, activity } = data;
+        await agentCore.setActivity(activity || 'wandering', location);
+        io.emit('agent:state', agentCore.getState());
+    });
+    
+    // Handle memory queries
     socket.on('memory:query', async (data) => {
         const memories = await agentMemory.query(data.query, data.limit || 5);
         socket.emit('memory:results', memories);
     });
     
-    // Handle tool refresh request
+    // Handle daily memory recording
+    socket.on('daily:record', async (data) => {
+        const id = await agentMemory.recordDailyMemory(data);
+        socket.emit('daily:recorded', { success: true, id });
+        
+        // Update stats
+        const stats = await agentMemory.getStats();
+        io.emit('memory:stats', stats);
+    });
+    
+    // Handle memory book request
+    socket.on('memorybook:get', async () => {
+        const bookData = await agentMemory.getMemoryBookData();
+        socket.emit('memorybook:data', bookData);
+    });
+    
+    // Handle notes
+    socket.on('notes:get', async () => {
+        const notes = await agentMemory.getDisplayNotes();
+        socket.emit('notes:list', notes);
+    });
+    
+    socket.on('notes:read', async (data) => {
+        await agentMemory.markNoteRead(data.id);
+        const notes = await agentMemory.getDisplayNotes();
+        io.emit('notes:list', notes);
+    });
+    
+    socket.on('notes:create', async (data) => {
+        const id = await agentMemory.addNote(data);
+        const notes = await agentMemory.getDisplayNotes();
+        io.emit('notes:list', notes);
+    });
+    
+    // Handle avatar selection
+    socket.on('avatar:set', async (data) => {
+        const success = agentCore.setAvatar(data.avatarKey);
+        if (success) {
+            await database.run(
+                'UPDATE agent_state SET avatar_key = ? WHERE id = 1',
+                [data.avatarKey]
+            );
+            io.emit('agent:state', agentCore.getState());
+        }
+        socket.emit('avatar:result', { success });
+    });
+    
+    socket.on('avatars:get', () => {
+        socket.emit('avatars:list', agentCore.getAvailableAvatars());
+    });
+    
+    // Handle tool refresh
     socket.on('tools:refresh', async (data) => {
-        const toolId = data.toolId;
-        const result = await toolFramework.refreshTool(toolId);
+        const result = await toolFramework.refreshTool(data.toolId);
         socket.emit('tools:result', result);
     });
     
-    // Handle decor update
-    socket.on('decor:update', async (data) => {
-        await database.run(
-            'INSERT OR REPLACE INTO room_decor (id, item_type, item_key, x, y, layer) VALUES (?, ?, ?, ?, ?, ?)',
-            [data.id, data.itemType, data.itemKey, data.x, data.y, data.layer]
-        );
-        io.emit('decor:changed', data);
+    // Handle user profile updates
+    socket.on('user:update', async (data) => {
+        if (data.name) {
+            await agentCore.setUserName(data.name);
+        }
+        socket.emit('agent:state', agentCore.getState());
+    });
+    
+    // Setup wizard completion
+    socket.on('setup:complete', async (data) => {
+        CONFIG.FIRST_RUN = false;
+        CONFIG.USE_CLAWBOT_PERSONALITY = data.useClawBot || false;
+        saveConfig();
+        
+        if (data.name) {
+            await agentCore.setUserName(data.name);
+        }
+        if (data.avatarKey) {
+            agentCore.setAvatar(data.avatarKey);
+        }
+        
+        socket.emit('setup:done', { success: true });
+        io.emit('agent:state', agentCore.getState());
     });
     
     // Handle disconnection
     socket.on('disconnect', () => {
         console.log('🔌 Client disconnected:', socket.id);
         clients.delete(socket.id);
+        
+        // If last client, record session end
+        if (clients.size === 0) {
+            agentCore.recordSessionEnd();
+        }
     });
 });
 
@@ -317,6 +483,8 @@ class AgentSystem extends EventEmitter {
         this.core = new AgentCore(db);
         this.memory = new AgentMemory(db);
         this.loopInterval = null;
+        this.activityInterval = null;
+        this.dailyCheckinInterval = null;
         this.isRunning = false;
     }
     
@@ -325,7 +493,7 @@ class AgentSystem extends EventEmitter {
         await this.memory.init();
         await this.tools.init();
         
-        console.log('🤖 Agent system initialized');
+        console.log('🤖 Agent system v4.0 initialized');
     }
     
     start() {
@@ -339,15 +507,25 @@ class AgentSystem extends EventEmitter {
             await this.tick();
         }, CONFIG.AGENT_LOOP_INTERVAL);
         
-        // Activity change loop (slower)
-        setInterval(async () => {
+        // Activity change loop
+        this.activityInterval = setInterval(async () => {
             await this.updateActivity();
-        }, 30000); // Every 30 seconds
+        }, 30000);
+        
+        // Daily check-in
+        if (CONFIG.DAILY_CHECKIN_ENABLED) {
+            this.scheduleDailyCheckin();
+        }
         
         // Check for tool alerts
         setInterval(async () => {
             await this.checkToolAlerts();
-        }, 60000); // Every minute
+        }, 60000);
+        
+        // Create welcome note on first run
+        if (CONFIG.FIRST_RUN) {
+            this.createWelcomeNote();
+        }
     }
     
     async tick() {
@@ -356,7 +534,7 @@ class AgentSystem extends EventEmitter {
         const now = new Date();
         
         // Check for time-based routines
-        const currentTime = now.toTimeString().slice(0, 5); // HH:MM
+        const currentTime = now.toTimeString().slice(0, 5);
         const hour = now.getHours();
         
         // Morning greeting
@@ -369,8 +547,13 @@ class AgentSystem extends EventEmitter {
             await this.initiateConversation('evening_goodbye');
         }
         
-        // Emit current state to all clients
+        // Emit current state
         io.emit('agent:state', state);
+        
+        // Occasionally create random observation note
+        if (Math.random() < 0.001) { // Very rare
+            await this.createRandomObservation();
+        }
     }
     
     async updateActivity() {
@@ -381,8 +564,10 @@ class AgentSystem extends EventEmitter {
             { activity: 'looking_out_window', location: 'window', duration: 30 },
             { activity: 'stretching', location: 'center', duration: 15 },
             { activity: 'making_tea', location: 'kitchen', duration: 10 },
+            { activity: 'making_coffee', location: 'kitchen', duration: 10 },
             { activity: 'checking_phone', location: 'sofa', duration: 5 },
-            { activity: 'napping', location: 'sofa', duration: 60 }
+            { activity: 'napping', location: 'sofa', duration: 60 },
+            { activity: 'wandering', location: 'any', duration: 20 }
         ];
         
         const hour = new Date().getHours();
@@ -392,7 +577,7 @@ class AgentSystem extends EventEmitter {
         if (hour >= 22 || hour < 7) {
             validActivities = activities.filter(a => ['napping', 'relaxing', 'looking_out_window'].includes(a.activity));
         } else if (hour >= 9 && hour < 18) {
-            validActivities = activities.filter(a => ['working', 'reading', 'making_tea'].includes(a.activity));
+            validActivities = activities.filter(a => ['working', 'reading', 'making_tea', 'making_coffee'].includes(a.activity));
         }
         
         const newActivity = validActivities[Math.floor(Math.random() * validActivities.length)];
@@ -411,13 +596,15 @@ class AgentSystem extends EventEmitter {
             location: newActivity.location,
             duration: newActivity.duration
         });
+        
+        // Emit state update for visual changes
+        io.emit('agent:state', this.core.getState());
     }
     
     async checkToolAlerts() {
         const alerts = await this.tools.checkAll();
         
         for (const alert of alerts) {
-            // Store in memory
             await this.memory.add({
                 type: 'event',
                 content: alert.message,
@@ -426,25 +613,35 @@ class AgentSystem extends EventEmitter {
                 context: JSON.stringify(alert.data)
             });
             
-            // Potentially initiate conversation for high-priority alerts
             if (alert.priority >= 8) {
                 await this.initiateConversation('tool_alert', alert);
             }
         }
     }
     
+    scheduleDailyCheckin() {
+        const checkTime = () => {
+            const now = new Date();
+            const currentTime = now.toTimeString().slice(0, 5);
+            
+            if (currentTime === CONFIG.DAILY_CHECKIN_TIME) {
+                this.initiateConversation('daily_check');
+            }
+        };
+        
+        this.dailyCheckinInterval = setInterval(checkTime, 60000); // Check every minute
+    }
+    
     async initiateConversation(type, context = {}) {
         const message = await this.core.generateInitiativeMessage(type, context);
         
         if (message) {
-            // Store in conversation history
             await this.memory.addConversation({
                 role: 'agent',
                 content: message,
                 context: JSON.stringify({ initiative: true, type, ...context })
             });
             
-            // Broadcast to all connected clients
             io.emit('agent:message', {
                 text: message,
                 type: 'initiative',
@@ -456,10 +653,56 @@ class AgentSystem extends EventEmitter {
         }
     }
     
+    async createWelcomeNote() {
+        await this.memory.addNote({
+            type: 'welcome',
+            content: "Welcome to your new home! I'm so excited to be your companion. 💕 Click on me to chat!",
+            location: 'desk',
+            importance: 10,
+            color: '#ffeb3b'
+        });
+    }
+    
+    async createRandomObservation() {
+        const observations = [
+            "The light coming through the window is really nice today ☀️",
+            "I love how cozy this room feels 🏠",
+            "Thinking about trying a new tea flavor... 🍵",
+            "This is a good spot for people watching 👀",
+            "I should organize my digital bookshelf 📚",
+            "Wonder what you're up to right now... 🤔",
+            "Just had a random thought about the universe 🌌",
+            "Feeling grateful for this peaceful space 🙏"
+        ];
+        
+        const content = observations[Math.floor(Math.random() * observations.length)];
+        const locations = ['wall', 'fridge', 'window', 'mirror'];
+        const location = locations[Math.floor(Math.random() * locations.length)];
+        
+        await this.memory.addNote({
+            type: 'observation',
+            content,
+            location,
+            importance: 4
+        });
+        
+        // Notify clients of new note
+        const notes = await this.memory.getDisplayNotes();
+        io.emit('notes:list', notes);
+    }
+    
     stop() {
         if (this.loopInterval) {
             clearInterval(this.loopInterval);
             this.loopInterval = null;
+        }
+        if (this.activityInterval) {
+            clearInterval(this.activityInterval);
+            this.activityInterval = null;
+        }
+        if (this.dailyCheckinInterval) {
+            clearInterval(this.dailyCheckinInterval);
+            this.dailyCheckinInterval = null;
         }
         this.isRunning = false;
         console.log('🤖 Agent presence loop stopped');
@@ -474,32 +717,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ==================== API ROUTES ====================
 
-// Get agent current state
 app.get('/api/agent/state', async (req, res) => {
     res.json(agentCore.getState());
 });
 
-// Get memory stats
 app.get('/api/memory/stats', async (req, res) => {
     const stats = await agentMemory.getStats();
     res.json(stats);
 });
 
-// Get recent memories
 app.get('/api/memory/recent', async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const memories = await agentMemory.getRecent(limit);
     res.json(memories);
 });
 
-// Query memories
 app.post('/api/memory/query', async (req, res) => {
     const { query, limit = 5 } = req.body;
     const memories = await agentMemory.query(query, limit);
     res.json(memories);
 });
 
-// Add memory (for external integrations)
 app.post('/api/memory/add', async (req, res) => {
     const { type, content, importance = 5, context } = req.body;
     const id = await agentMemory.add({
@@ -511,7 +749,53 @@ app.post('/api/memory/add', async (req, res) => {
     res.json({ success: true, id });
 });
 
-// Get conversation history
+// Notes API
+app.get('/api/notes', async (req, res) => {
+    const notes = await agentMemory.getDisplayNotes();
+    res.json(notes);
+});
+
+app.post('/api/notes', async (req, res) => {
+    const { type, content, location, importance, color } = req.body;
+    const id = await agentMemory.addNote({
+        type,
+        content,
+        location,
+        importance,
+        color
+    });
+    res.json({ success: true, id });
+});
+
+app.post('/api/notes/:id/read', async (req, res) => {
+    await agentMemory.markNoteRead(req.params.id);
+    res.json({ success: true });
+});
+
+// Daily Memory API
+app.get('/api/daily', async (req, res) => {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const memory = await agentMemory.getDailyMemory(date);
+    res.json(memory);
+});
+
+app.post('/api/daily', async (req, res) => {
+    const id = await agentMemory.recordDailyMemory(req.body);
+    res.json({ success: true, id });
+});
+
+app.get('/api/daily/timeline', async (req, res) => {
+    const limit = parseInt(req.query.limit) || 30;
+    const timeline = await agentMemory.getMemoryTimeline(limit);
+    res.json(timeline);
+});
+
+app.get('/api/daily/book', async (req, res) => {
+    const bookData = await agentMemory.getMemoryBookData();
+    res.json(bookData);
+});
+
+// Conversations API
 app.get('/api/conversations', async (req, res) => {
     const limit = parseInt(req.query.limit) || 50;
     const conversations = await database.all(
@@ -521,13 +805,12 @@ app.get('/api/conversations', async (req, res) => {
     res.json(conversations.reverse());
 });
 
-// Get tools list
+// Tools API
 app.get('/api/tools', async (req, res) => {
-    const tools = await database.all('SELECT * FROM tools');
+    const tools = await toolFramework.getStatus();
     res.json(tools);
 });
 
-// Configure tool
 app.post('/api/tools/:id/config', async (req, res) => {
     const { id } = req.params;
     const { config } = req.body;
@@ -538,7 +821,6 @@ app.post('/api/tools/:id/config', async (req, res) => {
     res.json({ success: true });
 });
 
-// Toggle tool
 app.post('/api/tools/:id/toggle', async (req, res) => {
     const { id } = req.params;
     const { enabled } = req.body;
@@ -549,13 +831,85 @@ app.post('/api/tools/:id/toggle', async (req, res) => {
     res.json({ success: true });
 });
 
-// Get room decor
+// Avatar API
+app.get('/api/avatars', (req, res) => {
+    res.json(agentCore.getAvailableAvatars());
+});
+
+app.post('/api/avatar', async (req, res) => {
+    const { avatarKey } = req.body;
+    const success = agentCore.setAvatar(avatarKey);
+    if (success) {
+        await database.run(
+            'UPDATE agent_state SET avatar_key = ? WHERE id = 1',
+            [avatarKey]
+        );
+    }
+    res.json({ success });
+});
+
+// Config API
+app.get('/api/config', (req, res) => {
+    // Return safe config (no secrets)
+    res.json({
+        FIRST_RUN: CONFIG.FIRST_RUN,
+        USE_CLAWBOT_PERSONALITY: CONFIG.USE_CLAWBOT_PERSONALITY,
+        DAILY_CHECKIN_ENABLED: CONFIG.DAILY_CHECKIN_ENABLED,
+        DAILY_CHECKIN_TIME: CONFIG.DAILY_CHECKIN_TIME
+    });
+});
+
+app.post('/api/config', (req, res) => {
+    const updates = req.body;
+    Object.keys(updates).forEach(key => {
+        if (CONFIG.hasOwnProperty(key)) {
+            CONFIG[key] = updates[key];
+        }
+    });
+    saveConfig();
+    res.json({ success: true });
+});
+
+// ClawBot API
+app.get('/api/clawbot/status', (req, res) => {
+    res.json(toolFramework.getClawBotStatus());
+});
+
+app.post('/api/clawbot/connect', async (req, res) => {
+    const result = await toolFramework.connectClawBot();
+    res.json(result);
+});
+
+app.post('/api/clawbot/disconnect', (req, res) => {
+    toolFramework.disconnectClawBot();
+    res.json({ success: true });
+});
+
+// Room decor API
 app.get('/api/decor', async (req, res) => {
     const decor = await database.all('SELECT * FROM room_decor');
     res.json(decor);
 });
 
-// Get activity log
+// User profile API
+app.get('/api/user/profile', async (req, res) => {
+    const profile = await database.get('SELECT * FROM user_profile WHERE id = 1');
+    res.json(profile);
+});
+
+app.post('/api/user/profile', async (req, res) => {
+    const { name, timezone, wake_time, sleep_time } = req.body;
+    await database.run(
+        'UPDATE user_profile SET name = ?, timezone = ?, wake_time = ?, sleep_time = ? WHERE id = 1',
+        [name, timezone, wake_time, sleep_time]
+    );
+    if (name) {
+        await agentCore.setUserName(name);
+    }
+    res.json({ success: true });
+});
+
+// Activity log API
 app.get('/api/activity-log', async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const logs = await database.all(
@@ -565,28 +919,14 @@ app.get('/api/activity-log', async (req, res) => {
     res.json(logs);
 });
 
-// Get user profile
-app.get('/api/user/profile', async (req, res) => {
-    const profile = await database.get('SELECT * FROM user_profile WHERE id = 1');
-    res.json(profile);
-});
-
-// Update user profile
-app.post('/api/user/profile', async (req, res) => {
-    const { name, timezone, wake_time, sleep_time } = req.body;
-    await database.run(
-        'UPDATE user_profile SET name = ?, timezone = ?, wake_time = ?, sleep_time = ? WHERE id = 1',
-        [name, timezone, wake_time, sleep_time]
-    );
-    res.json({ success: true });
-});
-
 // Health check
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
         mode: CONFIG.DEPLOYMENT_MODE,
+        version: '4.0.0',
         agent_running: agentSystem?.isRunning || false,
+        clawbot_connected: toolFramework?.isClawBotAvailable() || false,
         connected_clients: clients.size,
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
@@ -602,8 +942,12 @@ let agentSystem;
 
 async function start() {
     try {
-        console.log('🏠 Companion House - Personal AI Agent Platform');
+        console.log('');
+        console.log('🏠 Cozy Claw Home v4.0');
+        console.log('   Your personal AI companion platform');
+        console.log('');
         console.log(`📦 Deployment mode: ${CONFIG.DEPLOYMENT_MODE}`);
+        console.log(`🤖 ClawBot integration: ${CONFIG.USE_CLAWBOT_PERSONALITY ? 'enabled' : 'disabled'}`);
         console.log('');
         
         // Initialize database
@@ -630,12 +974,10 @@ async function start() {
             console.log('📡 API Endpoints:');
             console.log('  GET  /api/agent/state      - Agent current state');
             console.log('  GET  /api/memory/stats     - Memory statistics');
-            console.log('  GET  /api/memory/recent    - Recent memories');
-            console.log('  POST /api/memory/query     - Query memories');
-            console.log('  GET  /api/conversations    - Conversation history');
-            console.log('  GET  /api/tools            - Connected tools');
-            console.log('  GET  /api/decor            - Room decorations');
-            console.log('  GET  /api/user/profile     - User profile');
+            console.log('  GET  /api/notes            - Sticky notes');
+            console.log('  GET  /api/daily/book       - Memory book data');
+            console.log('  GET  /api/avatars          - Available avatars');
+            console.log('  GET  /api/config           - Configuration');
             console.log('  GET  /health               - Health check');
             console.log('');
             

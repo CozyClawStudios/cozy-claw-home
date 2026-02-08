@@ -1,18 +1,18 @@
 /**
- * Tool Framework - External Integration System
+ * Tool Framework v4.0 - External Integration System
+ * 
+ * NEW IN v4.0:
+ * - ClawBot integration for external AI personality
+ * - WebSocket connector to ClawBot
+ * - Fallback to local personality when ClawBot unavailable
+ * - Config-driven ClawBot settings
  * 
  * This module manages:
  * - Tool configuration and lifecycle
+ * - ClawBot WebSocket connection
  * - Data fetching from external APIs
  * - Alert generation based on tool data
  * - Caching and rate limiting
- * 
- * Supported tools:
- * - Trading (crypto/stocks)
- * - Calendar
- * - Weather
- * - News
- * - Custom webhooks
  */
 
 class ToolFramework {
@@ -22,6 +22,17 @@ class ToolFramework {
         this.cache = new Map();
         this.fetchQueue = [];
         this.isProcessing = false;
+        
+        // ClawBot connection
+        this.clawbot = {
+            ws: null,
+            connected: false,
+            config: null,
+            messageQueue: [],
+            lastPing: null,
+            reconnectAttempts: 0,
+            maxReconnectAttempts: 5
+        };
         
         // Built-in tool definitions
         this.toolDefinitions = {
@@ -33,9 +44,9 @@ class ToolFramework {
                     apiKey: '',
                     apiSecret: '',
                     watchlist: ['BTC', 'ETH', 'AAPL'],
-                    alertThreshold: 5 // % change
+                    alertThreshold: 5
                 },
-                checkInterval: 300, // 5 minutes
+                checkInterval: 300,
                 fetch: this.fetchTradingData.bind(this)
             },
             
@@ -44,12 +55,12 @@ class ToolFramework {
                 description: 'Google Calendar or iCal integration',
                 icon: '📅',
                 defaultConfig: {
-                    provider: 'google', // or 'ical'
+                    provider: 'google',
                     icalUrl: '',
                     googleToken: '',
-                    alertBefore: 15 // minutes
+                    alertBefore: 15
                 },
-                checkInterval: 60, // 1 minute
+                checkInterval: 60,
                 fetch: this.fetchCalendarData.bind(this)
             },
             
@@ -60,9 +71,9 @@ class ToolFramework {
                 defaultConfig: {
                     apiKey: '',
                     location: '',
-                    units: 'metric' // or 'imperial'
+                    units: 'metric'
                 },
-                checkInterval: 600, // 10 minutes
+                checkInterval: 600,
                 fetch: this.fetchWeatherData.bind(this)
             },
             
@@ -75,21 +86,38 @@ class ToolFramework {
                     topics: ['technology', 'science'],
                     sources: []
                 },
-                checkInterval: 1800, // 30 minutes
+                checkInterval: 1800,
                 fetch: this.fetchNewsData.bind(this)
+            },
+            
+            clawbot: {
+                name: 'ClawBot Integration',
+                description: 'Connect to external ClawBot for enhanced AI personality',
+                icon: '🔗',
+                defaultConfig: {
+                    enabled: false,
+                    wsUrl: 'ws://localhost:8080/clawbot',
+                    apiKey: '',
+                    fallbackOnDisconnect: true,
+                    overridePersonality: true,
+                    connectionTimeout: 5000,
+                    heartbeatInterval: 30000
+                },
+                checkInterval: 0,
+                fetch: null
             },
             
             webhook: {
                 name: 'Custom Webhook',
                 description: 'Receive data from any webhook source',
-                icon: '🔗',
+                icon: '🔌',
                 defaultConfig: {
                     endpoint: '',
                     secret: '',
                     filterRules: []
                 },
-                checkInterval: 0, // Push-based, no polling
-                fetch: null // Not polled
+                checkInterval: 0,
+                fetch: null
             }
         };
     }
@@ -106,7 +134,7 @@ class ToolFramework {
                         def.name,
                         type,
                         JSON.stringify(def.defaultConfig),
-                        0, // Disabled by default
+                        0,
                         def.checkInterval
                     ]
                 );
@@ -114,10 +142,251 @@ class ToolFramework {
             }
         }
         
-        console.log('🔧 Tool framework initialized');
+        // Initialize ClawBot if enabled
+        await this.initClawBot();
+        
+        console.log('🔧 Tool framework v4.0 initialized');
     }
     
-    // Fetch data for a specific tool
+    // ==================== CLAWBOT INTEGRATION ====================
+    
+    async initClawBot() {
+        const tool = await this.db.get("SELECT * FROM tools WHERE type = 'clawbot'");
+        if (!tool) return;
+        
+        this.clawbot.config = JSON.parse(tool.config);
+        
+        if (this.clawbot.config.enabled) {
+            await this.connectClawBot();
+        }
+    }
+    
+    async connectClawBot() {
+        if (!this.clawbot.config || !this.clawbot.config.enabled) {
+            return { success: false, error: 'ClawBot not enabled' };
+        }
+        
+        try {
+            const WebSocket = require('ws');
+            
+            console.log(`🔗 Connecting to ClawBot at ${this.clawbot.config.wsUrl}...`);
+            
+            this.clawbot.ws = new WebSocket(this.clawbot.config.wsUrl, {
+                headers: {
+                    'X-API-Key': this.clawbot.config.apiKey
+                },
+                handshakeTimeout: this.clawbot.config.connectionTimeout || 5000
+            });
+            
+            this.clawbot.ws.on('open', () => {
+                console.log('✅ Connected to ClawBot');
+                this.clawbot.connected = true;
+                this.clawbot.reconnectAttempts = 0;
+                this.clawbot.lastPing = Date.now();
+                
+                // Send any queued messages
+                while (this.clawbot.messageQueue.length > 0) {
+                    const msg = this.clawbot.messageQueue.shift();
+                    this.sendToClawBot(msg);
+                }
+                
+                // Start heartbeat
+                this.startClawBotHeartbeat();
+            });
+            
+            this.clawbot.ws.on('message', (data) => {
+                this.handleClawBotMessage(data);
+            });
+            
+            this.clawbot.ws.on('close', () => {
+                console.log('⚠️ ClawBot connection closed');
+                this.clawbot.connected = false;
+                this.stopClawBotHeartbeat();
+                
+                if (this.clawbot.config.fallbackOnDisconnect) {
+                    console.log('🔄 Falling back to local personality');
+                }
+                
+                // Attempt reconnection
+                if (this.clawbot.reconnectAttempts < this.clawbot.maxReconnectAttempts) {
+                    this.clawbot.reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, this.clawbot.reconnectAttempts), 30000);
+                    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.clawbot.reconnectAttempts})`);
+                    setTimeout(() => this.connectClawBot(), delay);
+                }
+            });
+            
+            this.clawbot.ws.on('error', (err) => {
+                console.error('❌ ClawBot connection error:', err.message);
+                this.clawbot.connected = false;
+            });
+            
+            return { success: true };
+            
+        } catch (err) {
+            console.error('❌ Failed to connect to ClawBot:', err.message);
+            return { success: false, error: err.message };
+        }
+    }
+    
+    disconnectClawBot() {
+        if (this.clawbot.ws) {
+            this.clawbot.ws.close();
+            this.clawbot.ws = null;
+        }
+        this.clawbot.connected = false;
+        this.stopClawBotHeartbeat();
+        console.log('🔌 Disconnected from ClawBot');
+    }
+    
+    sendToClawBot(message) {
+        if (!this.clawbot.connected || !this.clawbot.ws) {
+            // Queue message for when connection is restored
+            this.clawbot.messageQueue.push(message);
+            return false;
+        }
+        
+        try {
+            this.clawbot.ws.send(JSON.stringify(message));
+            return true;
+        } catch (err) {
+            console.error('Failed to send to ClawBot:', err);
+            this.clawbot.messageQueue.push(message);
+            return false;
+        }
+    }
+    
+    handleClawBotMessage(data) {
+        try {
+            const message = JSON.parse(data);
+            
+            switch (message.type) {
+                case 'response':
+                    // Forward to any listeners
+                    this.emit('clawbot:response', message);
+                    break;
+                    
+                case 'initiative':
+                    // ClawBot wants to say something proactively
+                    this.emit('clawbot:initiative', message);
+                    break;
+                    
+                case 'personality_update':
+                    // ClawBot is updating personality settings
+                    this.emit('clawbot:personality', message.data);
+                    break;
+                    
+                case 'pong':
+                    this.clawbot.lastPing = Date.now();
+                    break;
+                    
+                case 'error':
+                    console.error('ClawBot error:', message.error);
+                    break;
+                    
+                default:
+                    console.log('Unknown ClawBot message:', message);
+            }
+        } catch (err) {
+            console.error('Failed to parse ClawBot message:', err);
+        }
+    }
+    
+    startClawBotHeartbeat() {
+        if (this.clawbot.heartbeatInterval) {
+            clearInterval(this.clawbot.heartbeatInterval);
+        }
+        
+        const interval = this.clawbot.config.heartbeatInterval || 30000;
+        this.clawbot.heartbeatInterval = setInterval(() => {
+            if (this.clawbot.connected) {
+                this.sendToClawBot({ type: 'ping', timestamp: Date.now() });
+                
+                // Check if we've missed pings
+                if (Date.now() - this.clawbot.lastPing > interval * 3) {
+                    console.log('⚠️ ClawBot heartbeat timeout');
+                    this.clawbot.ws.terminate();
+                }
+            }
+        }, interval);
+    }
+    
+    stopClawBotHeartbeat() {
+        if (this.clawbot.heartbeatInterval) {
+            clearInterval(this.clawbot.heartbeatInterval);
+            this.clawbot.heartbeatInterval = null;
+        }
+    }
+    
+    // Send user message to ClawBot and get response
+    async queryClawBot(userMessage, context = {}) {
+        if (!this.clawbot.connected) {
+            return {
+                success: false,
+                fallback: true,
+                error: 'ClawBot not connected'
+            };
+        }
+        
+        return new Promise((resolve, reject) => {
+            const requestId = require('uuid').v4();
+            
+            // Set up one-time listener for response
+            const handleResponse = (message) => {
+                if (message.requestId === requestId) {
+                    this.off('clawbot:response', handleResponse);
+                    
+                    // Clear timeout
+                    clearTimeout(timeout);
+                    
+                    resolve({
+                        success: true,
+                        response: message.data,
+                        fromClawBot: true
+                    });
+                }
+            };
+            
+            this.on('clawbot:response', handleResponse);
+            
+            // Timeout after 10 seconds
+            const timeout = setTimeout(() => {
+                this.off('clawbot:response', handleResponse);
+                resolve({
+                    success: false,
+                    fallback: true,
+                    error: 'ClawBot response timeout'
+                });
+            }, 10000);
+            
+            // Send request
+            this.sendToClawBot({
+                type: 'query',
+                requestId,
+                message: userMessage,
+                context
+            });
+        });
+    }
+    
+    // Check if ClawBot is available
+    isClawBotAvailable() {
+        return this.clawbot.connected && this.clawbot.config && this.clawbot.config.enabled;
+    }
+    
+    // Get ClawBot status
+    getClawBotStatus() {
+        return {
+            connected: this.clawbot.connected,
+            enabled: this.clawbot.config?.enabled || false,
+            url: this.clawbot.config?.wsUrl,
+            reconnectAttempts: this.clawbot.reconnectAttempts,
+            queueLength: this.clawbot.messageQueue.length
+        };
+    }
+    
+    // ==================== STANDARD TOOLS ====================
+    
     async fetchToolData(toolId) {
         const tool = await this.db.get('SELECT * FROM tools WHERE id = ?', [toolId]);
         if (!tool || !tool.enabled) return null;
@@ -149,7 +418,6 @@ class ToolFramework {
         }
     }
     
-    // Check all enabled tools and return alerts
     async checkAll() {
         const alerts = [];
         const tools = await this.db.all('SELECT * FROM tools WHERE enabled = 1');
@@ -158,7 +426,6 @@ class ToolFramework {
             const def = this.toolDefinitions[tool.type];
             if (!def || !def.fetch) continue;
             
-            // Check if it's time to poll
             if (def.checkInterval > 0) {
                 const lastCheck = tool.last_check ? new Date(tool.last_check) : null;
                 const shouldCheck = !lastCheck || 
@@ -177,7 +444,6 @@ class ToolFramework {
         return alerts;
     }
     
-    // Refresh a specific tool on demand
     async refreshTool(toolId) {
         const tool = await this.db.get('SELECT * FROM tools WHERE id = ?', [toolId]);
         if (!tool) return { success: false, error: 'Tool not found' };
@@ -190,7 +456,6 @@ class ToolFramework {
         };
     }
     
-    // Generate alerts based on tool data
     generateAlerts(tool, data) {
         const alerts = [];
         const config = JSON.parse(tool.config);
@@ -247,17 +512,9 @@ class ToolFramework {
         return alerts;
     }
     
-    // Tool-specific fetch implementations
     async fetchTradingData(config) {
-        // This is a mock implementation
-        // In production, this would connect to:
-        // - Alpaca API for stocks
-        // - CoinGecko/Coinbase for crypto
-        // - Custom trading bot endpoints
-        
         console.log('📈 Fetching trading data...');
         
-        // Simulate data
         return {
             timestamp: new Date().toISOString(),
             portfolio: {
@@ -280,13 +537,9 @@ class ToolFramework {
     async fetchCalendarData(config) {
         console.log('📅 Fetching calendar data...');
         
-        // Mock implementation
-        // In production, would fetch from Google Calendar API or parse iCal
-        
         const now = new Date();
         const upcoming = [];
         
-        // Generate some mock events
         const mockEvents = [
             { title: 'Team Standup', start: new Date(now.getTime() + 30 * 60000) },
             { title: 'Lunch with Sarah', start: new Date(now.getTime() + 3 * 60 * 60000) },
@@ -305,9 +558,6 @@ class ToolFramework {
     async fetchWeatherData(config) {
         console.log('🌤️ Fetching weather data...');
         
-        // Mock implementation
-        // In production, would use OpenWeatherMap, WeatherAPI, etc.
-        
         const conditions = ['sunny', 'cloudy', 'rainy', 'partly cloudy'];
         const condition = conditions[Math.floor(Math.random() * conditions.length)];
         
@@ -324,15 +574,12 @@ class ToolFramework {
                 { day: 'Today', high: 24, low: 18, condition },
                 { day: 'Tomorrow', high: 26, low: 19, condition: 'sunny' }
             ],
-            alerts: [] // Would contain severe weather alerts
+            alerts: []
         };
     }
     
     async fetchNewsData(config) {
         console.log('📰 Fetching news data...');
-        
-        // Mock implementation
-        // In production, would use NewsAPI, RSS feeds, etc.
         
         const headlines = [
             'Tech stocks rally on AI optimism',
@@ -352,14 +599,12 @@ class ToolFramework {
         };
     }
     
-    // Handle incoming webhook data
     async handleWebhook(toolId, data, signature = null) {
         const tool = await this.db.get('SELECT * FROM tools WHERE id = ?', [toolId]);
         if (!tool) return { success: false, error: 'Tool not found' };
         
         const config = JSON.parse(tool.config);
         
-        // Verify signature if configured
         if (config.secret && signature) {
             const crypto = require('crypto');
             const expected = crypto
@@ -372,14 +617,12 @@ class ToolFramework {
             }
         }
         
-        // Store webhook data
         await this.db.run(
             `INSERT INTO tool_data (tool_id, data_type, data, fetched_at) 
              VALUES (?, ?, ?, datetime('now'))`,
             [toolId, 'webhook', JSON.stringify(data)]
         );
         
-        // Generate alert from webhook
         const alert = {
             toolId,
             type: 'webhook',
@@ -391,7 +634,6 @@ class ToolFramework {
         return { success: true, alert };
     }
     
-    // Get cached data for a tool
     async getCachedData(toolId) {
         const cached = await this.db.get(
             `SELECT * FROM tool_data 
@@ -406,7 +648,6 @@ class ToolFramework {
         return null;
     }
     
-    // Register a new custom tool
     async registerCustomTool(name, type, config) {
         const id = require('uuid').v4();
         
@@ -418,7 +659,6 @@ class ToolFramework {
         return id;
     }
     
-    // Get tool status summary
     async getStatus() {
         const tools = await this.db.all('SELECT * FROM tools');
         
@@ -430,6 +670,26 @@ class ToolFramework {
             lastCheck: tool.last_check,
             icon: this.toolDefinitions[tool.type]?.icon || '🔧'
         }));
+    }
+    
+    // Event emitter for ClawBot messages
+    emit(event, data) {
+        // Simple event emitter - would be replaced with proper EventEmitter in production
+        if (this.eventListeners && this.eventListeners[event]) {
+            this.eventListeners[event].forEach(cb => cb(data));
+        }
+    }
+    
+    on(event, callback) {
+        if (!this.eventListeners) this.eventListeners = {};
+        if (!this.eventListeners[event]) this.eventListeners[event] = [];
+        this.eventListeners[event].push(callback);
+    }
+    
+    off(event, callback) {
+        if (this.eventListeners && this.eventListeners[event]) {
+            this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+        }
     }
 }
 
