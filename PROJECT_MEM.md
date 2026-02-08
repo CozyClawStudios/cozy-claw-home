@@ -1,144 +1,75 @@
-# PROJECT_MEM.md - Cozy Claw Studio
+# PROJECT_MEM.md — Cozy Claw Game Studio Discord
 
-**Project:** Cozy Claw Home - AI Companion Platform  
+**Project:** Discord Server Infrastructure  
 **Created:** 2026-02-08  
-**Last Updated:** 2026-02-08 09:35 CST  
-**Status:** 🟢 **v1.0 LAUNCHED**
+**Last Updated:** 2026-02-08 12:52 CST  
+**Status:** 🟢 Active  
 
 ---
 
 ## 🎯 Current Goal
-Ship v1.0 as a functional AI companion platform where users have a persistent AI roommate who lives in their house, remembers them, and initiates conversations.
+Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 
 ---
 
-## ✅ Completed (v1.0 Launch)
+## ✅ Completed
 
-### Core Platform
-- [x] Migrated to separate repository
-- [x] Node.js + Express + Socket.io + SQLite3 stack
-- [x] 24/7 agent presence loop
-- [x] Persistent memory system
-- [x] JWT authentication
-- [x] Mobile PWA support
+### Server Structure
+- [x] 6 Categories created
+- [x] 20 Channels deployed
+- [x] Welcome messages seeded
+- [x] Agent offices configured
 
-### Multi-Room System
-- [x] 5 distinct rooms: Living, Kitchen, Bedroom, Bathroom, Outdoor
-- [x] 60+ furniture items across all rooms
-- [x] Empty room start - user places everything
-- [x] Wall/floor color customization with textures
-- [x] 8 window views (City, Forest, Beach, Space, Mountains, Night, Sunset)
-- [x] Room state persistence (localStorage + auto-save)
-
-### Celest AI Behaviors
-- [x] Greets user on first visit (time-aware)
-- [x] Comments on furniture placement
-- [x] Room preferences and reactions
-- [x] Daily check-in system
-- [x] Night routine (sleeps in bedroom, wakes up)
-- [x] Idle animations (bounce, yawn, look around)
-- [x] Random activities (read, water plants, look out window)
-- [x] Walking animations between rooms
-
-### UX & Interactions
-- [x] Drag & drop furniture placement
-- [x] Right-click context menu (move, rotate, delete)
-- [x] Undo/Redo (Ctrl+Z / Ctrl+Y)
-- [x] Keyboard shortcuts (1-5 for room switching)
-- [x] Search furniture catalog
-- [x] Favorites system
-- [x] First-time tutorial with pulse animation
-- [x] Hard refresh banner
-
-### Visual Polish
-- [x] Smooth room transitions
-- [x] Furniture placement animations
-- [x] Lighting effects (lamp glow, window rays)
-- [x] Loading screen with bouncing Celest
-- [x] Hover states and feedback
-- [x] Dark grid theme
-- [x] Room labels in header
-
-### Systems & Performance
-- [x] Auto-save every 30 seconds
-- [x] Export/Import room designs (JSON)
-- [x] 3 save slots for different layouts
-- [x] Performance optimized (60fps target)
-- [x] Object pooling, spatial culling
-- [x] Error handling and graceful fallbacks
-
-### Hybrid Connection (NEW)
-- [x] Real-time chat bridge
-- [x] Celest presence indicator (location, activity, mood)
-- [x] Initiative system - Celest can start conversations
-- [x] Context awareness (room, furniture, time)
-- [x] Sub-agent architecture for AI companions
-
-### Game Studio Team
-- [x] 6 specialized agents: Palette, Architect, Joy, Spark, Check, Vision
-- [x] Coordinated sprints completed
-- [x] Studio documentation and workflows
+### Categories Deployed
+| Category | Channels |
+|----------|----------|
+| 🌟 WELCOME | start-here, announcements, roles |
+| 🎮 GAME | cozy-claw-home, bug-reports, showcase |
+| 💻 DEVELOPMENT | sprint-planning, architecture, gameplay, ai-behavior, art-assets |
+| 🤖 AGENT HQ | 🎨-palette-office, 🏗️-architect-office, 🎮-joy-office, 🤖-spark-office, 🐛-check-office, 📊-vision-office |
+| 💬 COMMUNITY | ideas, off-topic |
+| 🔧 STUDIO OPS | releases, analytics |
 
 ---
 
 ## 🔄 In Progress
-- [ ] Deploy to GitHub (repo ready, needs push)
-- [ ] Spawn Celest sub-agent with SOUL/MEMORY
-- [ ] Test hybrid connection end-to-end
-- [ ] Create Cozy Claw Home skill for easy installation
+- [ ] Role assignment system — Assigned to: @Celest
+- [ ] First sprint planning session
+- [ ] Sub-agent spawn commands testing
+- [ ] Partner bot integration (Forgy AI)
 
 ---
 
 ## 📝 Key Decisions
-- **Avatar name:** "Celest" (matches OpenClaw identity)
-- **Theme:** Dark grid aesthetic
-- **Architecture:** Sub-agent for AI, main agent can spectate/take over
-- **Local-first:** Runs on user's machine, private by default
-- **Revenue:** Freemium with premium tiers
+| Date | Decision | Why |
+|------|----------|-----|
+| 2026-02-08 | Emoji prefixes for agent offices | Quick visual scanning |
+| 2026-02-08 | Open group policy initially | Iterate to restrict once roles set |
+| 2026-02-08 | Discord-native bot mentions for partner integration | Zero custom code needed |
+| 2026-02-08 | PROJECT_ORGANIZATION.md created | Standardize project hygiene |
 
 ---
 
 ## 🔧 Technical Notes
-- **Server:** localhost:3000 (Node.js + Express)
-- **Agent:** 5s tick loop, Socket.io for real-time
-- **Memory:** SQLite with importance scoring
-- **Save System:** localStorage + server backup
-- **Bridge:** Telegram/file-based fallback
+- Guild ID: `1470120682783375403`
+- Discord bot: Connected ✅
+- Config: `openclaw.json` has Discord enabled
+- Organization guide: `~/workspace/PROJECT_ORGANIZATION.md`
 
 ---
 
 ## 🐛 Known Issues
-- Sub-agent spawning not yet tested
-- Skill installation not built
-- GitHub push pending
+None yet
 
 ---
 
-## 💡 Next Sprint (v1.1)
-- [ ] Celest sub-agent lives in house
-- [ ] Voice output integration
-- [ ] More furniture items
-- [ ] Weather/time of day window views
-- [ ] Mobile app wrapper
-- [ ] Discord/Slack integration
-- [ ] Subscription model for hosted version
+## 💡 Ideas / Backlog
+- [ ] Add voice channels for team meetings
+- [ ] Create webhook integrations for GitHub commits
+- [ ] Set up announcement bot for releases
+- [ ] Design role-based permissions for agent channels
+- [ ] Archive system for completed sprints
 
 ---
 
-## 📊 Stats
-- **Lines of code:** ~15,000
-- **Furniture items:** 60+
-- **Rooms:** 5
-- **Agent sprints:** 5 completed
-- **Commits:** 15+
-
----
-
-## 📂 Repo
-- **GitHub:** github.com/ZakyPew/cozy-claw-home
-- **Local:** /home/zak/.openclaw/workspace/repos/cozy-claw-studio/
-- **Server:** http://localhost:3000
-
----
-
-*Part of the OpenClaw ecosystem | Revenue goal: Fund Claude Code Max ($100-200/mo)*
+*See PROJECT_ORGANIZATION.md for project hygiene standards.*
