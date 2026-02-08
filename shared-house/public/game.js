@@ -388,6 +388,10 @@ const decorPanel = {
                 { emoji: '📺', name: 'TV', size: 'large' },
                 { emoji: '📚', name: 'Books', size: 'large' },
                 { emoji: '📦', name: 'Box', size: 'large' },
+                { emoji: '🗄️', name: 'Cabinet', size: 'large' },
+                { emoji: '🏆', name: 'Trophy', size: 'large' },
+                { emoji: '🧩', name: 'Puzzle', size: 'large' },
+                { emoji: '🎨', name: 'Art', size: 'large' },
                 
                 // Medium items (2.5rem)
                 { emoji: '🪴', name: 'Plant', size: 'medium' },
@@ -398,6 +402,13 @@ const decorPanel = {
                 { emoji: '💻', name: 'Computer', size: 'medium' },
                 { emoji: '🪑', name: 'Chair', size: 'medium' },
                 { emoji: '📻', name: 'Radio', size: 'medium' },
+                { emoji: '🔮', name: 'Crystal', size: 'medium' },
+                { emoji: '🎁', name: 'Gift', size: 'medium' },
+                { emoji: '🎈', name: 'Balloon', size: 'medium' },
+                { emoji: '🎀', name: 'Ribbon', size: 'medium' },
+                { emoji: '👑', name: 'Crown', size: 'medium' },
+                { emoji: '🎪', name: 'Circus', size: 'medium' },
+                { emoji: '🎯', name: 'Target', size: 'medium' },
                 
                 // Small items (1.8rem)
                 { emoji: '🕯️', name: 'Candle', size: 'small' },
@@ -406,7 +417,15 @@ const decorPanel = {
                 { emoji: '📷', name: 'Camera', size: 'small' },
                 { emoji: '🎮', name: 'Gamepad', size: 'small' },
                 { emoji: '🍕', name: 'Pizza', size: 'small' },
-                { emoji: '🍹', name: 'Drink', size: 'small' }
+                { emoji: '🍹', name: 'Drink', size: 'small' },
+                { emoji: '💡', name: 'Light', size: 'small' },
+                { emoji: '🔋', name: 'Battery', size: 'small' },
+                { emoji: '💎', name: 'Gem', size: 'small' },
+                { emoji: '🍄', name: 'Mushroom', size: 'small' },
+                { emoji: '🌙', name: 'Moon', size: 'small' },
+                { emoji: '⭐', name: 'Star', size: 'small' },
+                { emoji: '🔥', name: 'Fire', size: 'small' },
+                { emoji: '💰', name: 'Money', size: 'small' }
             ];
             
             panel.innerHTML = `

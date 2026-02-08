@@ -1381,6 +1381,39 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(13, 13, 26, 0.95);
+        border-top: 1px solid rgba(255,154,158,0.2);
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        font-size: 0.8rem;
+    ">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">🦞</span>
+            <span style="color: #ff9a9e; font-weight: 600;">Cozy Claw Home</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.6);">
+            <span>💡 Tip:</span>
+            <code onclick="navigator.clipboard.writeText(this.textContent); this.style.background='#4ade80'; setTimeout(()=>this.style.background='',500)" style="
+                background: rgba(255,255,255,0.1);
+                padding: 4px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-family: monospace;
+                transition: all 0.3s;
+                user-select: all;
+            " title="Click to copy">0xCelestWalletAddressHere</code>
+        </div>
+    </footer>
+
     <script src="game.js"></script>
 </body>
 </html>
