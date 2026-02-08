@@ -382,26 +382,31 @@ const decorPanel = {
             `;
             
             const items = [
-                { emoji: '🪴', name: 'Plant' },
-                { emoji: '🖼️', name: 'Painting' },
-                { emoji: '🛋️', name: 'Couch' },
-                { emoji: '📚', name: 'Books' },
-                { emoji: '🕯️', name: 'Candle' },
-                { emoji: '🧸', name: 'Teddy' },
-                { emoji: '🎸', name: 'Guitar' },
-                { emoji: '🏺', name: 'Vase' },
-                { emoji: '🛏️', name: 'Bed' },
-                { emoji: '📺', name: 'TV' },
-                { emoji: '💻', name: 'Computer' },
-                { emoji: '🪑', name: 'Chair' },
-                { emoji: '📦', name: 'Box' },
-                { emoji: '🏵️', name: 'Flower' },
-                { emoji: '⏰', name: 'Clock' },
-                { emoji: '📷', name: 'Camera' },
-                { emoji: '🎮', name: 'Gamepad' },
-                { emoji: '📻', name: 'Radio' },
-                { emoji: '🍕', name: 'Pizza' },
-                { emoji: '🍹', name: 'Drink' }
+                // Large items (3.5rem)
+                { emoji: '🛋️', name: 'Couch', size: 'large' },
+                { emoji: '🛏️', name: 'Bed', size: 'large' },
+                { emoji: '📺', name: 'TV', size: 'large' },
+                { emoji: '📚', name: 'Books', size: 'large' },
+                { emoji: '📦', name: 'Box', size: 'large' },
+                
+                // Medium items (2.5rem)
+                { emoji: '🪴', name: 'Plant', size: 'medium' },
+                { emoji: '🖼️', name: 'Painting', size: 'medium' },
+                { emoji: '🧸', name: 'Teddy', size: 'medium' },
+                { emoji: '🎸', name: 'Guitar', size: 'medium' },
+                { emoji: '🏺', name: 'Vase', size: 'medium' },
+                { emoji: '💻', name: 'Computer', size: 'medium' },
+                { emoji: '🪑', name: 'Chair', size: 'medium' },
+                { emoji: '📻', name: 'Radio', size: 'medium' },
+                
+                // Small items (1.8rem)
+                { emoji: '🕯️', name: 'Candle', size: 'small' },
+                { emoji: '🏵️', name: 'Flower', size: 'small' },
+                { emoji: '⏰', name: 'Clock', size: 'small' },
+                { emoji: '📷', name: 'Camera', size: 'small' },
+                { emoji: '🎮', name: 'Gamepad', size: 'small' },
+                { emoji: '🍕', name: 'Pizza', size: 'small' },
+                { emoji: '🍹', name: 'Drink', size: 'small' }
             ];
             
             panel.innerHTML = `
@@ -410,8 +415,8 @@ const decorPanel = {
                     <button onclick="decorPanel.close()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                    ${items.map(item => `
-                        <div class="decor-item" onclick="decorPanel.placeItem('${item.emoji}')" style="
+                    ${items.map((item, index) => `
+                        <div class="decor-item" data-emoji="${item.emoji}" data-size="${item.size}" data-name="${item.name}" onclick="decorPanel.placeItem({emoji: '${item.emoji}', size: '${item.size}', name: '${item.name}'})" style="
                             background: rgba(255,255,255,0.05);
                             padding: 20px;
                             border-radius: 12px;
@@ -422,6 +427,7 @@ const decorPanel = {
                         " onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">
                             <div style="font-size: 2rem; margin-bottom: 8px;">${item.emoji}</div>
                             <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">${item.name}</div>
+                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px;">${item.size}</div>
                         </div>
                     `).join('')}
                 </div>
@@ -457,14 +463,26 @@ const decorPanel = {
         }
     },
     
-    placeItem(emoji) {
+    placeItem(itemData) {
         const room = document.querySelector('.room');
+        
+        // Handle both old string format and new object format
+        const emoji = typeof itemData === 'string' ? itemData : itemData.emoji;
+        const size = typeof itemData === 'string' ? 'medium' : (itemData.size || 'medium');
+        const name = typeof itemData === 'string' ? 'item' : itemData.name;
+        
+        // Size map
+        const sizeMap = {
+            small: '1.8rem',
+            medium: '2.5rem',
+            large: '3.5rem'
+        };
         
         // Create placed item
         const item = document.createElement('div');
         item.style.cssText = `
             position: absolute;
-            font-size: 2.5rem;
+            font-size: ${sizeMap[size]};
             cursor: move;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
             animation: place-in 0.3s ease;
@@ -511,7 +529,7 @@ const decorPanel = {
         this.close();
         
         // Celest reacts
-        addMessage('Celest', `Ooh, that ${emoji} looks nice! ✨`, true);
+        addMessage('Celest', `Ooh, that ${name} looks nice! ✨`, true);
     }
 };
 
