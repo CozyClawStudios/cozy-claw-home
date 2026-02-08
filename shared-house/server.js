@@ -966,6 +966,25 @@ async function start() {
         global.agentMemory = agentMemory;
         global.toolFramework = toolFramework;
         
+        // Listen for ClawBot responses and forward to socket.io clients
+        toolFramework.on('clawbot:response', (message) => {
+            console.log('📨 ClawBot response received, broadcasting to clients');
+            io.emit('agent:message', {
+                text: message.data.text,
+                mood: message.data.mood || agentCore.getState().mood,
+                fromClawBot: true
+            });
+        });
+        
+        toolFramework.on('clawbot:initiative', (message) => {
+            console.log('📨 ClawBot initiative message');
+            io.emit('agent:message', {
+                text: message.data.text,
+                type: 'initiative',
+                fromClawBot: true
+            });
+        });
+        
         // Start server
         server.listen(CONFIG.PORT, () => {
             console.log('');

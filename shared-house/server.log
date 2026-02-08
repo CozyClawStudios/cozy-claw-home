@@ -1,39 +1,53 @@
-🏠 Cozy Claw Studio - Shared House Server v3.0
-🌐 Running at http://localhost:3000
+
+🏠 Cozy Claw Home v4.0
+   Your personal AI companion platform
+
+📦 Deployment mode: local
+🤖 ClawBot integration: enabled
+
+💾 Initializing database...
+✅ Database initialized
+🤖 Agent 'Claw' initialized
+   Avatar: 🤖 Robo
+   Mood: sleepy
+   Companion for: Friend
+🧠 Memory system v4.0 initialized
+🔧 Tool framework v4.0 initialized
+🤖 Agent system v4.0 initialized
+
+🌐 Server running at http://localhost:3000
 
 📡 API Endpoints:
-  POST /api/auth/register     - Create account (rate limited)
-  POST /api/auth/login        - Login (rate limited)
-  POST /api/auth/guest        - Guest login
-  GET  /api/player/profile    - Get profile
-  POST /api/player/daily-reward - Claim daily reward
-  GET  /api/shop              - Browse shop
-  POST /api/shop/buy          - Buy item
-  GET  /api/inventory         - View inventory
-  GET  /api/house             - Get your house
-  POST /api/house/decorate    - Update decorations
-  POST /api/house/furniture   - Place furniture
-  GET  /health                - Health check
+  GET  /api/agent/state      - Agent current state
+  GET  /api/memory/stats     - Memory statistics
+  GET  /api/notes            - Sticky notes
+  GET  /api/daily/book       - Memory book data
+  GET  /api/avatars          - Available avatars
+  GET  /api/config           - Configuration
+  GET  /health               - Health check
 
-🔒 Security Features:
-  - Rate limiting on all endpoints
-  - Input sanitization (XSS protection)
-  - SQL injection prevention
-  - Duplicate player prevention
-  - Security headers
+🤖 Agent presence loop starting...
+🔌 Client connected: rWM1yjlRvW1aQmGhAAAB
+🎭 Avatar changed to: Whiskers 🐱
+SIGTERM received, shutting down gracefully
+🤖 Agent presence loop stopped
+/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:19
+        const statement = new Statement(this, sql, errBack);
+                          ^
 
-Schema error: Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: shop_items.id
---> in Statement#run([Function (anonymous)])
-    at Database.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:76:19)
-    at Database.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:20:19)
-    at /home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1013:12
-    at Array.forEach (<anonymous>)
-    at initDatabase (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1012:16)
-    at Server.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1069:5)
-    at Object.onceWrapper (node:events:633:28)
-    at Server.emit (node:events:531:35) {
-  errno: 19,
-  code: 'SQLITE_CONSTRAINT',
-  __augmented: true
+Error: SQLITE_MISUSE: Database is closed
+    at Database.<anonymous> (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:19:27)
+    at object.<computed> [as run] (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/trace.js:28:20)
+    at /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:255:21
+    at new Promise (<anonymous>)
+    at Database.run (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:254:16)
+    at AgentCore.handleUserMessage (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/agent/core.js:315:23)
+    at Socket.<anonymous> (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:345:40)
+    at Socket.emit (node:events:519:28)
+    at Socket.emitUntyped (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/socket.io/dist/typed-events.js:69:22)
+    at /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/socket.io/dist/socket.js:697:39 {
+  errno: 21,
+  code: 'SQLITE_MISUSE'
 }
-✅ Database initialized
+
+Node.js v22.22.0
