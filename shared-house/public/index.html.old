@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Cozy Claw Home - Your AI companion lives here">
+    <meta name="theme-color" content="#8B7355">
+    
+    <title>Cozy Claw Home 🏠</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-wall: #f5e6d3;
+            --bg-floor: #d4c4a8;
+            --accent-warm: #e8b86d;
+            --accent-cozy: #c9a86c;
+            --text-dark: #3d3229;
+            --text-muted: #7a6b5a;
+            --agent-glow: #ff9a76;
+            --chat-bg: rgba(255, 255, 255, 0.95);
+            --note-yellow: #ffeb3b;
+            --note-green: #81c784;
+            --note-blue: #64b5f6;
+            --note-orange: #ff8a65;
+            --note-purple: #e1bee7;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(180deg, #e8ddd0 0%, #d4c4a8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+        
+        /* Header */
+        .header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-icon:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        
+        /* Main Layout */
+        .main-container {
+            flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        /* The Room (Center) */
+        .room-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .room {
+            flex: 1;
+            background: linear-gradient(180deg, var(--bg-wall) 0%, var(--bg-floor) 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 60px rgba(0,0,0,0.1),
+                0 10px 40px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+        
+        /* Room Locations */
+        .location {
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Window */
+        .window {
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 220px;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            border: 8px solid #8B7355;
+            border-radius: 4px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: #8B7355;
+        }
+        
+        .window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 6px;
+            background: #8B7355;
+            transform: translateX(-50%);
+        }
+        
+        .window:hover {
+            box-shadow: inset 0 0 30px rgba(255,255,200,0.3);
+        }
+        
+        /* Desk */
+        .desk {
+            bottom: 100px;
+            right: 50px;
+            width: 120px;
+            height: 80px;
+            background: #8B7355;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .desk::before {
+            content: '🖥️';
+        }
+        
+        /* Sofa */
+        .sofa {
+            bottom: 80px;
+            left: 50px;
+            width: 140px;
+            height: 90px;
+            background: #6b5b4f;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+        }
+        
+        .sofa::before {
+            content: '🛋️';
+        }
+        
+        /* Kitchen */
+        .kitchen {
+            top: 50%;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background: #d4c4a8;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .kitchen::before {
+            content: '☕';
+        }
+        
+        /* Bookshelf */
+        .bookshelf {
+            top: 40%;
+            left: 20px;
+            width: 80px;
+            height: 120px;
+            background: #8B7355;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .bookshelf::before {
+            content: '📚';
+        }
+        
+        /* Memory Book */
+        .memory-book {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 50px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .memory-book:hover {
+            transform: translateX(-50%) scale(1.1);
+        }
+        
+        .memory-book::before {
+            content: '📖';
+        }
+        
+        .memory-book-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        /* Sticky Notes */
+        .sticky-note {
+            position: absolute;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            max-width: 120px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s;
+            transform: rotate(var(--rotation, -2deg));
+        }
+        
+        .sticky-note:hover {
+            transform: rotate(0deg) scale(1.05);
+            z-index: 10;
+        }
+        
+        .sticky-note.wall {
+            top: 20%;
+            right: 15%;
+        }
+        
+        .sticky-note.desk {
+            top: 30%;
+            right: 10%;
+        }
+        
+        .sticky-note.fridge {
+            top: 40%;
+            right: 5%;
+        }
+        
+        .sticky-note.window {
+            top: 10%;
+            left: 10%;
+        }
+        
+        .sticky-note.mirror {
+            top: 25%;
+            left: 5%;
+        }
+        
+        .sticky-note.fading {
+            opacity: 0.5;
+            filter: grayscale(0.3);
+        }
+        
+        .sticky-note.read {
+            opacity: 0.7;
+        }
+        
+        /* The Agent */
+        .agent-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 5;
+        }
+        
+        .agent-container.at-desk {
+            bottom: 160px;
+            right: 80px;
+            left: auto;
+            transform: none;
+        }
+        
+        .agent-container.at-sofa {
+            bottom: 140px;
+            left: 90px;
+            transform: none;
+        }
+        
+        .agent-container.at-window {
+            bottom: 300px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .agent-container.at-kitchen {
+            top: 50%;
+            right: 40px;
+            bottom: auto;
+            left: auto;
+            transform: none;
+        }
+        
+        .agent-container:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+        
+        .agent-container.at-desk:hover,
+        .agent-container.at-sofa:hover,
+        .agent-container.at-kitchen:hover {
+            transform: scale(1.05);
+        }
+        
+        .agent-container:hover .agent-avatar {
+            box-shadow: 0 0 40px var(--agent-glow);
+        }
+        
+        .agent-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ff9a76 0%, #ff7eb3 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 4px 20px rgba(255, 154, 118, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .agent-avatar::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 154, 118, 0.3);
+            animation: agent-breathe 3s ease-in-out infinite;
+        }
+        
+        @keyframes agent-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.2; }
+        }
+        
+        .agent-name {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .agent-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .activity-indicator {
+            display: inline-flex;
+            gap: 3px;
+        }
+        
+        .activity-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--accent-cozy);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .activity-dot:nth-child(2) { animation-delay: 0.2s; }
+        .activity-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        /* Thought bubble */
+        .thought-bubble {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+            max-width: 200px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+        
+        .thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+        
+        .thought-bubble.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        /* Coffee steam animation */
+        .steam {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .steam.visible {
+            animation: steam-rise 2s ease-out forwards;
+        }
+        
+        @keyframes steam-rise {
+            0% { opacity: 0; transform: translateX(-50%) translateY(0); }
+            20% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+        }
+        
+        /* Chat Section */
+        .chat-section {
+            background: var(--chat-bg);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .chat-messages {
+            height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--accent-cozy);
+            border-radius: 2px;
+        }
+        
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            animation: message-in 0.3s ease;
+        }
+        
+        @keyframes message-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.agent {
+            align-self: flex-start;
+            background: #f0f0f0;
+            color: var(--text-dark);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.initiative {
+            border-left: 3px solid var(--agent-glow);
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--accent-cozy);
+        }
+        
+        .btn-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cozy) 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(232, 184, 109, 0.4);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 280px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Memory Panel */
+        .memory-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.5);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cozy);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .memory-list {
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .memory-item {
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .memory-type {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--accent-warm);
+            color: white;
+        }
+        
+        /* Tools Panel */
+        .tools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tool-item:hover {
+            background: rgba(255,255,255,0.8);
+            transform: translateX(4px);
+        }
+        
+        .tool-item.disabled {
+            opacity: 0.5;
+        }
+        
+        .tool-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tool-info {
+            flex: 1;
+        }
+        
+        .tool-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .tool-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .tool-toggle {
+            width: 40px;
+            height: 22px;
+            background: #ddd;
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .tool-toggle.active {
+            background: #4ade80;
+        }
+        
+        .tool-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        
+        .tool-toggle.active::after {
+            transform: translateX(18px);
+        }
+        
+        /* Activity Log */
+        .activity-log {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.85rem;
+        }
+        
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 50px;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.visible {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            animation: modal-in 0.3s ease;
+        }
+        
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .modal-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        /* Setup Wizard */
+        .setup-step {
+            display: none;
+        }
+        
+        .setup-step.visible {
+            display: block;
+            animation: fade-in 0.3s ease;
+        }
+        
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .avatar-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .avatar-option:hover {
+            border-color: var(--accent-cozy);
+            transform: translateY(-2px);
+        }
+        
+        .avatar-option.selected {
+            border-color: var(--accent-warm);
+            background: rgba(232, 184, 109, 0.1);
+        }
+        
+        .avatar-option .emoji {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .avatar-option .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .avatar-option .desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-cozy);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cozy) 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(232, 184, 109, 0.4);
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 10px;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        /* Memory Book Modal */
+        .memory-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .memory-day {
+            padding: 15px;
+            background: #f8f8f8;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-cozy);
+        }
+        
+        .memory-day-date {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .memory-day-mood {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .memory-day-highlights {
+            font-size: 0.85rem;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .star {
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.2s;
+        }
+        
+        .star.active {
+            opacity: 1;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .panel {
+                flex: 1;
+                min-width: 250px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .header {
+                padding: 10px 15px;
+            }
+            
+            .main-container {
+                padding: 10px;
+                gap: 10px;
+            }
+            
+            .room {
+                min-height: 350px;
+            }
+            
+            .agent-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
+            }
+            
+            .sidebar {
+                flex-direction: column;
+            }
+            
+            .avatar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            🏠 Cozy Claw Home
+            <span class="status-dot" title="Agent is online"></span>
+        </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="decorPanel.open()" title="Decorate">🎨</button>
+            <button class="btn-icon" onclick="toggleMemoryBook()" title="Memory Book">📖</button>
+            <button class="btn-icon" onclick="toggleNotesPanel()" title="Notes">📝</button>
+            <button class="btn-icon" onclick="toggleToolsPanel()" title="Tools">🔧</button>
+            <button class="btn-icon" onclick="showSettings()" title="Settings">⚙️</button>
+        </div>
+    </header>
+    
+    <main class="main-container">
+        <!-- The Room -->
+        <div class="room-container">
+            <div class="room" id="room">
+                <!-- Locations -->
+                <div class="window location" id="window" onclick="clickLocation('window')"></div>
+                <div class="desk location" id="desk" onclick="clickLocation('desk')"></div>
+                <div class="sofa location" id="sofa" onclick="clickLocation('sofa')"></div>
+                <div class="kitchen location" id="kitchen" onclick="clickLocation('kitchen')"></div>
+                <div class="bookshelf location" id="bookshelf" onclick="clickLocation('bookshelf')"></div>
+                
+                <!-- Sticky Notes Container -->
+                <div id="notesContainer"></div>
+                
+                <!-- Memory Book -->
+                <div class="memory-book" onclick="toggleMemoryBook()">
+                    <div class="memory-book-label">Memories</div>
+                </div>
+                
+                <!-- The Agent -->
+                <div class="agent-container" id="agentContainer" onclick="clickAgent()">
+                    <div class="thought-bubble" id="thoughtBubble"></div>
+                    <div class="steam" id="steam">☁️</div>
+                    <div class="agent-avatar" id="agentAvatar">🤖</div>
+                    <div class="agent-name" id="agentName">Celest</div>
+                    <div class="agent-status">
+                        <span id="agentActivity">Relaxing</span>
+                        <span class="activity-indicator" id="typingIndicator" style="display: none;">
+                            <span class="activity-dot"></span>
+                            <span class="activity-dot"></span>
+                            <span class="activity-dot"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat -->
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="empty-state">Click on your companion to say hello! 👋</div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" 
+                           placeholder="Type a message..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button class="btn-send" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Memory Panel -->
+            <div class="panel">
+                <div class="panel-title">🧠 Memory</div>
+                <div class="memory-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="memoryCount">0</div>
+                        <div class="stat-label">Memories</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="noteCount">0</div>
+                        <div class="stat-label">Notes</div>
+                    </div>
+                </div>
+                <div class="memory-list" id="memoryList">
+                    <div class="empty-state">No memories yet...</div>
+                </div>
+            </div>
+            
+            <!-- Daily Check-in Panel -->
+            <div class="panel" id="dailyPanel" style="display: none;">
+                <div class="panel-title">📅 Daily Check-in</div>
+                <div id="dailyCheckinContent">
+                    <p style="font-size: 0.9rem; margin-bottom: 10px;">How was your day?</p>
+                    <div class="rating-stars" id="dayRating">
+                        <span class="star" onclick="setDayRating(1)">⭐</span>
+                        <span class="star" onclick="setDayRating(2)">⭐</span>
+                        <span class="star" onclick="setDayRating(3)">⭐</span>
+                        <span class="star" onclick="setDayRating(4)">⭐</span>
+                        <span class="star" onclick="setDayRating(5)">⭐</span>
+                    </div>
+                    <input type="text" class="chat-input" id="dailyMood" placeholder="One word to describe today..." style="margin-bottom: 10px;">
+                    <button class="btn-primary" onclick="submitDailyCheckin()">Save</button>
+                </div>
+            </div>
+            
+            <!-- Tools Panel -->
+            <div class="panel">
+                <div class="panel-title">🔧 Connected Tools</div>
+                <div class="tools-list" id="toolsList">
+                    <div class="empty-state">No tools configured</div>
+                </div>
+            </div>
+            
+            <!-- Activity Log -->
+            <div class="panel">
+                <div class="panel-title">📋 Recent Activity</div>
+                <div class="activity-log" id="activityLog">
+                    <div class="empty-state">Waiting for activity...</div>
+                </div>
+            </div>
+        </aside>
+    </main>
+    
+    <!-- Setup Wizard Modal -->
+    <div class="modal-overlay" id="setupModal">
+        <div class="modal">
+            <div class="setup-step visible" id="step1">
+                <h2 class="modal-title">Welcome to Cozy Claw Home! 🏠</h2>
+                <p class="modal-subtitle">Let's set up your personal AI companion</p>
+                
+                <div class="form-group">
+                    <label>What should I call you?</label>
+                    <input type="text" id="setupName" placeholder="Your name" value="Friend">
+                </div>
+                
+                <button class="btn-primary" onclick="nextSetupStep()">Continue</button>
+            </div>
+            
+            <div class="setup-step" id="step2">
+                <h2 class="modal-title">Choose Your Companion</h2>
+                <p class="modal-subtitle">Pick an avatar that resonates with you</p>
+                
+                <div class="avatar-grid" id="avatarGrid"></div>
+                
+                <button class="btn-primary" onclick="nextSetupStep()">Continue</button>
+                <button class="btn-secondary" onclick="prevSetupStep()">Back</button>
+            </div>
+            
+            <div class="setup-step" id="step3">
+                <h2 class="modal-title">ClawBot Integration (Optional)</h2>
+                <p class="modal-subtitle">Connect to an external ClawBot for enhanced AI</p>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="useClawBot"> Use ClawBot personality
+                    </label>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
+                        This will override my local personality with an external AI
+                    </p>
+                </div>
+                
+                <button class="btn-primary" onclick="completeSetup()">Start Your Journey</button>
+                <button class="btn-secondary" onclick="prevSetupStep()">Back</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Memory Book Modal -->
+    <div class="modal-overlay" id="memoryBookModal">
+        <div class="modal" style="max-width: 600px;">
+            <h2 class="modal-title">📖 Memory Book</h2>
+            <p class="modal-subtitle">Your journey together</p>
+            
+            <div id="memoryBookStats" style="margin-bottom: 20px;"></div>
+            
+            <div class="memory-timeline" id="memoryTimeline">
+                <div class="empty-state">No daily memories recorded yet...</div>
+            </div>
+            
+            <button class="btn-secondary" onclick="closeMemoryBook()">Close</button>
+        </div>
+    </div>
+    
+    <!-- Daily Check-in Modal -->
+    <div class="modal-overlay" id="dailyCheckinModal">
+        <div class="modal">
+            <h2 class="modal-title">How was your day? 🌟</h2>
+            <p class="modal-subtitle">I'd love to hear about it</p>
+            
+            <div class="form-group">
+                <label>Rate your day</label>
+                <div class="rating-stars" id="modalDayRating">
+                    <span class="star" onclick="setModalDayRating(1)">⭐</span>
+                    <span class="star" onclick="setModalDayRating(2)">⭐</span>
+                    <span class="star" onclick="setModalDayRating(3)">⭐</span>
+                    <span class="star" onclick="setModalDayRating(4)">⭐</span>
+                    <span class="star" onclick="setModalDayRating(5)">⭐</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>How are you feeling?</label>
+                <input type="text" id="modalDailyMood" placeholder="Happy, tired, excited...">
+            </div>
+            
+            <div class="form-group">
+                <label>Any highlights?</label>
+                <input type="text" id="dailyHighlights" placeholder="What went well today?">
+            </div>
+            
+            <button class="btn-primary" onclick="submitModalDailyCheckin()">Save Memory</button>
+            <button class="btn-secondary" onclick="closeDailyCheckin()">Maybe later</button>
+        </div>
+    </div>
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="decor-panel.js"></script>
+    <script>
+        // Socket connection
+        const socket = io();
+        
+        // State
+        let agentState = {
+            mood: 'content',
+            activity: 'relaxing',
+            location: 'sofa',
+            avatar: { emoji: '🤖', color: '#4a90d9' },
+            userName: 'Friend'
+        };
+        
+        let selectedAvatar = null;
+        let currentDayRating = 0;
+        let availableAvatars = [];
+        let config = {};
+        
+        // Socket event handlers
+        socket.on('connect', () => {
+            console.log('Connected to companion server');
+        });
+        
+        socket.on('agent:state', (state) => {
+            agentState = state;
+            updateAgentDisplay(state);
+            updateAgentPosition(state.location);
+        });
+        
+        socket.on('agent:message', (message) => {
+            addMessage(message.text, 'agent', message.initiative);
+            showThoughtBubble(message.text);
+        });
+        
+        socket.on('agent:activity', (activity) => {
+            addActivityLog(activity);
+            if (activity.type === 'making_coffee' || activity.type === 'making_tea') {
+                showSteamAnimation();
+            }
+        });
+        
+        socket.on('memory:stats', (stats) => {
+            updateMemoryStats(stats);
+        });
+        
+        socket.on('notes:list', (notes) => {
+            renderNotes(notes);
+        });
+        
+        socket.on('memorybook:data', (data) => {
+            renderMemoryBook(data);
+        });
+        
+        socket.on('avatars:list', (avatars) => {
+            availableAvatars = avatars;
+            renderAvatarGrid();
+        });
+        
+        socket.on('setup:done', () => {
+            closeSetupModal();
+        });
+        
+        socket.on('tools:result', (result) => {
+            console.log('Tool result:', result);
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load config
+            const configRes = await fetch('/api/config');
+            config = await configRes.json();
+            
+            if (config.FIRST_RUN) {
+                showSetupModal();
+            }
+            
+            // Load avatars
+            socket.emit('avatars:get');
+            
+            // Load initial data
+            loadTools();
+            socket.emit('notes:get');
+        });
+        
+        // UI Functions
+        function updateAgentDisplay(state) {
+            document.getElementById('agentName').textContent = state.name || 'Celest';
+            
+            const activityInfo = state.activityInfo || { emoji: '😌', description: 'relaxing' };
+            document.getElementById('agentActivity').textContent = activityInfo.description;
+            
+            // Update avatar emoji and color
+            if (state.avatar) {
+                const avatarEl = document.getElementById('agentAvatar');
+                avatarEl.textContent = state.avatar.emoji;
+                if (state.avatar.color) {
+                    avatarEl.style.background = `linear-gradient(135deg, ${state.avatar.color} 0%, ${state.avatar.secondaryColor || state.avatar.color} 100%)`;
+                }
+            }
+        }
+        
+        function updateAgentPosition(location) {
+            const container = document.getElementById('agentContainer');
+            container.className = 'agent-container';
+            
+            const locationClasses = {
+                desk: 'at-desk',
+                sofa: 'at-sofa',
+                window: 'at-window',
+                kitchen: 'at-kitchen'
+            };
+            
+            if (locationClasses[location]) {
+                container.classList.add(locationClasses[location]);
+            }
+        }
+        
+        function clickAgent() {
+            socket.emit('agent:click');
+            const avatar = document.getElementById('agentAvatar');
+            avatar.style.transform = 'scale(0.9)';
+            setTimeout(() => avatar.style.transform = '', 150);
+        }
+        
+        function clickLocation(location) {
+            // Visual feedback only - agent doesn't move on click
+            // but we could add interaction here
+            console.log('Clicked location:', location);
+        }
+        
+        function showThoughtBubble(text) {
+            const bubble = document.getElementById('thoughtBubble');
+            bubble.textContent = text.substring(0, 50) + (text.length > 50 ? '...' : '');
+            bubble.classList.add('visible');
+            setTimeout(() => bubble.classList.remove('visible'), 4000);
+        }
+        
+        function showSteamAnimation() {
+            const steam = document.getElementById('steam');
+            steam.classList.add('visible');
+            setTimeout(() => steam.classList.remove('visible'), 2000);
+        }
+        
+        function addMessage(text, sender, isInitiative = false) {
+            const container = document.getElementById('chatMessages');
+            
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            const message = document.createElement('div');
+            message.className = `message ${sender}${isInitiative ? ' initiative' : ''}`;
+            message.textContent = text;
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            socket.emit('user:message', { message: text });
+            input.value = '';
+            
+            document.getElementById('typingIndicator').style.display = 'inline-flex';
+            setTimeout(() => {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }, 1000);
+        }
+        
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+        
+        function updateMemoryStats(stats) {
+            document.getElementById('memoryCount').textContent = stats.totalMemories || 0;
+            document.getElementById('noteCount').textContent = stats.activeNotes || 0;
+        }
+        
+        function renderNotes(notes) {
+            const container = document.getElementById('notesContainer');
+            container.innerHTML = '';
+            
+            notes.forEach(note => {
+                const noteEl = document.createElement('div');
+                noteEl.className = `sticky-note ${note.location} ${note.status}`;
+                noteEl.style.background = note.color;
+                noteEl.style.setProperty('--rotation', (Math.random() * 6 - 3) + 'deg');
+                noteEl.textContent = note.content;
+                noteEl.onclick = () => markNoteRead(note.id);
+                container.appendChild(noteEl);
+            });
+        }
+        
+        function markNoteRead(id) {
+            socket.emit('notes:read', { id });
+        }
+        
+        function addActivityLog(activity) {
+            const container = document.getElementById('activityLog');
+            
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <span class="activity-time">${time}</span>
+                <span>${activity.type || 'Unknown activity'}</span>
+            `;
+            
+            container.insertBefore(item, container.firstChild);
+            
+            while (container.children.length > 20) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        // Setup Wizard
+        let currentSetupStep = 1;
+        
+        function showSetupModal() {
+            document.getElementById('setupModal').classList.add('visible');
+        }
+        
+        function closeSetupModal() {
+            document.getElementById('setupModal').classList.remove('visible');
+        }
+        
+        function nextSetupStep() {
+            document.getElementById(`step${currentSetupStep}`).classList.remove('visible');
+            currentSetupStep++;
+            document.getElementById(`step${currentSetupStep}`).classList.add('visible');
+        }
+        
+        function prevSetupStep() {
+            document.getElementById(`step${currentSetupStep}`).classList.remove('visible');
+            currentSetupStep--;
+            document.getElementById(`step${currentSetupStep}`).classList.add('visible');
+        }
+        
+        function renderAvatarGrid() {
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = '';
+            
+            availableAvatars.forEach(avatar => {
+                const option = document.createElement('div');
+                option.className = 'avatar-option';
+                option.innerHTML = `
+                    <div class="emoji">${avatar.emoji}</div>
+                    <div class="name">${avatar.name}</div>
+                    <div class="desc">${avatar.description}</div>
+                `;
+                option.onclick = () => selectAvatar(avatar.key, option);
+                grid.appendChild(option);
+            });
+        }
+        
+        function selectAvatar(key, element) {
+            selectedAvatar = key;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+        
+        function completeSetup() {
+            const name = document.getElementById('setupName').value || 'Friend';
+            const useClawBot = document.getElementById('useClawBot').checked;
+            
+            socket.emit('setup:complete', {
+                name,
+                avatarKey: selectedAvatar || 'robot',
+                useClawBot
+            });
+        }
+        
+        // Memory Book
+        function toggleMemoryBook() {
+            const modal = document.getElementById('memoryBookModal');
+            if (modal.classList.contains('visible')) {
+                closeMemoryBook();
+            } else {
+                modal.classList.add('visible');
+                socket.emit('memorybook:get');
+            }
+        }
+        
+        function closeMemoryBook() {
+            document.getElementById('memoryBookModal').classList.remove('visible');
+        }
+        
+        function renderMemoryBook(data) {
+            const statsEl = document.getElementById('memoryBookStats');
+            const timelineEl = document.getElementById('memoryTimeline');
+            
+            if (data.stats) {
+                statsEl.innerHTML = `
+                    <div class="memory-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">${data.stats.totalDays || 0}</div>
+                            <div class="stat-label">Days Recorded</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">${data.stats.streak || 0}</div>
+                            <div class="stat-label">Day Streak</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (data.memories && data.memories.length > 0) {
+                timelineEl.innerHTML = data.memories.map(m => `
+                    <div class="memory-day">
+                        <div class="memory-day-date">${new Date(m.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+                        <div class="memory-day-mood">Mood: ${m.mood || 'Not recorded'} | Rating: ${m.day_rating || '-'}/10</div>
+                        ${m.highlights ? `
+                            <div class="memory-day-highlights">
+                                ✨ ${JSON.parse(m.highlights || '[]').join(', ')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Daily Check-in
+        function toggleDailyCheckin() {
+            const modal = document.getElementById('dailyCheckinModal');
+            modal.classList.add('visible');
+        }
+        
+        function closeDailyCheckin() {
+            document.getElementById('dailyCheckinModal').classList.remove('visible');
+        }
+        
+        function setDayRating(rating) {
+            currentDayRating = rating;
+            updateStarDisplay('dayRating', rating);
+        }
+        
+        function setModalDayRating(rating) {
+            currentDayRating = rating;
+            updateStarDisplay('modalDayRating', rating);
+        }
+        
+        function updateStarDisplay(containerId, rating) {
+            const stars = document.querySelectorAll(`#${containerId} .star`);
+            stars.forEach((star, index) => {
+                star.classList.toggle('active', index < rating);
+            });
+        }
+        
+        function submitModalDailyCheckin() {
+            const mood = document.getElementById('modalDailyMood').value;
+            const highlights = document.getElementById('dailyHighlights').value;
+            
+            socket.emit('daily:record', {
+                mood,
+                dayRating: currentDayRating,
+                highlights: highlights ? [highlights] : []
+            });
+            
+            closeDailyCheckin();
+            addMessage("Thanks for sharing! I've saved that memory. 💕", 'agent', true);
+        }
+        
+        // Tools
+        async function loadTools() {
+            try {
+                const response = await fetch('/api/tools');
+                const tools = await response.json();
+                
+                const container = document.getElementById('toolsList');
+                container.innerHTML = '';
+                
+                tools.forEach(tool => {
+                    const item = document.createElement('div');
+                    item.className = `tool-item${tool.enabled ? '' : ' disabled'}`;
+                    item.innerHTML = `
+                        <div class="tool-icon">${tool.icon}</div>
+                        <div class="tool-info">
+                            <div class="tool-name">${tool.name}</div>
+                            <div class="tool-status">${tool.enabled ? 'Active' : 'Disabled'}</div>
+                        </div>
+                        <div class="tool-toggle ${tool.enabled ? 'active' : ''}" 
+                             onclick="toggleTool('${tool.id}', ${!tool.enabled})"></div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                console.error('Failed to load tools:', err);
+            }
+        }
+        
+        async function toggleTool(id, enabled) {
+            try {
+                await fetch(`/api/tools/${id}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled })
+                });
+                loadTools();
+            } catch (err) {
+                console.error('Failed to toggle tool:', err);
+            }
+        }
+        
+        function toggleToolsPanel() {
+            loadTools();
+        }
+        
+        function toggleNotesPanel() {
+            socket.emit('notes:get');
+        }
+        
+        function showSettings() {
+            alert('Settings coming in v4.1! 🛠️');
+        }
+    </script>
+</body>
+</html>

@@ -1,46 +1,35 @@
 {
-  "name": "cozy-claw-home",
-  "version": "4.0.0",
-  "description": "A local-first AI companion platform - your AI agent's cozy home",
+  "name": "companion-house",
+  "version": "3.0.0",
+  "description": "A visual home for your personal AI companion - always here, always helpful",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
     "init-db": "node scripts/init-db.js",
-    "setup": "node scripts/setup.js"
+    "export-memories": "node scripts/export-memories.js",
+    "import-memories": "node scripts/import-memories.js",
+    "migrate": "node scripts/migrate-from-game.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "socket.io": "^4.7.2",
     "cors": "^2.8.5",
     "sqlite3": "^5.1.6",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "uuid": "^9.0.0",
-    "ws": "^8.14.2",
-    "node-cron": "^3.0.2",
-    "chalk": "^4.1.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
   "keywords": [
-    "ai-companion",
-    "virtual-pet",
-    "cozy",
-    "local-first",
+    "ai",
+    "companion",
+    "assistant",
+    "personal",
     "agent",
-    "home",
-    "sqlite",
-    "websocket"
+    "cozy",
+    "visual"
   ],
   "author": "Cozy Claw Studio",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/cozyclaw/cozy-claw-home"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  }
+  "license": "MIT"
 }

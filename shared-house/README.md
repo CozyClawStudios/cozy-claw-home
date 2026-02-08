@@ -1,215 +1,314 @@
-# 🏠 Cozy Claw Home
+# Companion House 🏠🤖
 
-> A local-first AI companion platform - your AI agent lives in a cozy virtual home
+> A visual home where your personal AI agent lives 24/7.
+> Like a Tamagotchi, but useful.
 
-[![Version](https://img.shields.io/badge/version-4.0.0-blue.svg)](https://github.com/cozyclaw/cozy-claw-home)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)](https://nodejs.org)
+![Version](https://img.shields.io/badge/version-3.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## ✨ What is Cozy Claw Home?
+## What is this?
 
-Cozy Claw Home is a **local-first** AI companion platform where your personal AI agent lives in a cozy virtual home. Unlike cloud-based AI services, everything runs on your machine - your conversations, memories, and preferences stay private.
+**Companion House** is not a game. It's a companion platform - a cozy visual space where your AI agent lives, works, and interacts with you.
 
-Your AI companion:
-- 🏠 Lives in a customizable virtual home
-- 📝 Leaves sticky notes with reminders and thoughts
-- 📅 Tracks your daily mood and memories
-- 🤖 Can optionally connect to external ClawBot for enhanced AI
-- 💕 Gets to know you over time
+- **Persistent Memory**: Your agent remembers everything - your preferences, routines, conversations
+- **Real-Time Presence**: The agent is always active, doing activities, reacting to events
+- **Tool Integration**: Connect trading bots, calendars, weather, news - your agent monitors them
+- **Visual Experience**: A cozy room you can decorate, with your agent moving around doing things
+- **Proactive**: Your agent initiates conversations - "Good morning! Your trading bot made $50 overnight"
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install
-npm install -g cozy-claw-home
+# Clone and enter directory
+cd cozy-claw-studio/shared-house
 
-# Run
-cozy-claw-home
-
-# Or clone and run
-git clone https://github.com/cozyclaw/cozy-claw-home.git
-cd cozy-claw-home
+# Install dependencies
 npm install
+
+# Start the server
 npm start
 
-# Open http://localhost:3000
+# Open in browser
+open http://localhost:3000
 ```
 
-## 🎮 Features
-
-### 🤖 Avatar System
-Choose your companion's appearance:
-- 🤖 **Robot** - Logical and helpful
-- 🐱 **Cat** - Cozy and observant  
-- 🦊 **Fox** - Clever and witty
-- 👻 **Ghost** - Gentle and mysterious
-- 🌟 **Star** - Bright and encouraging
-- 🍵 **Tea Cup** - Calming and wise
-
-### 📝 Sticky Notes
-Your agent leaves notes around the room:
-- **Reminders** - Yellow notes for important tasks
-- **Thoughts** - Green notes with observations
-- **Jokes** - Orange notes to make you smile
-- **Observations** - Blue notes about the day
-
-Notes fade over time and can be clicked to read.
-
-### 📖 Daily Memory Book
-- Agent asks "How was your day?" 
-- Rate your day (1-10) and record mood
-- Timeline visualization of your journey
-- Agent brings up past memories in conversation
-
-### 🏡 Visual Activities
-Watch your agent move around the room:
-- **Window** - Looking out, commenting on weather
-- **Desk** - Working on the computer
-- **Sofa** - Reading, relaxing, napping
-- **Kitchen** - Making coffee/tea with steam animations
-
-### 💬 Natural Dialogue
-- Context-aware greetings (morning, afternoon, evening)
-- Remembers how long you've been away
-- Uses your name naturally
-- Warm, slightly sassy personality
-- Avatar-specific responses and jokes
-
-### 🔌 Optional ClawBot Integration
-Connect to an external ClawBot for enhanced AI capabilities:
-```json
-{
-  "USE_CLAWBOT_PERSONALITY": true,
-  "CLAWBOT_WS_URL": "ws://your-clawbot-server:8080"
-}
-```
-
-## 🛠️ Configuration
-
-Create a `config.json` file:
-
-```json
-{
-  "PORT": 3000,
-  "DAILY_CHECKIN_ENABLED": true,
-  "DAILY_CHECKIN_TIME": "20:00",
-  "USE_CLAWBOT_PERSONALITY": false,
-  "CLAWBOT_WS_URL": "ws://localhost:8080/clawbot",
-  "CLAWBOT_API_KEY": ""
-}
-```
-
-## 🗄️ Database
-
-Cozy Claw Home uses SQLite for all data storage:
-- **Location**: `./memory/agent_memory.db`
-- **Conversations**: Stored locally
-- **Memories**: Never leave your machine
-- **Daily entries**: Private to you
-
-## 🔌 API
-
-### REST Endpoints
-- `GET /api/agent/state` - Current agent state
-- `GET /api/notes` - Sticky notes
-- `GET /api/daily/book` - Memory book data
-- `GET /api/avatars` - Available avatars
-- `GET /health` - Health check
-
-### WebSocket Events
-```javascript
-const socket = io();
-
-socket.emit('user:message', { message: 'Hello!' });
-socket.on('agent:message', (data) => console.log(data.text));
-```
-
-## 🐳 Docker
-
-```bash
-docker build -t cozy-claw-home .
-docker run -p 3000:3000 -v $(pwd)/memory:/app/memory cozy-claw-home
-```
-
-## 🤝 Connecting to ClawBot
-
-To use an external ClawBot for AI responses:
-
-1. Set `USE_CLAWBOT_PERSONALITY: true` in config
-2. Configure `CLAWBOT_WS_URL` to your ClawBot WebSocket endpoint
-3. Optionally set `CLAWBOT_API_KEY` for authentication
-
-The local agent acts as a "host" - handling visual activities, notes, and memory while ClawBot provides AI responses.
-
-## 📝 Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | 3000 |
-| `DB_PATH` | Database location | `./memory/agent_memory.db` |
-| `JWT_SECRET` | Secret for tokens | (auto-generated) |
-| `CLAWBOT_WS_URL` | ClawBot WebSocket URL | - |
-| `CLAWBOT_API_KEY` | ClawBot API key | - |
-
-## 🧪 Development
-
-```bash
-# Install dev dependencies
-npm install
-
-# Run in dev mode with auto-reload
-npm run dev
-
-# Initialize database
-npm run init-db
-```
-
-## 📦 Project Structure
+## Architecture
 
 ```
-cozy-claw-home/
+┌─────────────────────────────────────────────────────────┐
+│                    COMPANION HOUSE                       │
+├─────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐ │
+│  │   Agent     │    │   Memory    │    │   Tools     │ │
+│  │   Core      │◄──►│   System    │◄──►│  Framework  │ │
+│  │             │    │             │    │             │ │
+│  │ • Personality│    │ • Facts     │    │ • Trading   │ │
+│  │ • Mood      │    │ • Preferences│   │ • Calendar  │ │
+│  │ • Activities│    │ • Routines  │    │ • Weather   │ │
+│  │ • Chat      │    │ • History   │    │ • News      │ │
+│  └─────────────┘    └─────────────┘    └─────────────┘ │
+│           │                                           │
+│           ▼                                           │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │              Real-Time Agent Loop                │  │
+│  │     (always running, even when you're away)      │  │
+│  └─────────────────────────────────────────────────┘  │
+│           │                                           │
+│           ▼                                           │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │              Socket.io / Express                 │  │
+│  └─────────────────────────────────────────────────┘  │
+│           │                                           │
+│           ▼                                           │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │         Cozy Visual UI (Browser)                 │  │
+│  │                                                  │  │
+│  │    ┌─────────┐                                   │  │
+│  │    │  🪟     │  ┌─────────┐                      │  │
+│  │    │ Window  │  │   🤖    │ ← Click to chat     │  │
+│  │    └─────────┘  │  Agent  │                      │  │
+│  │                 └─────────┘                      │  │
+│  │    ┌─────────┐  ┌─────────┐  ┌─────────┐        │  │
+│  │    │   🛋️   │  │   💻    │  │   🪴    │        │  │
+│  │    │  Sofa   │  │  Desk   │  │  Plant  │        │  │
+│  │    └─────────┘  └─────────┘  └─────────┘        │  │
+│  │                                                  │  │
+│  └─────────────────────────────────────────────────┘  │
+│                                                          │
+└─────────────────────────────────────────────────────────┘
+```
+
+## Key Features
+
+### 🧠 Persistent Memory
+- **Facts**: "User works as a software engineer"
+- **Preferences**: "User prefers coffee in the morning"
+- **Routines**: "User has meetings on Mondays at 9am"
+- **Conversation History**: Full chat history with context
+- **Importance Scoring**: Agent prioritizes important memories
+
+### 🤖 Real-Time Agent Presence
+- Agent is **always** doing something (reading, working, relaxing)
+- Changes activities based on time of day
+- Moves around the room (sofa → desk → window)
+- Has moods that affect behavior
+
+### 🔧 Tool Integration
+- **Trading**: Monitor stocks, crypto, trading bots
+- **Calendar**: Google Calendar, iCal integration
+- **Weather**: Local weather alerts
+- **News**: Personalized news feed
+- **Custom Webhooks**: Connect anything
+
+Agent "walks to the computer" → "types" → reports back
+
+### 🎨 Visual Companion Experience
+- Simple, cozy room (not a complex game)
+- Decorate to personalize
+- Click agent to chat
+- Voice input support
+- Agent shows what it's doing
+
+### 🗣️ Agent-Initiated Conversations
+- Morning greetings
+- Tool alerts ("Bitcoin is up 10%!")
+- Calendar reminders
+- Idle check-ins
+- Evening wind-down
+
+## File Structure
+
+```
+shared-house/
+├── server.js              # Main server, agent loop
+├── package.json           # Dependencies
+├── DEPLOYMENT.md          # Local vs hosted setup
+├── README.md             # This file
+│
 ├── agent/
-│   ├── core.js          # Agent personality & avatars
-│   ├── memory.js        # Memory & notes system
-│   └── tools.js         # Tools & ClawBot connector
+│   ├── core.js           # Personality, mood, responses
+│   ├── memory.js         # Memory storage and retrieval
+│   └── tools.js          # Tool integration framework
+│
 ├── public/
-│   └── index.html       # UI with visual activities
-├── memory/              # SQLite database
-├── server.js            # Main server
-├── config.json          # User configuration
-└── package.json
+│   ├── index.html        # Cozy visual UI
+│   └── companion.js      # Frontend logic
+│
+├── memory/
+│   └── agent_memory.db   # SQLite database (created on start)
+│
+└── scripts/              # Utility scripts
+    ├── export-memories.js
+    ├── import-memories.js
+    └── migrate-from-game.js
 ```
 
-## 🤔 Why Local-First?
+## API Endpoints
 
-- **Privacy** - Your conversations stay on your machine
-- **Ownership** - Your data belongs to you
-- **Offline** - Works without internet
-- **Speed** - No network latency
-- **Longevity** - Works as long as you have the files
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/agent/state` | GET | Current agent mood, activity, location |
+| `/api/memory/stats` | GET | Memory statistics |
+| `/api/memory/recent` | GET | Recent memories |
+| `/api/memory/query` | POST | Search memories |
+| `/api/memory/add` | POST | Add memory (external integrations) |
+| `/api/conversations` | GET | Chat history |
+| `/api/tools` | GET | List connected tools |
+| `/api/tools/:id/toggle` | POST | Enable/disable tool |
+| `/api/decor` | GET | Room decorations |
+| `/health` | GET | Health check |
 
-## 🗺️ Roadmap
+## Socket.io Events
 
-- [ ] v4.1 - PWA support, offline mode
-- [ ] v4.2 - Cloud sync (optional)
-- [ ] v5.0 - Multi-agent support
-- [ ] v5.5 - Voice input/output
-- [ ] v6.0 - Mobile apps
+**From Server:**
+- `agent:state` - Agent state update
+- `agent:message` - Agent sends a message
+- `agent:activity` - Agent changes activity
+- `memory:stats` - Memory statistics
 
-## 🤝 Contributing
+**From Client:**
+- `user:message` - Send message to agent
+- `agent:click` - User clicked on agent
+- `memory:query` - Query memories
+- `tools:refresh` - Refresh tool data
 
-Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) first.
+## Deployment
 
-## 📄 License
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for:
+- Local mode setup
+- Hosted mode plans
+- Docker deployment
+- Reverse proxy configuration
+- Security considerations
 
-MIT License - see [LICENSE](LICENSE) file
+## Environment Variables
 
-## 💕 Acknowledgments
+```bash
+PORT=3000                    # Server port
+JWT_SECRET=change-me         # JWT secret (change in production!)
+DEPLOYMENT_MODE=local        # 'local' or 'hosted'
+DB_PATH=./memory/agent_memory.db  # Database path
+```
 
-- Built with love by the Cozy Claw Studio team
-- Inspired by virtual pets and cozy games
-- Thanks to all our early testers
+## Memory System
+
+The agent remembers things in categories:
+
+```javascript
+// Fact
+{ type: 'fact', content: 'User lives in Seattle', importance: 7 }
+
+// Preference
+{ type: 'preference', content: 'User likes dark mode', importance: 6 }
+
+// Routine
+{ type: 'routine', content: 'User wakes up at 7am', importance: 8 }
+
+// Event
+{ type: 'event', content: 'User got a promotion', importance: 9 }
+
+// Conversation
+{ type: 'conversation', content: 'User asked about weather', importance: 3 }
+```
+
+## Tool Configuration
+
+Tools are configured via the UI or API:
+
+```javascript
+// Trading Tool
+{
+  type: 'trading',
+  config: {
+    apiKey: '...',
+    watchlist: ['BTC', 'ETH', 'AAPL'],
+    alertThreshold: 5
+  }
+}
+
+// Calendar Tool
+{
+  type: 'calendar',
+  config: {
+    provider: 'google',
+    alertBefore: 15
+  }
+}
+```
+
+## Customization
+
+### Change Agent Name
+Edit `agent/core.js`:
+```javascript
+this.personality = {
+  name: 'YourAgentName',
+  // ...
+};
+```
+
+### Add Decor
+Add items to `room_decor` table or use the UI.
+
+### Custom Tools
+Extend `agent/tools.js` with new tool definitions.
+
+## Comparison: Old vs New
+
+| Feature | Old (Game) | New (Companion) |
+|---------|------------|-----------------|
+| Purpose | Multiplayer game | Personal companion |
+| Focus | Coins, levels | Memories, tools |
+| Players | Multiple | Just you |
+| Agent | Background NPC | Main character |
+| Persistence | Session-only | Permanent memory |
+| Tools | None | Trading, Calendar, etc. |
+| Economy | Coins | None |
+| Minigames | Yes | Removed |
+| Voice | No | Yes |
+
+## Roadmap
+
+### v3.0 (Current)
+- ✅ Core companion platform
+- ✅ Memory system
+- ✅ Tool framework
+- ✅ Visual room
+- ✅ Voice input
+
+### v3.1 (Planned)
+- Better LLM integration (OpenAI, Claude, etc.)
+- More tool integrations (GitHub, Spotify, etc.)
+- Mobile app
+- Widgets for desktop
+
+### v3.2 (Planned)
+- Memory visualization
+- Agent "dreams" (memory consolidation)
+- Multi-room house
+- Custom agent appearance
+
+### v4.0 (Planned)
+- Hosted/cloud version
+- Team/family plans
+- Advanced AI personalities
+- Plugin system
+
+## Contributing
+
+Contributions welcome! Areas we need help:
+- More tool integrations
+- Better UI/UX
+- Documentation
+- Tests
+
+## License
+
+MIT License - see LICENSE file.
 
 ---
 
-**Your companion is waiting. Welcome home.** 🏠
+Made with 💜 by Cozy Claw Studio
+
+*Your companion is waiting.*

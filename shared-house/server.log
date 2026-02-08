@@ -1,53 +1,63 @@
-
-🏠 Cozy Claw Home v4.0
-   Your personal AI companion platform
-
+🏠 Companion House - Personal AI Agent Platform
 📦 Deployment mode: local
-🤖 ClawBot integration: enabled
 
-💾 Initializing database...
+💾 Local mode - using SQLite database
 ✅ Database initialized
+🎨 Decor database initialized
 🤖 Agent 'Claw' initialized
-   Avatar: 🤖 Robo
    Mood: sleepy
-   Companion for: Friend
-🧠 Memory system v4.0 initialized
-🔧 Tool framework v4.0 initialized
-🤖 Agent system v4.0 initialized
+   Activity: napping
+🧠 Memory system initialized
+🔧 Tool framework initialized
+🤖 Agent system initialized
+📬 Message queue initialized: /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/memory/message-queue
+👁️  Watching message queue...
+🌉 ClawBot Bridge initialized
+
 
 🌐 Server running at http://localhost:3000
 
 📡 API Endpoints:
-  GET  /api/agent/state      - Agent current state
-  GET  /api/memory/stats     - Memory statistics
-  GET  /api/notes            - Sticky notes
-  GET  /api/daily/book       - Memory book data
-  GET  /api/avatars          - Available avatars
-  GET  /api/config           - Configuration
-  GET  /health               - Health check
+  GET  /api/agent/state          - Agent current state
+  GET  /api/memory/stats         - Memory statistics
+  GET  /api/memory/recent        - Recent memories
+  POST /api/memory/query         - Query memories
+  GET  /api/conversations        - Conversation history
+  GET  /api/tools                - Connected tools
+
+🌉 Bridge Endpoints:
+  POST /api/clawbot/message      - Send message to agent
+  GET  /api/clawbot/responses    - Get agent responses
+  POST /api/clawbot/webhook      - Webhook for responses
+  GET  /api/clawbot/status       - Bridge status
+
+🎨 Decor Endpoints:
+  GET  /api/decor/catalog        - Get available items
+  GET  /api/decor/placements     - Get current layout
+  POST /api/decor/place          - Place an item
+  POST /api/decor/move           - Move an item
+  GET  /api/decor/themes         - Get room themes
 
 🤖 Agent presence loop starting...
-🔌 Client connected: rWM1yjlRvW1aQmGhAAAB
-🎭 Avatar changed to: Whiskers 🐱
-SIGTERM received, shutting down gracefully
-🤖 Agent presence loop stopped
-/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:19
-        const statement = new Statement(this, sql, errBack);
-                          ^
-
-Error: SQLITE_MISUSE: Database is closed
-    at Database.<anonymous> (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:19:27)
-    at object.<computed> [as run] (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/trace.js:28:20)
-    at /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:255:21
-    at new Promise (<anonymous>)
-    at Database.run (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:254:16)
-    at AgentCore.handleUserMessage (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/agent/core.js:315:23)
-    at Socket.<anonymous> (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/server.js:345:40)
-    at Socket.emit (node:events:519:28)
-    at Socket.emitUntyped (/home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/socket.io/dist/typed-events.js:69:22)
-    at /home/zak/.openclaw/workspace/repos/cozy-claw-studio/shared-house/node_modules/socket.io/dist/socket.js:697:39 {
-  errno: 21,
-  code: 'SQLITE_MISUSE'
-}
-
-Node.js v22.22.0
+🤖 Mood changed: sleepy → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → focused (activity)
+🤖 Mood changed: focused → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → calm (activity)

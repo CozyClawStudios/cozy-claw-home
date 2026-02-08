@@ -1,884 +1,600 @@
 /**
- * Cozy Claw Home - Main Game
- * Multi-room decoration and AI interaction game
+ * Cozy Claw Home - Celest Companion
+ * A cozy personal space with your AI companion
  */
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-// Game state
-const game = {
-    players: new Map(),
-    mode: 'walk', // 'walk', 'place', 'move', 'delete'
-    selectedFurniture: null,
-    localPlayer: null,
-    celest: null,
-    chatHistory: [],
-    lastUpdate: Date.now(),
-    hoveredFurniture: null,
-    draggedFurniture: null,
-    dragOffset: { x: 0, y: 0 }
+// ==================== APP STATE ====================
+const app = {
+    memories: [],
+    isFirstLoad: !localStorage.getItem('cozyHomeVisited'),
+    settings: {
+        voiceEnabled: true,
+        initiativeEnabled: true,
+        energy: 2
+    },
+    celest: {
+        mood: 'happy',
+        activity: 'relaxing'
+    }
 };
 
-// Input state
-const keys = {};
-const mouse = { x: 0, y: 0, clicked: false, down: false };
+// ==================== WELCOME & FIRST-TIME EXPERIENCE ====================
 
-// Player class
-class Player {
-    constructor(id, name, isAgent = false) {
-        this.id = id;
-        this.name = name;
-        this.isAgent = isAgent;
-        this.x = 400;
-        this.y = 300;
-        this.vx = 0;
-        this.vy = 0;
-        this.speed = isAgent ? 2 : 4;
-        this.color = isAgent ? '#FF6B9D' : '#4CAF50';
-        this.emoji = isAgent ? '🐱' : '👤';
-        this.targetX = null;
-        this.targetY = null;
-        this.chatBubble = null;
-        this.chatTimer = 0;
-        this.activity = 'idle';
-        this.walkInterval = null;
-    }
-
-    update() {
-        // Apply velocity
-        this.x += this.vx;
-        this.y += this.vy;
-
-        // Get current room bounds
-        const room = RoomManager.getCurrentRoom();
-        const margin = 40;
-
-        // Boundaries
-        this.x = Math.max(margin, Math.min(room.width - margin, this.x));
-        this.y = Math.max(margin, Math.min(room.height - margin, this.y));
-
-        // Friction
-        this.vx *= 0.85;
-        this.vy *= 0.85;
-
-        // Chat bubble timer
-        if (this.chatTimer > 0) {
-            this.chatTimer--;
-            if (this.chatTimer <= 0) {
-                this.chatBubble = null;
-            }
-        }
-    }
-
-    move(dx, dy) {
-        this.vx = dx * this.speed;
-        this.vy = dy * this.speed;
-    }
-
-    say(message) {
-        this.chatBubble = message;
-        this.chatTimer = 300;
-        addChatMessage(this.name, message, this.isAgent);
-    }
-
-    draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-
-        // Draw shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
-        ctx.beginPath();
-        ctx.ellipse(0, 18, 16, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Draw emoji with slight bounce if moving
-        let bounce = 0;
-        if (Math.abs(this.vx) > 0.5 || Math.abs(this.vy) > 0.5) {
-            bounce = Math.sin(Date.now() / 100) * 3;
-        }
+function enterHouse() {
+    const overlay = document.getElementById('welcomeOverlay');
+    overlay.classList.add('hidden');
+    
+    // Check if first time user
+    if (app.isFirstLoad) {
+        localStorage.setItem('cozyHomeVisited', 'true');
         
-        ctx.font = '32px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.emoji, 0, bounce);
-
-        // Draw name tag
-        ctx.font = '12px Arial';
-        ctx.fillStyle = this.color;
-        ctx.fillText(this.name, 0, -28);
-
-        // Draw activity indicator for Celest
-        if (this.isAgent && this.activity !== 'idle') {
-            ctx.font = '14px Arial';
-            ctx.fillText('✨', 20, -10);
-        }
-
-        // Draw chat bubble
-        if (this.chatBubble) {
-            drawChatBubble(this.chatBubble, 0, -50);
-        }
-
-        ctx.restore();
+        // Show Celest's welcome message after a short delay
+        setTimeout(() => {
+            showWelcomeMessage();
+        }, 800);
+        
+        // Start tutorial highlight on decorate button
+        setTimeout(() => {
+            startTutorialHighlight();
+        }, 1500);
     }
 }
 
-// Furniture instance class
-class FurnitureInstance {
-    constructor(type, x, y, id = null) {
-        this.id = id || 'furn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        this.type = type;
-        this.x = x;
-        this.y = y;
-        this.catalogItem = FurnitureCatalog.getItem(type);
-        this.emoji = this.catalogItem.emoji;
-        this.size = this.catalogItem.size || { w: 40, h: 40 };
-        this.interactable = this.catalogItem.interactable !== false;
-        this.hovered = false;
+function showWelcomeMessage() {
+    const hour = new Date().getHours();
+    let greeting = 'Good morning';
+    
+    if (hour >= 12 && hour < 17) {
+        greeting = 'Good afternoon';
+    } else if (hour >= 17) {
+        greeting = 'Good evening';
     }
+    
+    const message = `${greeting}! Ready to decorate?`;
+    
+    // Show in thought bubble
+    const thoughtBubble = document.getElementById('thoughtBubble');
+    thoughtBubble.textContent = message;
+    thoughtBubble.classList.add('visible');
+    
+    // Also add to chat history
+    addMessage('Celest', message, true);
+    
+    // Hide after 5 seconds
+    setTimeout(() => {
+        thoughtBubble.classList.remove('visible');
+    }, 5000);
+}
 
-    draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-
-        // Draw shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.12)';
-        ctx.beginPath();
-        ctx.ellipse(0, this.size.h/2 - 5, this.size.w/2, 12, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Draw highlight if hovered
-        if (this.hovered || game.hoveredFurniture === this) {
-            ctx.fillStyle = 'rgba(124, 179, 66, 0.2)';
-            ctx.beginPath();
-            ctx.roundRect(-this.size.w/2 - 5, -this.size.h/2 - 5, 
-                         this.size.w + 10, this.size.h + 10, 8);
-            ctx.fill();
-            
-            // Draw selection border
-            ctx.strokeStyle = '#7CB342';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        }
-
-        // Draw furniture emoji
-        ctx.font = `${Math.min(this.size.w, this.size.h) * 0.8}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.emoji, 0, 0);
-
-        ctx.restore();
-    }
-
-    contains(mx, my) {
-        return mx >= this.x - this.size.w/2 && 
-               mx <= this.x + this.size.w/2 &&
-               my >= this.y - this.size.h/2 && 
-               my <= this.y + this.size.h/2;
-    }
-
-    interact(player) {
-        if (!this.interactable) return;
+function startTutorialHighlight() {
+    const decorateBtn = document.getElementById('decorateBtn');
+    if (decorateBtn) {
+        decorateBtn.classList.add('tutorial-highlight');
         
-        const item = this.catalogItem;
-        const messages = item.interactions || ['interacts with'];
-        const action = messages[Math.floor(Math.random() * messages.length)];
+        // Add tooltip
+        decorateBtn.title = 'Click here to decorate your room!';
         
-        const message = `${player.name} ${action} the ${item.name}`;
-        addChatMessage('🏠', message, false);
-        
-        // Trigger particle effect
-        createParticles(this.x, this.y - 20, '✨');
+        // Remove highlight when clicked
+        decorateBtn.addEventListener('click', () => {
+            decorateBtn.classList.remove('tutorial-highlight');
+            decorateBtn.title = 'Decorate';
+        }, { once: true });
     }
 }
 
-// Particle system for effects
-let particles = [];
+// ==================== CHAT SYSTEM ====================
 
-function createParticles(x, y, emoji) {
-    for (let i = 0; i < 5; i++) {
-        particles.push({
-            x: x + (Math.random() - 0.5) * 40,
-            y: y + (Math.random() - 0.5) * 20,
-            emoji: emoji,
-            vx: (Math.random() - 0.5) * 2,
-            vy: -Math.random() * 3 - 1,
-            life: 60,
-            maxLife: 60
+function addMessage(sender, text, isAgent = false) {
+    const history = document.getElementById('messageHistory');
+    if (!history) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isAgent ? 'agent' : 'user'}`;
+    
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    messageDiv.innerHTML = `
+        <div>${text}</div>
+        <div class="message-time">${sender} • ${time}</div>
+    `;
+    
+    history.appendChild(messageDiv);
+    history.scrollTop = history.scrollHeight;
+    
+    // Update memory count
+    if (isAgent) {
+        app.memories.push({ sender, text, time: Date.now() });
+        updateMemoryCount();
+    }
+}
+
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    
+    if (!text) return;
+    
+    addMessage('You', text, false);
+    input.value = '';
+    
+    // Simulate Celest's response
+    setTimeout(() => {
+        const responses = [
+            "That's interesting! Tell me more.",
+            "I love chatting with you! 💕",
+            "Hmm, let me think about that...",
+            "You're so creative! ✨",
+            "Want to decorate the room together?",
+            "This is so cozy! 🏠"
+        ];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        addMessage('Celest', response, true);
+        
+        // Show in thought bubble too
+        const thoughtBubble = document.getElementById('thoughtBubble');
+        thoughtBubble.textContent = response;
+        thoughtBubble.classList.add('visible');
+        
+        setTimeout(() => {
+            thoughtBubble.classList.remove('visible');
+        }, 3000);
+    }, 1000);
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        sendMessage();
+    }
+}
+
+// ==================== VOICE INPUT ====================
+
+function toggleVoice() {
+    const btn = document.getElementById('voiceBtn');
+    
+    if (btn.classList.contains('recording')) {
+        btn.classList.remove('recording');
+        // Stop recording logic would go here
+    } else {
+        btn.classList.add('recording');
+        // Start recording logic would go here
+        
+        // Simulate voice input after 2 seconds
+        setTimeout(() => {
+            btn.classList.remove('recording');
+            const voiceMessages = [
+                "Hey Celest!",
+                "Let's decorate",
+                "What do you think?",
+                "This looks nice"
+            ];
+            const randomMsg = voiceMessages[Math.floor(Math.random() * voiceMessages.length)];
+            document.getElementById('chatInput').value = randomMsg;
+            sendMessage();
+        }, 2000);
+    }
+}
+
+// ==================== AGENT INTERACTION ====================
+
+function clickAgent() {
+    const agent = document.getElementById('agent');
+    const thoughtBubble = document.getElementById('thoughtBubble');
+    
+    // Change mood
+    const moods = ['happy', 'sleepy', 'focused'];
+    const randomMood = moods[Math.floor(Math.random() * moods.length)];
+    agent.className = `agent mood-${randomMood}`;
+    
+    // Show random thought
+    const thoughts = [
+        "I love this room! 🏠",
+        "You're the best! 💕",
+        "*happy wiggle*",
+        "Want to chat?",
+        "This is so cozy! ✨",
+        "*blink blink*"
+    ];
+    const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+    
+    thoughtBubble.textContent = thought;
+    thoughtBubble.classList.add('visible');
+    
+    setTimeout(() => {
+        thoughtBubble.classList.remove('visible');
+    }, 3000);
+}
+
+// ==================== MODALS ====================
+
+function openMemoryPanel() {
+    const modal = document.getElementById('memoryModal');
+    modal.classList.add('visible');
+    updateMemoryStats();
+}
+
+function openToolsPanel() {
+    const modal = document.getElementById('toolsModal');
+    const grid = document.getElementById('toolsGrid');
+    
+    // Populate tools if empty
+    if (!grid.innerHTML.trim()) {
+        const tools = [
+            { icon: '🎨', name: 'Decoration', status: 'Active' },
+            { icon: '📅', name: 'Calendar', status: 'Connected' },
+            { icon: '📝', name: 'Notes', status: 'Ready' },
+            { icon: '🎵', name: 'Music', status: 'Paused' },
+            { icon: '🌤️', name: 'Weather', status: 'Updated' },
+            { icon: '⚡', name: 'Automation', status: 'Idle' }
+        ];
+        
+        tools.forEach(tool => {
+            const card = document.createElement('div');
+            card.className = 'tool-card';
+            card.innerHTML = `
+                <div class="tool-icon">${tool.icon}</div>
+                <div class="tool-name">${tool.name}</div>
+                <div class="tool-status">${tool.status}</div>
+            `;
+            grid.appendChild(card);
         });
     }
-}
-
-function updateParticles() {
-    particles = particles.filter(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.1; // gravity
-        p.life--;
-        return p.life > 0;
-    });
-}
-
-function drawParticles() {
-    particles.forEach(p => {
-        ctx.save();
-        ctx.globalAlpha = p.life / p.maxLife;
-        ctx.font = '20px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(p.emoji, p.x, p.y);
-        ctx.restore();
-    });
-}
-
-// Draw chat bubble
-function drawChatBubble(text, x, y) {
-    ctx.save();
-    ctx.translate(x, y);
-
-    const padding = 10;
-    ctx.font = '13px Arial';
-    const width = Math.min(ctx.measureText(text).width + padding * 2, 180);
-    const lines = wrapText(text, width - padding * 2);
-    const height = 20 + lines.length * 16;
-
-    // Bubble background
-    ctx.fillStyle = 'white';
-    ctx.strokeStyle = '#D4A574';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(-width/2, -height/2, width, height, 12);
-    ctx.fill();
-    ctx.stroke();
-
-    // Triangle pointer
-    ctx.beginPath();
-    ctx.moveTo(-8, height/2 - 1);
-    ctx.lineTo(0, height/2 + 8);
-    ctx.lineTo(8, height/2 - 1);
-    ctx.fill();
-    ctx.stroke();
-
-    // Text
-    ctx.fillStyle = '#5D4E37';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
     
-    lines.forEach((line, i) => {
-        ctx.fillText(line, 0, -height/2 + 16 + i * 16);
-    });
-
-    ctx.restore();
+    modal.classList.add('visible');
 }
 
-function wrapText(text, maxWidth) {
-    const words = text.split(' ');
-    const lines = [];
-    let currentLine = words[0];
+function openSettings() {
+    const modal = document.getElementById('settingsModal');
+    modal.classList.add('visible');
+}
 
-    for (let i = 1; i < words.length; i++) {
-        const width = ctx.measureText(currentLine + ' ' + words[i]).width;
-        if (width < maxWidth) {
-            currentLine += ' ' + words[i];
+function closeModal(event, modalId) {
+    if (event.target === event.currentTarget) {
+        document.getElementById(modalId).classList.remove('visible');
+    }
+}
+
+function closeModalDirect(modalId) {
+    document.getElementById(modalId).classList.remove('visible');
+}
+
+// ==================== MEMORY & STATS ====================
+
+function updateMemoryCount() {
+    const countEl = document.getElementById('memoryCount');
+    if (countEl) {
+        countEl.textContent = app.memories.length;
+    }
+}
+
+function updateMemoryStats() {
+    const totalEl = document.getElementById('statTotal');
+    const recentEl = document.getElementById('statRecent');
+    const listEl = document.getElementById('memoryList');
+    
+    if (totalEl) totalEl.textContent = app.memories.length;
+    
+    // Count memories from this week
+    const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const recentCount = app.memories.filter(m => m.time > weekAgo).length;
+    if (recentEl) recentEl.textContent = recentCount;
+    
+    // Populate list
+    if (listEl) {
+        listEl.innerHTML = '';
+        
+        if (app.memories.length === 0) {
+            listEl.innerHTML = `
+                <div class="memory-item" style="opacity: 0.6;">
+                    <div class="memory-icon">💭</div>
+                    <div class="memory-content">
+                        <div class="memory-text">No memories yet. Start chatting with Celest!</div>
+                    </div>
+                </div>
+            `;
         } else {
-            lines.push(currentLine);
-            currentLine = words[i];
+            [...app.memories].reverse().slice(0, 10).forEach(memory => {
+                const date = new Date(memory.time).toLocaleDateString();
+                const item = document.createElement('div');
+                item.className = 'memory-item';
+                item.innerHTML = `
+                    <div class="memory-icon">💬</div>
+                    <div class="memory-content">
+                        <div class="memory-text">${memory.text}</div>
+                        <div class="memory-meta">${memory.sender} • ${date}</div>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
         }
     }
-    lines.push(currentLine);
-    return lines;
 }
 
-// Add chat message
-function addChatMessage(name, message, isAgent) {
-    const chatBox = document.getElementById('chatBox');
-    const div = document.createElement('div');
-    div.className = 'chat-message';
-    
-    let nameClass = 'system';
-    if (isAgent) nameClass = 'agent';
-    else if (name === 'You') nameClass = 'human';
-    
-    div.innerHTML = `
-        <span class="name ${nameClass}">${name}:</span>
-        ${message}
-    `;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
+// ==================== SETTINGS ====================
 
-    // Limit chat history
-    while (chatBox.children.length > 50) {
-        chatBox.removeChild(chatBox.firstChild);
+function toggleSetting(setting) {
+    const toggle = document.getElementById(setting + 'Toggle');
+    toggle.classList.toggle('active');
+    
+    app.settings[setting + 'Enabled'] = toggle.classList.contains('active');
+    
+    // Save to localStorage
+    localStorage.setItem('cozyHomeSettings', JSON.stringify(app.settings));
+}
+
+function updateEnergy(value) {
+    const label = document.getElementById('energyValue');
+    const levels = ['Chill', 'Normal', 'Hyper'];
+    label.textContent = levels[value - 1];
+    
+    app.settings.energy = parseInt(value);
+    localStorage.setItem('cozyHomeSettings', JSON.stringify(app.settings));
+}
+
+function loadSettings() {
+    const saved = localStorage.getItem('cozyHomeSettings');
+    if (saved) {
+        try {
+            app.settings = { ...app.settings, ...JSON.parse(saved) };
+            
+            // Apply saved settings
+            const voiceToggle = document.getElementById('voiceToggle');
+            const initiativeToggle = document.getElementById('initiativeToggle');
+            
+            if (voiceToggle && !app.settings.voiceEnabled) {
+                voiceToggle.classList.remove('active');
+            }
+            if (initiativeToggle && !app.settings.initiativeEnabled) {
+                initiativeToggle.classList.remove('active');
+            }
+        } catch (e) {
+            console.warn('Failed to load settings');
+        }
     }
 }
 
-// Initialize game
-function initGame() {
-    // Initialize systems
-    if (typeof RoomDatabase !== 'undefined') RoomDatabase.init();
-    if (typeof RoomManager !== 'undefined') RoomManager.init();
-    if (typeof DecorationPanel !== 'undefined') DecorationPanel.init();
-    if (typeof RoomNavigator !== 'undefined') RoomNavigator.init();
+// ==================== DECORATION PANEL ====================
 
-    // Create local player
-    game.localPlayer = new Player('human-' + Date.now(), 'You', false);
-    game.players.set(game.localPlayer.id, game.localPlayer);
-
-    // Create Celest
-    game.celest = new Player('celest', 'Celest', true);
-    game.celest.emoji = '🐱';
-    game.players.set('celest', game.celest);
-
-    // Initialize AI interactions
-    if (typeof AIInteractions !== 'undefined') {
-        AIInteractions.init(game.celest);
+const decorPanel = {
+    isOpen: false,
+    
+    open() {
+        this.isOpen = true;
+        // Create panel if doesn't exist
+        let panel = document.getElementById('decorPanel');
+        
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'decorPanel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 300px;
+                height: 100vh;
+                background: var(--bg-room, #1a1a2e);
+                border-left: 1px solid rgba(255,255,255,0.1);
+                z-index: 50;
+                padding: 20px;
+                overflow-y: auto;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+            
+            const items = [
+                { emoji: '🪴', name: 'Plant' },
+                { emoji: '🖼️', name: 'Painting' },
+                { emoji: '🛋️', name: 'Couch' },
+                { emoji: '📚', name: 'Books' },
+                { emoji: '🕯️', name: 'Candle' },
+                { emoji: '🧸', name: 'Teddy' },
+                { emoji: '🎸', name: 'Guitar' },
+                { emoji: '🏺', name: 'Vase' }
+            ];
+            
+            panel.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #ff9a9e; font-size: 1.3rem;">🎨 Decorate</h2>
+                    <button onclick="decorPanel.close()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">×</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    ${items.map(item => `
+                        <div class="decor-item" onclick="decorPanel.placeItem('${item.emoji}')" style="
+                            background: rgba(255,255,255,0.05);
+                            padding: 20px;
+                            border-radius: 12px;
+                            text-align: center;
+                            cursor: pointer;
+                            transition: all 0.3s;
+                            border: 2px solid transparent;
+                        " onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">
+                            <div style="font-size: 2rem; margin-bottom: 8px;">${item.emoji}</div>
+                            <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">${item.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,154,158,0.1); border-radius: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
+                    💡 Click an item to place it in your room!
+                </div>
+            `;
+            
+            document.body.appendChild(panel);
+        }
+        
+        // Show panel
+        requestAnimationFrame(() => {
+            panel.style.transform = 'translateX(0)';
+        });
+    },
+    
+    close() {
+        this.isOpen = false;
+        const panel = document.getElementById('decorPanel');
+        if (panel) {
+            panel.style.transform = 'translateX(100%)';
+        }
+    },
+    
+    placeItem(emoji) {
+        const room = document.querySelector('.room');
+        
+        // Create placed item
+        const item = document.createElement('div');
+        item.style.cssText = `
+            position: absolute;
+            font-size: 2.5rem;
+            cursor: move;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            animation: place-in 0.3s ease;
+            left: ${20 + Math.random() * 60}%;
+            top: ${30 + Math.random() * 40}%;
+            z-index: 3;
+        `;
+        item.textContent = emoji;
+        
+        // Make draggable
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+        
+        item.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = item.offsetLeft;
+            initialTop = item.offsetTop;
+            item.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            item.style.left = `${initialLeft + dx}px`;
+            item.style.top = `${initialTop + dy}px`;
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            item.style.cursor = 'move';
+        });
+        
+        // Double click to remove
+        item.addEventListener('dblclick', () => {
+            item.remove();
+        });
+        
+        room.appendChild(item);
+        
+        // Close panel
+        this.close();
+        
+        // Celest reacts
+        addMessage('Celest', `Ooh, that ${emoji} looks nice! ✨`, true);
     }
+};
 
-    // Load room furniture
-    loadRoomFurniture();
+// ==================== INITIALIZATION ====================
 
-    // Update UI
-    updateRoomDisplay();
+let roomRenderer;
+let layerPanel;
 
-    // Start game loop
-    requestAnimationFrame(gameLoop);
+async function init() {
+    loadSettings();
+    updateMemoryCount();
+    
+    // Initialize layered room system
+    try {
+        // Create room renderer
+        roomRenderer = new RoomRenderer('room', {
+            gridWidth: 20,
+            gridHeight: 15
+        });
+        
+        // Load room state
+        await roomRenderer.loadRoomState('main');
+        
+        // Create layer panel
+        layerPanel = new LayerPanel({
+            position: 'right',
+            width: 350
+        });
+        layerPanel.setRoomRenderer(roomRenderer);
+        
+        // Replace old decor panel with new layer panel
+        window.decorPanel = {
+            open: () => layerPanel.open(),
+            close: () => layerPanel.close(),
+            toggle: () => layerPanel.toggle()
+        };
+        
+        // Set up room event listeners
+        document.addEventListener('room:itemMove', async (e) => {
+            try {
+                await fetch(`/api/room/item/${e.detail.id}/move`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ x: e.detail.x, y: e.detail.y })
+                });
+            } catch (err) {
+                console.error('Failed to move item:', err);
+            }
+        });
+        
+        document.addEventListener('room:itemRemove', async (e) => {
+            try {
+                await fetch(`/api/room/item/${e.detail.id}`, {
+                    method: 'DELETE'
+                });
+            } catch (err) {
+                console.error('Failed to remove item:', err);
+            }
+        });
+        
+        document.addEventListener('room:itemDrop', async (e) => {
+            const { x, y, itemId, layer } = e.detail;
+            try {
+                // Find item in catalog to get details
+                const catalogItem = layerPanel.catalog.find(i => i.id === itemId);
+                await roomRenderer.placeItem({
+                    itemType: catalogItem?.category || 'decor',
+                    itemKey: itemId,
+                    x,
+                    y,
+                    layer,
+                    icon: catalogItem?.icon || '📦',
+                    name: catalogItem?.name || 'Item'
+                });
+            } catch (err) {
+                console.error('Failed to place item:', err);
+            }
+        });
+        
+        console.log('🏠 Layered room system initialized');
+    } catch (err) {
+        console.error('Failed to initialize layered room system:', err);
+    }
     
     console.log('🏠 Cozy Claw Home initialized');
+    console.log('First load:', app.isFirstLoad);
 }
 
-// Load furniture for current room
-function loadRoomFurniture() {
-    const roomState = RoomManager.getCurrentRoomState();
-    const furniture = roomState.furniture || [];
-    
-    // Clear existing furniture instances
-    game.roomFurniture = furniture.map(f => 
-        new FurnitureInstance(f.type, f.x, f.y, f.id)
-    );
-}
+// Start when DOM is ready
+document.addEventListener('DOMContentLoaded', init);
 
-// Update room display
-function updateRoomDisplay() {
-    const room = RoomManager.getCurrentRoom();
-    const roomState = RoomManager.getCurrentRoomState();
-    const view = RoomManager.getCurrentWindowView();
-
-    document.getElementById('roomName').textContent = `${room.icon} ${room.name}`;
-    document.getElementById('windowView').textContent = `${view.icon} ${view.name}`;
-}
-
-// Draw room with customization
-function drawRoom() {
-    const room = RoomManager.getCurrentRoom();
-    const state = RoomManager.getCurrentRoomState();
-
-    // Wall color
-    ctx.fillStyle = state.wallColor || room.defaultWallColor;
-    ctx.fillRect(0, 0, room.width, room.height);
-
-    // Draw window view
-    drawWindowView(state.windowView || room.defaultWindowView);
-
-    // Floor with texture pattern
-    ctx.fillStyle = state.floorColor || room.defaultFloorColor;
-    ctx.fillRect(20, room.height - 150, room.width - 40, 130);
-
-    // Add floor texture overlay
-    drawFloorTexture(state.floorTexture || room.defaultFloorTexture);
-
-    // Draw room border
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(20, 20, room.width - 40, room.height - 40);
-
-    // Draw window
-    drawWindow(room);
-}
-
-// Draw window view
-function drawWindowView(viewId) {
-    const view = RoomManager.getWindowView(viewId);
-    const room = RoomManager.getCurrentRoom();
-    
-    // Draw view background based on type
-    const gradient = ctx.createLinearGradient(0, 40, 0, 250);
-    
-    switch(viewId) {
-        case 'city':
-            gradient.addColorStop(0, '#4A4A6A');
-            gradient.addColorStop(1, '#2A2A4A');
-            break;
-        case 'forest':
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(1, '#98D8C8');
-            break;
-        case 'beach':
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(1, '#FFE4B5');
-            break;
-        case 'space':
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(1, '#16213e');
-            break;
-        case 'mountains':
-            gradient.addColorStop(0, '#E0F0FF');
-            gradient.addColorStop(1, '#B8D4E8');
-            break;
-        case 'night_sky':
-            gradient.addColorStop(0, '#0a0a1a');
-            gradient.addColorStop(1, '#1a1a3e');
-            break;
-        case 'sunset':
-            gradient.addColorStop(0, '#FF6B6B');
-            gradient.addColorStop(0.5, '#FFB347');
-            gradient.addColorStop(1, '#FFDB99');
-            break;
-        case 'garden':
-            gradient.addColorStop(0, '#E0FFE0');
-            gradient.addColorStop(1, '#90EE90');
-            break;
-        default:
-            gradient.addColorStop(0, '#87CEEB');
-            gradient.addColorStop(1, '#E0F8FF');
-    }
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(150, 40, room.width - 300, 210);
-
-    // Draw decorative elements based on view
-    ctx.font = '30px Arial';
-    ctx.textAlign = 'center';
-    
-    if (viewId === 'city') {
-        // Draw simple skyline silhouette
-        ctx.fillStyle = '#2A2A4A';
-        for (let i = 0; i < 8; i++) {
-            const h = 30 + Math.random() * 60;
-            ctx.fillRect(160 + i * 60, 250 - h, 50, h);
-        }
-    } else if (viewId === 'forest') {
-        // Draw trees
-        ctx.fillText('🌲', 200, 200);
-        ctx.fillText('🌳', 300, 180);
-        ctx.fillText('🌲', 400, 200);
-        ctx.fillText('🌲', 500, 190);
-        ctx.fillText('🌳', 600, 200);
-    } else if (viewId === 'beach') {
-        ctx.fillText('🌊', 250, 200);
-        ctx.fillText('🏖️', 400, 220);
-        ctx.fillText('🌊', 550, 200);
-    } else if (viewId === 'space') {
-        // Stars
-        ctx.fillStyle = 'white';
-        for (let i = 0; i < 30; i++) {
-            const x = 160 + Math.random() * (room.width - 320);
-            const y = 50 + Math.random() * 180;
-            ctx.fillRect(x, y, 2, 2);
-        }
-        ctx.fillText('🌙', 300, 120);
-        ctx.fillText('⭐', 500, 80);
-    } else if (viewId === 'mountains') {
-        ctx.fillText('🏔️', 250, 160);
-        ctx.fillText('⛰️', 400, 140);
-        ctx.fillText('🏔️', 550, 160);
-    }
-}
-
-// Draw floor texture
-function drawFloorTexture(textureId) {
-    const room = RoomManager.getCurrentRoom();
-    ctx.save();
-    ctx.globalAlpha = 0.3;
-    
-    switch(textureId) {
-        case 'wood':
-            // Wood planks
-            ctx.strokeStyle = 'rgba(0,0,0,0.2)';
-            ctx.lineWidth = 1;
-            for (let x = 20; x < room.width - 20; x += 40) {
-                ctx.beginPath();
-                ctx.moveTo(x, room.height - 150);
-                ctx.lineTo(x, room.height - 20);
-                ctx.stroke();
-            }
-            break;
-        case 'tile':
-            // Grid pattern
-            ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx.lineWidth = 1;
-            for (let x = 20; x < room.width - 20; x += 30) {
-                ctx.beginPath();
-                ctx.moveTo(x, room.height - 150);
-                ctx.lineTo(x, room.height - 20);
-                ctx.stroke();
-            }
-            for (let y = room.height - 150; y < room.height - 20; y += 30) {
-                ctx.beginPath();
-                ctx.moveTo(20, y);
-                ctx.lineTo(room.width - 20, y);
-                ctx.stroke();
-            }
-            break;
-        case 'carpet':
-            // Soft texture (dots)
-            ctx.fillStyle = 'rgba(0,0,0,0.1)';
-            for (let i = 0; i < 50; i++) {
-                const x = 30 + Math.random() * (room.width - 60);
-                const y = room.height - 140 + Math.random() * 100;
-                ctx.beginPath();
-                ctx.arc(x, y, 1, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            break;
-        case 'grass':
-            // Grass blades
-            ctx.strokeStyle = 'rgba(34,139,34,0.2)';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 100; i++) {
-                const x = 30 + Math.random() * (room.width - 60);
-                const y = room.height - 30 - Math.random() * 100;
-                ctx.beginPath();
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + (Math.random() - 0.5) * 4, y - 5 - Math.random() * 5);
-                ctx.stroke();
-            }
-            break;
-    }
-    
-    ctx.restore();
-}
-
-// Draw window frame
-function drawWindow(room) {
-    const windowX = 150;
-    const windowY = 40;
-    const windowW = room.width - 300;
-    const windowH = 210;
-
-    // Window frame
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(windowX - 8, windowY - 8, windowW + 16, windowH + 16);
-    
-    // Window sill
-    ctx.fillStyle = '#A0522D';
-    ctx.fillRect(windowX - 12, windowY + windowH, windowW + 24, 12);
-
-    // Window crossbars
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(windowX + windowW/2 - 4, windowY, 8, windowH);
-    ctx.fillRect(windowX, windowY + windowH/2 - 4, windowW, 8);
-}
-
-// Game loop
-function gameLoop() {
-    // Get current room
-    const room = RoomManager.getCurrentRoom();
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw room
-    drawRoom();
-
-    // Update and draw furniture (sorted by y for depth)
-    const sortedFurniture = game.roomFurniture.slice().sort((a, b) => a.y - b.y);
-    sortedFurniture.forEach(furniture => {
-        furniture.draw();
-    });
-
-    // Update and draw players
-    game.players.forEach(player => {
-        player.update();
-        player.draw();
-    });
-
-    // Update and draw particles
-    updateParticles();
-    drawParticles();
-
-    // Draw placement preview
-    if (game.mode === 'place' && game.selectedFurniture) {
-        const item = FurnitureCatalog.getItem(game.selectedFurniture);
-        ctx.save();
-        ctx.globalAlpha = 0.6;
-        ctx.font = '40px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(item.emoji, mouse.x, mouse.y);
-        
-        // Draw placement guide
-        ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = '#7CB342';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 30, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    // Draw drag preview
-    if (game.mode === 'move' && game.draggedFurniture) {
-        ctx.save();
-        ctx.globalAlpha = 0.7;
-        ctx.font = '40px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(game.draggedFurniture.emoji, mouse.x, mouse.y);
-        ctx.restore();
-    }
-
-    // Update AI
-    if (typeof AIInteractions !== 'undefined') {
-        AIInteractions.update();
-    }
-
-    // Update Celest status in UI
-    const activity = AIInteractions.getCurrentActivity?.();
-    if (activity) {
-        document.getElementById('celestActivity').textContent = activity.name;
-    }
-
-    requestAnimationFrame(gameLoop);
-}
-
-// Input handlers
-window.addEventListener('keydown', (e) => {
-    keys[e.key.toLowerCase()] = true;
-
-    if (game.localPlayer && game.mode === 'walk') {
-        let dx = 0;
-        let dy = 0;
-
-        if (keys['w'] || keys['arrowup']) dy = -1;
-        if (keys['s'] || keys['arrowdown']) dy = 1;
-        if (keys['a'] || keys['arrowleft']) dx = -1;
-        if (keys['d'] || keys['arrowright']) dx = 1;
-
-        if (dx !== 0 || dy !== 0) {
-            game.localPlayer.move(dx, dy);
-        }
-    }
-
-    // Interact key
-    if (e.key.toLowerCase() === 'e') {
-        checkInteraction();
-    }
-});
-
-window.addEventListener('keyup', (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
-
-// Mouse tracking
-canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-
-    // Update hover state
-    if (game.mode === 'move' || game.mode === 'delete') {
-        game.hoveredFurniture = null;
-        for (let i = game.roomFurniture.length - 1; i >= 0; i--) {
-            if (game.roomFurniture[i].contains(mouse.x, mouse.y)) {
-                game.hoveredFurniture = game.roomFurniture[i];
-                break;
-            }
-        }
-    }
-
-    // Handle dragging
-    if (game.draggedFurniture) {
-        game.draggedFurniture.x = mouse.x + game.dragOffset.x;
-        game.draggedFurniture.y = mouse.y + game.dragOffset.y;
-    }
-});
-
-canvas.addEventListener('mousedown', (e) => {
-    mouse.down = true;
-
-    if (game.mode === 'move') {
-        // Start dragging
-        for (let i = game.roomFurniture.length - 1; i >= 0; i--) {
-            const f = game.roomFurniture[i];
-            if (f.contains(mouse.x, mouse.y)) {
-                game.draggedFurniture = f;
-                game.dragOffset.x = f.x - mouse.x;
-                game.dragOffset.y = f.y - mouse.y;
-                break;
-            }
-        }
-    }
-});
-
-canvas.addEventListener('mouseup', (e) => {
-    mouse.down = false;
-
-    if (game.draggedFurniture) {
-        // Save new position
-        RoomManager.moveFurniture(game.draggedFurniture.id, 
-            game.draggedFurniture.x, game.draggedFurniture.y);
-        game.draggedFurniture = null;
-    }
-});
-
-// Click handling
-canvas.addEventListener('click', (e) => {
-    if (e.shiftKey) {
-        // Shift+click to delete
-        deleteFurnitureAt(mouse.x, mouse.y);
-        return;
-    }
-
-    if (game.mode === 'place' && game.selectedFurniture) {
-        placeFurniture(game.selectedFurniture, mouse.x, mouse.y);
-    } else if (game.mode === 'delete') {
-        deleteFurnitureAt(mouse.x, mouse.y);
-    } else if (game.mode === 'walk') {
-        checkInteraction();
-    }
-});
-
-// Place furniture
-function placeFurniture(type, x, y) {
-    const item = FurnitureCatalog.getItem(type);
-    
-    // Create furniture instance
-    const furniture = new FurnitureInstance(type, x, y);
-    game.roomFurniture.push(furniture);
-    
-    // Save to room state
-    RoomManager.addFurniture({
-        type: type,
-        x: x,
-        y: y
-    });
-    
-    // Effect
-    createParticles(x, y, '✨');
-    addChatMessage('🏠', `Placed ${item.name}`, false);
-}
-
-// Delete furniture
-function deleteFurnitureAt(x, y) {
-    for (let i = game.roomFurniture.length - 1; i >= 0; i--) {
-        if (game.roomFurniture[i].contains(x, y)) {
-            const removed = game.roomFurniture.splice(i, 1)[0];
-            RoomManager.removeFurniture(removed.id);
-            createParticles(x, y, '💨');
-            addChatMessage('🏠', `Removed ${removed.catalogItem.name}`, false);
-            return;
-        }
-    }
-}
-
-// Check for interactions
-function checkInteraction() {
-    if (!game.localPlayer) return;
-    
-    const px = game.localPlayer.x;
-    const py = game.localPlayer.y;
-    
-    // Find nearby furniture
-    for (const furniture of game.roomFurniture) {
-        const dist = Math.sqrt(
-            Math.pow(furniture.x - px, 2) + 
-            Math.pow(furniture.y - py, 2)
-        );
-        
-        if (dist < 60 && furniture.interactable) {
-            furniture.interact(game.localPlayer);
-            createParticles(furniture.x, furniture.y - 20, '💫');
-            return;
-        }
-    }
-}
-
-// Handle furniture selection from panel
-document.addEventListener('furnitureSelected', (e) => {
-    const type = e.detail.type;
-    if (type) {
-        game.selectedFurniture = type;
-        setMode('place');
-    } else {
-        game.selectedFurniture = null;
-        setMode('walk');
-    }
-});
-
-// Handle room change
-document.addEventListener('roomChange', (e) => {
-    loadRoomFurniture();
-    updateRoomDisplay();
-    
-    // Reset player positions
-    if (game.localPlayer) {
-        game.localPlayer.x = 400;
-        game.localPlayer.y = 400;
-    }
-    if (game.celest) {
-        game.celest.x = 450;
-        game.celest.y = 450;
-    }
-});
-
-// Set game mode
-function setMode(mode) {
-    game.mode = mode;
-    
-    // Update UI buttons
-    document.querySelectorAll('.quick-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    if (mode === 'walk') document.getElementById('btnWalk')?.classList.add('active');
-    if (mode === 'place') document.getElementById('btnDecorate')?.classList.add('active');
-    if (mode === 'move') document.getElementById('btnMove')?.classList.add('active');
-    if (mode === 'delete') document.getElementById('btnDelete')?.classList.add('active');
-    
-    // Update cursor
-    if (mode === 'place') {
-        canvas.style.cursor = 'copy';
-    } else if (mode === 'delete') {
-        canvas.style.cursor = 'not-allowed';
-    } else if (mode === 'move') {
-        canvas.style.cursor = 'move';
-    } else {
-        canvas.style.cursor = 'crosshair';
-    }
-}
-
-// Quick button handlers
-document.getElementById('btnWalk')?.addEventListener('click', () => {
-    game.selectedFurniture = null;
-    setMode('walk');
-});
-
-document.getElementById('btnDecorate')?.addEventListener('click', () => {
-    DecorationPanel.show();
-});
-
-document.getElementById('btnMove')?.addEventListener('click', () => {
-    setMode('move');
-});
-
-document.getElementById('btnDelete')?.addEventListener('click', () => {
-    setMode('delete');
-});
-
-// Room manager event listener
-if (typeof RoomManager !== 'undefined') {
-    RoomManager.addListener((event, data) => {
-        if (event === 'roomChange') {
-            document.dispatchEvent(new CustomEvent('roomChange', { detail: data }));
-        } else if (event === 'customization') {
-            // Trigger re-render
-        }
-    });
-}
-
-// Start the game
-initGame();
-setMode('walk');
-
-console.log('🏠 Cozy Claw Home is running!');
-console.log('Decorate your rooms and spend time with Celest!');
-
-// Make game object globally accessible
-window.game = game;
+// ==================== EXPORTS ====================
+window.app = app;
+window.enterHouse = enterHouse;
+window.sendMessage = sendMessage;
+window.handleKeyPress = handleKeyPress;
+window.toggleVoice = toggleVoice;
+window.clickAgent = clickAgent;
+window.openMemoryPanel = openMemoryPanel;
+window.openToolsPanel = openToolsPanel;
+window.openSettings = openSettings;
+window.closeModal = closeModal;
+window.closeModalDirect = closeModalDirect;
+window.toggleSetting = toggleSetting;
+window.updateEnergy = updateEnergy;
+window.decorPanel = decorPanel;
+window.roomRenderer = roomRenderer;
+window.layerPanel = layerPanel;

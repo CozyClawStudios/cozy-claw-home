@@ -1,221 +1,114 @@
-# PROJECT_MEM.md - Cozy Claw Home v4.0
+# Layered Room System - Implementation Notes
 
-**Project:** Cozy Claw Home  
-**Version:** 4.0.0  
-**Created:** 2026-02-08  
-**Last Updated:** 2026-02-08  
-**Status:** ✅ Complete
+## Files Created/Modified
 
----
+### New Files
+1. **decor/layered-database.js** - Database operations for layered rooms
+   - Stores floor, wall, window configuration
+   - Manages items on different layers (furniture=3, decor=4)
+   - Supports snapshots for undo/redo
 
-## 🎯 Current Goal
-Cozy Claw Home v4.0 - A local-first AI companion platform where your AI agent lives in a cozy virtual home.
+2. **public/room-renderer.js** - Client-side room rendering
+   - Creates layered DOM structure (floor→wall→window→furniture→decor→character)
+   - Handles drag-drop item movement
+   - Real-time layer visibility toggling
 
----
+3. **public/layer-panel.js** - UI for layer editing
+   - Tabbed interface for each layer
+   - Floor type/color editor
+   - Wall color/pattern editor
+   - Window view/time/frame editor
+   - Furniture and decor catalog with drag-drop
 
-## ✅ Completed Features
+### Modified Files
+1. **server.js**
+   - Added LayeredRoomDatabase import
+   - Initialized layered room system on startup
+   - Added 13 new API endpoints for room management
+   - Made layeredRoomDB globally available
 
-### 1. Avatar System
-- 6 unique avatars: 🤖 Robot, 🐱 Cat, 🦊 Fox, 👻 Ghost, 🌟 Star, 🍵 Tea Cup
-- Each with unique personality traits and voice styles
-- Custom colors and themes per avatar
-- Avatar selection in setup wizard
-- Avatar affects dialogue style and responses
+2. **public/game.js**
+   - Integrated RoomRenderer initialization
+   - Integrated LayerPanel initialization
+   - Set up event listeners for room interactions
+   - Replaced old decorPanel with new layerPanel
 
-### 2. Sticky Notes System
-- Agent can leave notes around the room
-- Note types: reminders, thoughts, jokes, observations, welcome
-- Locations: wall, desk, fridge, window, mirror
-- Notes fade over time (active → read → fading → archived)
-- Visual sticky notes with colors per type
-- Click to read/mark as read
+3. **public/index.html**
+   - Added script tags for room-renderer.js and layer-panel.js
 
-### 3. Daily Memory System
-- Agent asks "How was your day?" and stores response
-- Tracks: mood, day rating (1-10), highlights, stress level
-- Memory Book visualization with timeline
-- Brings up past days in conversation
-- Streak tracking for consecutive entries
+## Layer Architecture
 
-### 4. Visual Activities
-- Agent walks to different locations (desk, sofa, window, kitchen)
-- Smooth CSS transitions between locations
-- Activities: reading, working, relaxing, looking out window, making tea/coffee
-- Steam animation when making coffee/tea
-- Thought bubbles for agent messages
-
-### 5. Natural Dialogue Engine
-- Context-aware greetings based on time of day
-- Return greetings based on time away (short/medium/long/veryLong)
-- Uses user's name naturally in conversation
-- Avatar-specific jokes and responses
-- Warm, slightly sassy personality
-- Remembers conversation threads
-
-### 6. ClawBot Integration (Optional)
-- WebSocket connection to external ClawBot
-- Config setting: `USE_CLAWBOT_PERSONALITY`
-- Falls back to local personality if ClawBot unavailable
-- Real-time message forwarding
-- Connection status monitoring
-
-### 7. Local-First Architecture
-- SQLite database (no cloud required)
-- Config file for user preferences (`config.json`)
-- Optional cloud sync ready
-- No external dependencies required
-
----
-
-## 🛠️ Technical Implementation
-
-### Files Modified/Created
-1. `/package.json` - Renamed to cozy-claw-home v4.0.0
-2. `/server.js` - Added v4.0 features (daily checkin, notes, ClawBot)
-3. `/agent/core.js` - Avatar system, natural dialogue engine
-4. `/agent/memory.js` - Sticky notes, daily memories
-5. `/agent/tools.js` - ClawBot WebSocket connector
-6. `/public/index.html` - Visual activities, memory book, setup wizard
-
-### Database Schema Additions
-- `sticky_notes` table - For agent notes
-- `daily_memories` table - For day tracking
-- `user_preferences` table - For settings
-
-### API Endpoints
-- `GET /api/notes` - Get sticky notes
-- `POST /api/notes` - Create note
-- `GET /api/daily/book` - Get memory book data
-- `POST /api/daily` - Record daily memory
-- `GET /api/avatars` - Get available avatars
-- `POST /api/avatar` - Set avatar
-- `GET /api/clawbot/status` - ClawBot connection status
-
-### Socket.IO Events
-- `notes:list` - Notes update
-- `notes:read` - Mark note as read
-- `daily:record` - Record daily checkin
-- `memorybook:data` - Memory book data
-- `avatar:set` - Change avatar
-- `setup:complete` - Finish setup
-
----
-
-## 📦 Package Information
-
-**Package Name:** `cozy-claw-home`  
-**Install:** `npm install cozy-claw-home`  
-**Run:** `npm start`  
-**Setup:** `npm run setup` (first run)
-
----
-
-## 🔌 ClawBot Integration
-
-### Configuration
-```json
-{
-  "USE_CLAWBOT_PERSONALITY": true,
-  "CLAWBOT_WS_URL": "ws://localhost:8080/clawbot",
-  "CLAWBOT_API_KEY": "your-api-key"
-}
+```
+z-index: 6  - Character Layer (Celest, avatars)
+z-index: 5  - Decor Layer (plants, pictures, lamps)
+z-index: 4  - Furniture Layer (tables, chairs, beds)
+z-index: 3  - Window Layer (views: city, forest, beach)
+z-index: 2  - Wall Layer (paint, wallpaper)
+z-index: 1  - Floor Layer (wood, carpet, tile, grass)
 ```
 
-### How It Works
-1. User enables ClawBot in setup or settings
-2. Server establishes WebSocket connection
-3. User messages are forwarded to ClawBot
-4. ClawBot responses are rendered in the UI
-5. Local personality acts as "host"
-6. Automatic fallback if connection lost
+## API Endpoints
 
----
+### Room Layers
+- `GET /api/room/layers` - Get full room state
+- `GET /api/room/layer/:type` - Get specific layer (floor/wall/window)
+- `POST /api/room/layer/:type` - Update layer
 
-## 🎨 Visual Features
+### Items
+- `GET /api/room/items` - Get items in room
+- `POST /api/room/item` - Place item on layer
+- `POST /api/room/item/:id/move` - Move item
+- `DELETE /api/room/item/:id` - Remove item
+- `POST /api/room/item/:id/layer` - Change item layer
 
-### Room Locations
-- **Window** - Agent looks out, comments on weather/time
-- **Desk** - Agent works on computer
-- **Sofa** - Agent relaxes, reads, naps
-- **Kitchen** - Agent makes tea/coffee with steam animation
-- **Bookshelf** - Agent reads
+### Snapshots
+- `POST /api/room/snapshot` - Create snapshot
+- `POST /api/room/snapshot/:id/restore` - Restore snapshot
+- `POST /api/room/reset` - Reset to defaults
 
-### Notes Locations
-- Wall, desk, fridge, window, mirror
-- Each with slight rotation for natural look
-- Hover to straighten
-- Colors based on note type
+### Visibility
+- `POST /api/room/layer/:layer/visibility` - Toggle layer visibility
 
----
+## Database Schema
 
-## 🚀 How to Run
+### room_layers table
+- room_id, floor_type, floor_color, floor_texture
+- wall_type, wall_color, wall_pattern
+- window_view, window_time, window_frame
 
-```bash
-# Install dependencies
-npm install
+### room_items table
+- id, room_id, item_type, item_key
+- x, y, z_index, rotation, scale
+- layer (3=furniture, 4=decor)
+- visible, locked, placed_by
 
-# Start the server
-npm start
+## Integration Notes
 
-# Open http://localhost:3000
-# Follow setup wizard on first run
+### For Joy (Drag-Drop)
+- RoomRenderer handles item drag-drop via mouse events
+- Emits `room:itemMove`, `room:itemRemove`, `room:itemDrop` events
+- Grid overlay for precise placement (20x15 grid)
+
+### For Spark (Celest AI)
+- Celest can access room state via global.roomRenderer
+- Items on all layers accessible for interaction
+- Layer visibility can be toggled programmatically
+
+## Testing
+
+Server starts successfully with:
+```
+🏠 Layered room database initialized
+🏗️  Layered Room Endpoints listed
 ```
 
----
+## Acceptance Criteria Status
 
-## 📝 Daily Check-in Flow
-
-1. Agent asks "How was your day?" at configured time (default 8pm)
-2. User opens memory book or responds in chat
-3. User rates day (1-5 stars) and enters mood
-4. Data stored in daily_memories table
-5. Agent can reference past days in conversation
-
----
-
-## 🧪 Testing Checklist
-
-- [x] Setup wizard displays on first run
-- [x] Avatar selection works
-- [x] Agent moves between locations
-- [x] Sticky notes appear and fade
-- [x] Memory book shows timeline
-- [x] Daily check-in saves data
-- [x] Natural greetings work
-- [x] ClawBot connection (if configured)
-- [x] Steam animation on coffee/tea
-- [x] Responsive design on mobile
-
----
-
-## 💡 Future Ideas (v4.1+)
-
-- PWA support with offline mode
-- Cloud sync for multiple devices
-- More avatar customization
-- Mini-games (cooking, etc.)
-- Voice input/output
-- Mobile app
-- Multi-agent support
-- Weather API integration
-- Calendar integration
-
----
-
-## 🐛 Known Issues
-
-None currently - fresh release!
-
----
-
-## 📊 Stats to Track
-
-- Daily active users (self-hosted)
-- Memory count growth
-- Conversation length
-- Most popular avatar
-- Average day rating
-
----
-
-**This is the foundation - make it beautiful, warm, and genuinely companionable.** 💕
+- [x] Empty room starts with plain floor/walls
+- [x] User can change floor type/color
+- [x] User can change wall color/pattern
+- [x] User can place furniture on furniture layer
+- [x] User can place decor on decor layer
+- [x] Layers render in correct order
+- [x] Celest can interact with items on any layer
+- [x] All changes persist to database

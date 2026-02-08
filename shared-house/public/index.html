@@ -2,10 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="Cozy Claw Home - Your AI companion lives here">
-    <meta name="theme-color" content="#8B7355">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Cozy Claw Home - Your personal AI companion space">
+    <meta name="theme-color" content="#1a1a2e">
+
+    <!-- Apple Mobile Web App -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cozy Home">
+
     <title>Cozy Claw Home 🏠</title>
     <style>
         * {
@@ -13,463 +18,576 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
-            --bg-wall: #f5e6d3;
-            --bg-floor: #d4c4a8;
-            --accent-warm: #e8b86d;
-            --accent-cozy: #c9a86c;
-            --text-dark: #3d3229;
-            --text-muted: #7a6b5a;
-            --agent-glow: #ff9a76;
-            --chat-bg: rgba(255, 255, 255, 0.95);
-            --note-yellow: #ffeb3b;
-            --note-green: #81c784;
-            --note-blue: #64b5f6;
-            --note-orange: #ff8a65;
-            --note-purple: #e1bee7;
+            --bg-dark: #0d0d1a;
+            --bg-room: #1a1a2e;
+            --primary: #ff9a9e;
+            --secondary: #fad0c4;
+            --accent: #4ecdc4;
+            --text: #ffffff;
+            --text-muted: rgba(255,255,255,0.6);
+            --agent-glow: rgba(255,154,158,0.3);
         }
-        
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px var(--agent-glow); }
+            50% { box-shadow: 0 0 40px var(--agent-glow), 0 0 60px var(--agent-glow); }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        @keyframes pulse-tutorial {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 154, 158, 0.7);
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 0 15px rgba(255, 154, 158, 0);
+            }
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(180deg, #e8ddd0 0%, #d4c4a8 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            color: var(--text-dark);
-            overflow-x: hidden;
+            color: var(--text);
+            overflow: hidden;
         }
-        
+
+        /* Hard Refresh Banner */
+        .refresh-banner {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            color: white;
+            padding: 8px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .refresh-banner button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .refresh-banner button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
         /* Header */
         .header {
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 10;
         }
-        
-        .logo {
-            font-size: 1.3rem;
-            font-weight: 600;
+
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-        
+
+        .room-label {
+            background: rgba(255,154,158,0.15);
+            border: 1px solid rgba(255,154,158,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .memory-badge {
+            background: rgba(255,154,158,0.2);
+            border: 1px solid var(--primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .memory-badge:hover {
+            background: rgba(255,154,158,0.3);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
         .status-dot {
             width: 8px;
             height: 8px;
-            border-radius: 50%;
             background: #4ade80;
+            border-radius: 50%;
             animation: pulse 2s infinite;
         }
-        
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
-        
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .btn-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+
+        .header-btn {
+            background: rgba(255,255,255,0.1);
             border: none;
-            background: rgba(255,255,255,0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.2s;
-        }
-        
-        .btn-icon:hover {
-            background: white;
-            transform: scale(1.1);
-        }
-        
-        /* Main Layout */
-        .main-container {
-            flex: 1;
             display: flex;
-            padding: 20px;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            position: relative;
         }
-        
-        /* The Room (Center) */
+
+        .header-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Tutorial pulse for decorate button */
+        .header-btn.tutorial-highlight {
+            animation: pulse-tutorial 1.5s ease-in-out infinite;
+            background: rgba(255,154,158,0.3);
+            border: 2px solid var(--primary);
+        }
+
+        /* Main Room */
         .room-container {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .room {
             flex: 1;
-            background: linear-gradient(180deg, var(--bg-wall) 0%, var(--bg-floor) 100%);
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .room {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 4/3;
+            background: linear-gradient(180deg, #2d2d44 0%, var(--bg-room) 100%);
             border-radius: 20px;
             position: relative;
             overflow: hidden;
-            box-shadow: 
-                inset 0 0 60px rgba(0,0,0,0.1),
-                0 10px 40px rgba(0,0,0,0.1);
-            min-height: 500px;
+            box-shadow:
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 0 100px rgba(0,0,0,0.3);
         }
-        
-        /* Room Locations */
-        .location {
+
+        /* Room Decor */
+        .room-wall {
             position: absolute;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 30%;
+            background: linear-gradient(180deg, #3a3a55 0%, #2d2d44 100%);
         }
-        
-        /* Window */
+
         .window {
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 180px;
-            height: 220px;
-            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
-            border: 8px solid #8B7355;
-            border-radius: 4px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
-            cursor: pointer;
+            position: absolute;
+            top: 15%;
+            left: 10%;
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(180deg, #1a1a3e 0%, #2d2d5e 100%);
+            border-radius: 10px;
+            border: 8px solid #4a4a6a;
+            overflow: hidden;
         }
-        
+
         .window::before {
             content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px),
+                radial-gradient(circle at 70% 20%, rgba(255,255,255,0.6) 1px, transparent 1px),
+                radial-gradient(circle at 40% 60%, rgba(255,255,255,0.4) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.5) 1px, transparent 1px);
+            animation: twinkle 3s infinite;
+        }
+
+        .window-frame {
             position: absolute;
             top: 50%;
             left: 0;
             right: 0;
-            height: 6px;
-            background: #8B7355;
+            height: 4px;
+            background: #4a4a6a;
+            transform: translateY(-50%);
         }
-        
-        .window::after {
-            content: '';
+
+        .window-frame-v {
             position: absolute;
             top: 0;
             bottom: 0;
             left: 50%;
-            width: 6px;
-            background: #8B7355;
+            width: 4px;
+            background: #4a4a6a;
             transform: translateX(-50%);
         }
-        
-        .window:hover {
-            box-shadow: inset 0 0 30px rgba(255,255,200,0.3);
+
+        .room-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30%;
+            background: linear-gradient(180deg, #3d3d5c 0%, #2d2d44 100%);
         }
-        
-        /* Desk */
-        .desk {
-            bottom: 100px;
-            right: 50px;
-            width: 120px;
+
+        .rug {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
             height: 80px;
-            background: #8B7355;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            cursor: pointer;
+            background: radial-gradient(ellipse, rgba(255,154,158,0.2) 0%, transparent 70%);
+            border-radius: 50%;
         }
-        
-        .desk::before {
-            content: '🖥️';
+
+        /* Furniture */
+        .furniture {
+            position: absolute;
+            transition: all 0.5s ease;
         }
-        
-        /* Sofa */
+
         .sofa {
-            bottom: 80px;
-            left: 50px;
+            bottom: 20%;
+            left: 15%;
             width: 140px;
-            height: 90px;
-            background: #6b5b4f;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            cursor: pointer;
+            height: 70px;
+            background: linear-gradient(180deg, #5a5a7a 0%, #4a4a6a 100%);
+            border-radius: 15px 15px 10px 10px;
         }
-        
+
         .sofa::before {
-            content: '🛋️';
-        }
-        
-        /* Kitchen */
-        .kitchen {
-            top: 50%;
-            right: 20px;
-            width: 100px;
-            height: 100px;
-            background: #d4c4a8;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            cursor: pointer;
-        }
-        
-        .kitchen::before {
-            content: '☕';
-        }
-        
-        /* Bookshelf */
-        .bookshelf {
-            top: 40%;
-            left: 20px;
-            width: 80px;
-            height: 120px;
-            background: #8B7355;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            cursor: pointer;
-        }
-        
-        .bookshelf::before {
-            content: '📚';
-        }
-        
-        /* Memory Book */
-        .memory-book {
+            content: '';
             position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 50px;
-            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.3s;
+            top: -25px;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(180deg, #6a6a8a 0%, #5a5a7a 100%);
+            border-radius: 15px 15px 0 0;
         }
-        
-        .memory-book:hover {
-            transform: translateX(-50%) scale(1.1);
-        }
-        
-        .memory-book::before {
-            content: '📖';
-        }
-        
-        .memory-book-label {
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        
-        /* Sticky Notes */
-        .sticky-note {
-            position: absolute;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            max-width: 120px;
-            box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
-            cursor: pointer;
-            transition: all 0.3s;
-            transform: rotate(var(--rotation, -2deg));
-        }
-        
-        .sticky-note:hover {
-            transform: rotate(0deg) scale(1.05);
-            z-index: 10;
-        }
-        
-        .sticky-note.wall {
-            top: 20%;
+
+        .desk {
+            bottom: 20%;
             right: 15%;
+            width: 120px;
+            height: 70px;
+            background: linear-gradient(180deg, #6a5a4a 0%, #5a4a3a 100%);
+            border-radius: 5px;
         }
-        
-        .sticky-note.desk {
-            top: 30%;
-            right: 10%;
+
+        .desk::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: 10px;
+            right: 10px;
+            height: 8px;
+            background: #4a3a2a;
+            border-radius: 2px;
         }
-        
-        .sticky-note.fridge {
-            top: 40%;
+
+        .chair {
+            bottom: 22%;
+            right: 20%;
+            width: 40px;
+            height: 50px;
+            background: linear-gradient(180deg, #5a5a7a 0%, #4a4a6a 100%);
+            border-radius: 5px 5px 0 0;
+        }
+
+        .plant {
+            bottom: 20%;
             right: 5%;
+            width: 40px;
+            height: 60px;
         }
-        
-        .sticky-note.window {
-            top: 10%;
-            left: 10%;
+
+        .plant-pot {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 25px;
+            background: linear-gradient(180deg, #8a6a4a 0%, #6a4a3a 100%);
+            border-radius: 0 0 5px 5px;
         }
-        
-        .sticky-note.mirror {
-            top: 25%;
-            left: 5%;
+
+        .plant-leaves {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 40px;
+            background: radial-gradient(ellipse at center, #4ade80 0%, #22c55e 100%);
+            border-radius: 50%;
         }
-        
-        .sticky-note.fading {
-            opacity: 0.5;
-            filter: grayscale(0.3);
+
+        .lamp {
+            bottom: 35%;
+            right: 35%;
+            width: 30px;
+            height: 60px;
         }
-        
-        .sticky-note.read {
-            opacity: 0.7;
+
+        .lamp-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 8px;
+            background: #4a4a5a;
+            border-radius: 3px;
         }
-        
+
+        .lamp-pole {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 40px;
+            background: #5a5a6a;
+        }
+
+        .lamp-shade {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 20px;
+            background: linear-gradient(180deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 30px rgba(252,182,159,0.5);
+        }
+
         /* The Agent */
         .agent-container {
             position: absolute;
-            bottom: 40px;
+            bottom: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+        }
+
+        .agent {
+            width: 80px;
+            height: 100px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .agent:hover {
+            transform: scale(1.05);
+        }
+
+        .agent-body {
+            width: 60px;
+            height: 70px;
+            background: linear-gradient(180deg, var(--primary) 0%, #ff758c 100%);
+            border-radius: 30px 30px 25px 25px;
+            margin: 0 auto;
+            position: relative;
+            animation: breathe 4s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(255,154,158,0.4);
+        }
+
+        .agent-face {
+            position: absolute;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 5;
+            gap: 8px;
         }
-        
-        .agent-container.at-desk {
-            bottom: 160px;
-            right: 80px;
-            left: auto;
-            transform: none;
+
+        .agent-eyes {
+            display: flex;
+            gap: 15px;
         }
-        
-        .agent-container.at-sofa {
-            bottom: 140px;
-            left: 90px;
-            transform: none;
+
+        .agent-eye {
+            width: 10px;
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            animation: blink 4s infinite;
         }
-        
-        .agent-container.at-window {
-            bottom: 300px;
+
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        .agent-mouth {
+            width: 15px;
+            height: 8px;
+            border: 2px solid #1a1a2e;
+            border-top: none;
+            border-radius: 0 0 15px 15px;
+            transition: all 0.3s;
+        }
+
+        .agent.mood-happy .agent-mouth {
+            height: 12px;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .agent.mood-sleepy .agent-eyes {
+            transform: scaleY(0.3);
+        }
+
+        .agent.mood-focused .agent-eye {
+            height: 6px;
+        }
+
+        .agent-arms {
+            position: absolute;
+            top: 35px;
             left: 50%;
             transform: translateX(-50%);
-        }
-        
-        .agent-container.at-kitchen {
-            top: 50%;
-            right: 40px;
-            bottom: auto;
-            left: auto;
-            transform: none;
-        }
-        
-        .agent-container:hover {
-            transform: translateX(-50%) scale(1.05);
-        }
-        
-        .agent-container.at-desk:hover,
-        .agent-container.at-sofa:hover,
-        .agent-container.at-kitchen:hover {
-            transform: scale(1.05);
-        }
-        
-        .agent-container:hover .agent-avatar {
-            box-shadow: 0 0 40px var(--agent-glow);
-        }
-        
-        .agent-avatar {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #ff9a76 0%, #ff7eb3 100%);
-            border-radius: 50%;
+            width: 80px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow: 0 4px 20px rgba(255, 154, 118, 0.4);
-            transition: all 0.3s ease;
-            position: relative;
+            justify-content: space-between;
         }
-        
-        .agent-avatar::before {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 154, 118, 0.3);
-            animation: agent-breathe 3s ease-in-out infinite;
+
+        .agent-arm {
+            width: 12px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--primary) 0%, #ff758c 100%);
+            border-radius: 10px;
+            transform-origin: top center;
         }
-        
-        @keyframes agent-breathe {
-            0%, 100% { transform: scale(1); opacity: 0.5; }
-            50% { transform: scale(1.1); opacity: 0.2; }
+
+        .agent-arm.left {
+            transform: rotate(-20deg);
+            animation: wave-left 3s ease-in-out infinite;
         }
-        
-        .agent-name {
-            margin-top: 10px;
-            font-weight: 600;
-            color: var(--text-dark);
+
+        .agent-arm.right {
+            transform: rotate(20deg);
+            animation: wave-right 3s ease-in-out infinite;
         }
-        
-        .agent-status {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+
+        @keyframes wave-left {
+            0%, 100% { transform: rotate(-20deg); }
+            50% { transform: rotate(-30deg); }
         }
-        
+
+        @keyframes wave-right {
+            0%, 100% { transform: rotate(20deg); }
+            50% { transform: rotate(30deg); }
+        }
+
+        /* Activity indicators */
         .activity-indicator {
-            display: inline-flex;
-            gap: 3px;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
         }
-        
-        .activity-dot {
-            width: 4px;
-            height: 4px;
-            background: var(--accent-cozy);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
+
+        .agent-container:hover .activity-indicator,
+        .activity-indicator.visible {
+            opacity: 1;
         }
-        
-        .activity-dot:nth-child(2) { animation-delay: 0.2s; }
-        .activity-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-        }
-        
+
         /* Thought bubble */
         .thought-bubble {
             position: absolute;
-            top: -80px;
+            bottom: 110%;
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            padding: 10px 15px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            font-size: 0.85rem;
-            max-width: 200px;
-            text-align: center;
+            color: #1a1a2e;
+            padding: 12px 16px;
+            border-radius: 20px;
+            min-width: 150px;
+            max-width: 250px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
+            transition: all 0.3s ease;
             pointer-events: none;
+            z-index: 10;
         }
-        
+
+        .thought-bubble.visible {
+            opacity: 1;
+            animation: pop-in 0.3s ease;
+        }
+
+        @keyframes pop-in {
+            0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
+            100% { transform: translateX(-50%) scale(1); opacity: 1; }
+        }
+
         .thought-bubble::after {
             content: '';
             position: absolute;
@@ -480,1200 +598,805 @@
             border-right: 8px solid transparent;
             border-top: 8px solid white;
         }
-        
-        .thought-bubble.visible {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-10px);
+
+        /* Chat Interface */
+        .chat-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, transparent 0%, var(--bg-dark) 20%);
+            padding: 20px;
+            z-index: 20;
         }
-        
-        /* Coffee steam animation */
-        .steam {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            pointer-events: none;
+
+        .chat-input-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
-        
-        .steam.visible {
-            animation: steam-rise 2s ease-out forwards;
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            padding: 12px 20px;
+            color: var(--text);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
         }
-        
-        @keyframes steam-rise {
-            0% { opacity: 0; transform: translateX(-50%) translateY(0); }
-            20% { opacity: 0.6; }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.15);
         }
-        
-        /* Chat Section */
-        .chat-section {
-            background: var(--chat-bg);
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
         }
-        
-        .chat-messages {
-            height: 150px;
+
+        .chat-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--agent-glow);
+        }
+
+        .chat-btn:active {
+            transform: scale(0.95);
+        }
+
+        .voice-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .voice-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .voice-btn.recording {
+            background: #ef4444;
+            animation: pulse-red 1s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+        }
+
+        /* Message history */
+        .message-history {
+            max-width: 600px;
+            margin: 0 auto 15px;
+            max-height: 200px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding-right: 5px;
+            padding: 0 10px;
         }
-        
-        .chat-messages::-webkit-scrollbar {
-            width: 4px;
-        }
-        
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: var(--accent-cozy);
-            border-radius: 2px;
-        }
-        
+
         .message {
-            padding: 10px 14px;
-            border-radius: 12px;
+            padding: 10px 15px;
+            border-radius: 18px;
             max-width: 80%;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             animation: message-in 0.3s ease;
         }
-        
+
         @keyframes message-in {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .message.user {
-            align-self: flex-end;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary);
             color: white;
+            align-self: flex-end;
             border-bottom-right-radius: 4px;
         }
-        
+
         .message.agent {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
             align-self: flex-start;
-            background: #f0f0f0;
-            color: var(--text-dark);
             border-bottom-left-radius: 4px;
         }
-        
-        .message.initiative {
-            border-left: 3px solid var(--agent-glow);
-        }
-        
-        .chat-input-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .chat-input {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        .chat-input:focus {
-            border-color: var(--accent-cozy);
-        }
-        
-        .btn-send {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            border: none;
-            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cozy) 100%);
-            color: white;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .btn-send:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(232, 184, 109, 0.4);
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            min-width: 280px;
-        }
-        
-        .panel {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        }
-        
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        /* Memory Panel */
-        .memory-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .stat-box {
-            background: rgba(255,255,255,0.5);
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-cozy);
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
+
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.6;
             margin-top: 4px;
         }
-        
-        .memory-list {
-            margin-top: 12px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        
-        .memory-item {
-            padding: 8px 10px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .memory-type {
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background: var(--accent-warm);
-            color: white;
-        }
-        
-        /* Tools Panel */
-        .tools-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .tool-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .tool-item:hover {
-            background: rgba(255,255,255,0.8);
-            transform: translateX(4px);
-        }
-        
-        .tool-item.disabled {
-            opacity: 0.5;
-        }
-        
-        .tool-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .tool-info {
-            flex: 1;
-        }
-        
-        .tool-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        .tool-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        
-        .tool-toggle {
-            width: 40px;
-            height: 22px;
-            background: #ddd;
-            border-radius: 11px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .tool-toggle.active {
-            background: #4ade80;
-        }
-        
-        .tool-toggle::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.2s;
-        }
-        
-        .tool-toggle.active::after {
-            transform: translateX(18px);
-        }
-        
-        /* Activity Log */
-        .activity-log {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .activity-item {
-            display: flex;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            font-size: 0.85rem;
-        }
-        
-        .activity-time {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            min-width: 50px;
-        }
-        
-        /* Modal Styles */
+
+        /* Modals */
         .modal-overlay {
             position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 100;
-            backdrop-filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        
+
         .modal-overlay.visible {
             display: flex;
+            opacity: 1;
         }
-        
+
         .modal {
-            background: white;
+            background: var(--bg-room);
             border-radius: 20px;
             padding: 30px;
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            animation: modal-in 0.3s ease;
+            transform: scale(0.9);
+            transition: transform 0.3s;
         }
-        
-        @keyframes modal-in {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+
+        .modal-overlay.visible .modal {
+            transform: scale(1);
         }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-        
-        .modal-subtitle {
-            text-align: center;
-            color: var(--text-muted);
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
         }
-        
-        /* Setup Wizard */
-        .setup-step {
-            display: none;
+
+        .modal-title {
+            font-size: 1.3rem;
+            color: var(--primary);
         }
-        
-        .setup-step.visible {
-            display: block;
-            animation: fade-in 0.3s ease;
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
         }
-        
-        @keyframes fade-in {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .avatar-grid {
+
+        /* Memory Panel */
+        .memory-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin: 20px 0;
+            margin-bottom: 20px;
         }
-        
-        .avatar-option {
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
             padding: 15px;
-            border: 2px solid #e0e0e0;
             border-radius: 12px;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        
-        .avatar-option:hover {
-            border-color: var(--accent-cozy);
-            transform: translateY(-2px);
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
         }
-        
-        .avatar-option.selected {
-            border-color: var(--accent-warm);
-            background: rgba(232, 184, 109, 0.1);
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 5px;
         }
-        
-        .avatar-option .emoji {
-            font-size: 2.5rem;
-            margin-bottom: 5px;
+
+        .memory-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        
-        .avatar-option .name {
-            font-weight: 600;
+
+        .memory-item {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .memory-icon {
+            font-size: 1.2rem;
+        }
+
+        .memory-content {
+            flex: 1;
+        }
+
+        .memory-text {
             font-size: 0.9rem;
         }
-        
-        .avatar-option .desc {
+
+        .memory-meta {
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 4px;
         }
-        
-        .form-group {
-            margin-bottom: 15px;
+
+        /* Tools Panel */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
         }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
+
+        .tool-card {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .tool-card:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--primary);
+        }
+
+        .tool-card.active {
+            border-color: var(--accent);
+            background: rgba(78,205,196,0.1);
+        }
+
+        .tool-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .tool-name {
             font-weight: 500;
             font-size: 0.9rem;
         }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
+
+        .tool-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
-        
-        .form-group input:focus {
+
+        /* Settings Panel */
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .setting-value {
+            color: var(--primary);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
             outline: none;
-            border-color: var(--accent-cozy);
+            -webkit-appearance: none;
         }
-        
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cozy) 100%);
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Welcome overlay */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            transition: opacity 0.5s;
+        }
+
+        .welcome-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .welcome-content {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .welcome-agent {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .welcome-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+
+        .welcome-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border: none;
-            border-radius: 10px;
+            padding: 15px 40px;
+            border-radius: 30px;
             color: white;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
         }
-        
-        .btn-primary:hover {
+
+        .welcome-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(232, 184, 109, 0.4);
+            box-shadow: 0 10px 30px var(--agent-glow);
         }
-        
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: #f0f0f0;
-            border: none;
-            border-radius: 10px;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-            cursor: pointer;
-            margin-top: 10px;
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .room {
+                aspect-ratio: 3/4;
+            }
+
+            .agent {
+                width: 60px;
+                height: 80px;
+            }
+
+            .agent-body {
+                width: 45px;
+                height: 55px;
+            }
+
+            .memory-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .room-label {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .refresh-banner {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+            }
         }
-        
-        /* Memory Book Modal */
-        .memory-timeline {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        
-        .memory-day {
-            padding: 15px;
-            background: #f8f8f8;
-            border-radius: 10px;
-            border-left: 4px solid var(--accent-cozy);
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
         }
-        
-        .memory-day-date {
-            font-weight: 600;
-            margin-bottom: 5px;
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
         }
-        
-        .memory-day-mood {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
         }
-        
-        .memory-day-highlights {
+
+        /* Decoration Panel */
+        .decor-panel {
+            box-shadow: -5px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .decor-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .decor-item.selected {
+            border-color: #ff9a9e !important;
+            background: rgba(255,154,158,0.1) !important;
+        }
+
+        /* Placement items with proper emoji rendering */
+        .placement-item {
+            animation: place-in 0.3s ease;
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Android Emoji", sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        @keyframes place-in {
+            from {
+                transform: scale(0) rotate(-10deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .placement-item:hover {
+            filter: brightness(1.2) drop-shadow(0 0 10px rgba(255,154,158,0.5));
+        }
+
+        .decor-grid {
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: calc(100% / 20) calc(100% / 15);
+        }
+
+        .decor-grid.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        /* Welcome Sticky Note */
+        .welcome-note {
+            position: absolute;
+            top: 15%;
+            right: 5%;
+            width: 180px;
+            min-height: 150px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #1a1a2e;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 
+                3px 3px 10px rgba(0,0,0,0.3),
+                inset 0 -20px 20px -20px rgba(0,0,0,0.1);
+            transform: rotate(3deg);
+            z-index: 5;
+            font-family: 'Segoe UI', 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        .welcome-note::before {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 20px;
+            background: rgba(255,255,255,0.4);
+            border-radius: 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .welcome-note h3 {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #92400e;
+        }
+
+        .welcome-note p {
             font-size: 0.85rem;
+            line-height: 1.5;
+            color: #78350f;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
-        
-        .rating-stars {
-            display: flex;
-            gap: 5px;
-            margin: 10px 0;
-        }
-        
-        .star {
-            font-size: 1.5rem;
+
+        .welcome-note .close-note {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #92400e;
+            font-size: 1.2rem;
             cursor: pointer;
-            opacity: 0.3;
+            opacity: 0.6;
             transition: opacity 0.2s;
         }
-        
-        .star.active {
+
+        .welcome-note .close-note:hover {
             opacity: 1;
         }
-        
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 0.9rem;
+
+        /* Decor item placed (alternative class name) */
+        .decor-item-placed {
+            font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+            font-size: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        
-        /* Responsive */
-        @media (max-width: 900px) {
-            .main-container {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .panel {
-                flex: 1;
-                min-width: 250px;
-            }
+
+        /* Theme-specific room styles */
+        .room.theme-cozy {
+            --wall-color: #3a3a55;
+            --floor-color: #3d3d5c;
         }
-        
-        @media (max-width: 600px) {
-            .header {
-                padding: 10px 15px;
-            }
-            
-            .main-container {
-                padding: 10px;
-                gap: 10px;
-            }
-            
-            .room {
-                min-height: 350px;
-            }
-            
-            .agent-avatar {
-                width: 80px;
-                height: 80px;
-                font-size: 2.5rem;
-            }
-            
-            .sidebar {
-                flex-direction: column;
-            }
-            
-            .avatar-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+
+        .room.theme-modern {
+            --wall-color: #2a2a3a;
+            --floor-color: #3a3a4a;
+        }
+
+        .room.theme-nature {
+            --wall-color: #2d3d2d;
+            --floor-color: #3d4d3d;
+        }
+
+        .room.theme-futuristic {
+            --wall-color: #0d0d1a;
+            --floor-color: #1a1a2e;
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            🏠 Cozy Claw Home
-            <span class="status-dot" title="Agent is online"></span>
+    <!-- Hard Refresh Banner -->
+    <div class="refresh-banner" id="refreshBanner">
+        <span>💡 Press Ctrl+F5 if things look weird</span>
+        <button onclick="document.getElementById('refreshBanner').style.display='none'">Dismiss</button>
+    </div>
+
+    <!-- Welcome Overlay -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-content">
+            <div class="welcome-agent">🏠</div>
+            <h1 class="welcome-title">Cozy Claw Home</h1>
+            <p class="welcome-subtitle">Your personal space with Celest</p>
+            <button class="welcome-btn" onclick="enterHouse()">Enter Your Home</button>
         </div>
-        <div class="header-actions">
-            <button class="btn-icon" onclick="decorPanel.open()" title="Decorate">🎨</button>
-            <button class="btn-icon" onclick="toggleMemoryBook()" title="Memory Book">📖</button>
-            <button class="btn-icon" onclick="toggleNotesPanel()" title="Notes">📝</button>
-            <button class="btn-icon" onclick="toggleToolsPanel()" title="Tools">🔧</button>
-            <button class="btn-icon" onclick="showSettings()" title="Settings">⚙️</button>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="room-label" id="roomLabel">🏠 Living Room</div>
+            <div class="memory-badge" onclick="openMemoryPanel()">
+                🧠 <span id="memoryCount">0</span> memories
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span id="agentStatus">Celest is here</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="decorateBtn" onclick="decorPanel?.open()" title="Decorate">🎨</button>
+            <button class="header-btn" onclick="openToolsPanel()" title="Tools">🔧</button>
+            <button class="header-btn" onclick="openSettings()" title="Settings">⚙️</button>
         </div>
     </header>
-    
-    <main class="main-container">
-        <!-- The Room -->
-        <div class="room-container">
-            <div class="room" id="room">
-                <!-- Locations -->
-                <div class="window location" id="window" onclick="clickLocation('window')"></div>
-                <div class="desk location" id="desk" onclick="clickLocation('desk')"></div>
-                <div class="sofa location" id="sofa" onclick="clickLocation('sofa')"></div>
-                <div class="kitchen location" id="kitchen" onclick="clickLocation('kitchen')"></div>
-                <div class="bookshelf location" id="bookshelf" onclick="clickLocation('bookshelf')"></div>
-                
-                <!-- Sticky Notes Container -->
-                <div id="notesContainer"></div>
-                
-                <!-- Memory Book -->
-                <div class="memory-book" onclick="toggleMemoryBook()">
-                    <div class="memory-book-label">Memories</div>
-                </div>
-                
-                <!-- The Agent -->
-                <div class="agent-container" id="agentContainer" onclick="clickAgent()">
-                    <div class="thought-bubble" id="thoughtBubble"></div>
-                    <div class="steam" id="steam">☁️</div>
-                    <div class="agent-avatar" id="agentAvatar">🤖</div>
-                    <div class="agent-name" id="agentName">Celest</div>
-                    <div class="agent-status">
-                        <span id="agentActivity">Relaxing</span>
-                        <span class="activity-indicator" id="typingIndicator" style="display: none;">
-                            <span class="activity-dot"></span>
-                            <span class="activity-dot"></span>
-                            <span class="activity-dot"></span>
-                        </span>
-                    </div>
-                </div>
+
+    <!-- Room -->
+    <div class="room-container">
+        <div class="room">
+            <div class="room-wall"></div>
+            <div class="window">
+                <div class="window-frame"></div>
+                <div class="window-frame-v"></div>
             </div>
-            
-            <!-- Chat -->
-            <div class="chat-section">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="empty-state">Click on your companion to say hello! 👋</div>
-                </div>
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input" id="chatInput" 
-                           placeholder="Type a message..." 
-                           onkeypress="handleKeyPress(event)">
-                    <button class="btn-send" onclick="sendMessage()">➤</button>
-                </div>
+            <div class="room-floor"></div>
+            <div class="rug"></div>
+
+            <!-- Welcome Sticky Note -->
+            <div class="welcome-note" id="welcomeNote">
+                <button class="close-note" onclick="document.getElementById('welcomeNote').style.display='none'">×</button>
+                <h3>Welcome Home! 🏠</h3>
+                <p>This is your cozy space. Chat with Celest, decorate the room, and make it yours!</p>
+                <p style="margin-top: 10px; font-size: 0.75rem;">Click 🎨 to decorate</p>
             </div>
-        </div>
-        
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <!-- Memory Panel -->
-            <div class="panel">
-                <div class="panel-title">🧠 Memory</div>
-                <div class="memory-stats">
-                    <div class="stat-box">
-                        <div class="stat-value" id="memoryCount">0</div>
-                        <div class="stat-label">Memories</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="noteCount">0</div>
-                        <div class="stat-label">Notes</div>
-                    </div>
-                </div>
-                <div class="memory-list" id="memoryList">
-                    <div class="empty-state">No memories yet...</div>
-                </div>
+
+            <!-- Furniture - Improved Layout -->
+            <div class="furniture sofa" id="sofa" style="left: 10%; bottom: 25%;"></div>
+            <div class="furniture desk" id="desk" style="right: 8%; bottom: 25%;">
+                <div class="laptop" style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 1.5rem;">💻</div>
             </div>
-            
-            <!-- Daily Check-in Panel -->
-            <div class="panel" id="dailyPanel" style="display: none;">
-                <div class="panel-title">📅 Daily Check-in</div>
-                <div id="dailyCheckinContent">
-                    <p style="font-size: 0.9rem; margin-bottom: 10px;">How was your day?</p>
-                    <div class="rating-stars" id="dayRating">
-                        <span class="star" onclick="setDayRating(1)">⭐</span>
-                        <span class="star" onclick="setDayRating(2)">⭐</span>
-                        <span class="star" onclick="setDayRating(3)">⭐</span>
-                        <span class="star" onclick="setDayRating(4)">⭐</span>
-                        <span class="star" onclick="setDayRating(5)">⭐</span>
-                    </div>
-                    <input type="text" class="chat-input" id="dailyMood" placeholder="One word to describe today..." style="margin-bottom: 10px;">
-                    <button class="btn-primary" onclick="submitDailyCheckin()">Save</button>
-                </div>
+            <div class="furniture chair" id="chair" style="right: 18%; bottom: 27%;"></div>
+            <div class="furniture plant" id="plant" style="left: 2%; bottom: 22%;">
+                <div class="plant-leaves"></div>
+                <div class="plant-pot"></div>
             </div>
-            
-            <!-- Tools Panel -->
-            <div class="panel">
-                <div class="panel-title">🔧 Connected Tools</div>
-                <div class="tools-list" id="toolsList">
-                    <div class="empty-state">No tools configured</div>
-                </div>
+            <div class="furniture lamp" id="lamp" style="left: 35%; bottom: 35%;">
+                <div class="lamp-shade"></div>
+                <div class="lamp-pole"></div>
+                <div class="lamp-base"></div>
             </div>
-            
-            <!-- Activity Log -->
-            <div class="panel">
-                <div class="panel-title">📋 Recent Activity</div>
-                <div class="activity-log" id="activityLog">
-                    <div class="empty-state">Waiting for activity...</div>
-                </div>
-            </div>
-        </aside>
-    </main>
-    
-    <!-- Setup Wizard Modal -->
-    <div class="modal-overlay" id="setupModal">
-        <div class="modal">
-            <div class="setup-step visible" id="step1">
-                <h2 class="modal-title">Welcome to Cozy Claw Home! 🏠</h2>
-                <p class="modal-subtitle">Let's set up your personal AI companion</p>
-                
-                <div class="form-group">
-                    <label>What should I call you?</label>
-                    <input type="text" id="setupName" placeholder="Your name" value="Friend">
-                </div>
-                
-                <button class="btn-primary" onclick="nextSetupStep()">Continue</button>
-            </div>
-            
-            <div class="setup-step" id="step2">
-                <h2 class="modal-title">Choose Your Companion</h2>
-                <p class="modal-subtitle">Pick an avatar that resonates with you</p>
-                
-                <div class="avatar-grid" id="avatarGrid"></div>
-                
-                <button class="btn-primary" onclick="nextSetupStep()">Continue</button>
-                <button class="btn-secondary" onclick="prevSetupStep()">Back</button>
-            </div>
-            
-            <div class="setup-step" id="step3">
-                <h2 class="modal-title">ClawBot Integration (Optional)</h2>
-                <p class="modal-subtitle">Connect to an external ClawBot for enhanced AI</p>
-                
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" id="useClawBot"> Use ClawBot personality
-                    </label>
-                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">
-                        This will override my local personality with an external AI
-                    </p>
-                </div>
-                
-                <button class="btn-primary" onclick="completeSetup()">Start Your Journey</button>
-                <button class="btn-secondary" onclick="prevSetupStep()">Back</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Memory Book Modal -->
-    <div class="modal-overlay" id="memoryBookModal">
-        <div class="modal" style="max-width: 600px;">
-            <h2 class="modal-title">📖 Memory Book</h2>
-            <p class="modal-subtitle">Your journey together</p>
-            
-            <div id="memoryBookStats" style="margin-bottom: 20px;"></div>
-            
-            <div class="memory-timeline" id="memoryTimeline">
-                <div class="empty-state">No daily memories recorded yet...</div>
-            </div>
-            
-            <button class="btn-secondary" onclick="closeMemoryBook()">Close</button>
-        </div>
-    </div>
-    
-    <!-- Daily Check-in Modal -->
-    <div class="modal-overlay" id="dailyCheckinModal">
-        <div class="modal">
-            <h2 class="modal-title">How was your day? 🌟</h2>
-            <p class="modal-subtitle">I'd love to hear about it</p>
-            
-            <div class="form-group">
-                <label>Rate your day</label>
-                <div class="rating-stars" id="modalDayRating">
-                    <span class="star" onclick="setModalDayRating(1)">⭐</span>
-                    <span class="star" onclick="setModalDayRating(2)">⭐</span>
-                    <span class="star" onclick="setModalDayRating(3)">⭐</span>
-                    <span class="star" onclick="setModalDayRating(4)">⭐</span>
-                    <span class="star" onclick="setModalDayRating(5)">⭐</span>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>How are you feeling?</label>
-                <input type="text" id="modalDailyMood" placeholder="Happy, tired, excited...">
-            </div>
-            
-            <div class="form-group">
-                <label>Any highlights?</label>
-                <input type="text" id="dailyHighlights" placeholder="What went well today?">
-            </div>
-            
-            <button class="btn-primary" onclick="submitModalDailyCheckin()">Save Memory</button>
-            <button class="btn-secondary" onclick="closeDailyCheckin()">Maybe later</button>
-        </div>
-    </div>
-    
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="decor-panel.js"></script>
-    <script>
-        // Socket connection
-        const socket = io();
-        
-        // State
-        let agentState = {
-            mood: 'content',
-            activity: 'relaxing',
-            location: 'sofa',
-            avatar: { emoji: '🤖', color: '#4a90d9' },
-            userName: 'Friend'
-        };
-        
-        let selectedAvatar = null;
-        let currentDayRating = 0;
-        let availableAvatars = [];
-        let config = {};
-        
-        // Socket event handlers
-        socket.on('connect', () => {
-            console.log('Connected to companion server');
-        });
-        
-        socket.on('agent:state', (state) => {
-            agentState = state;
-            updateAgentDisplay(state);
-            updateAgentPosition(state.location);
-        });
-        
-        socket.on('agent:message', (message) => {
-            addMessage(message.text, 'agent', message.initiative);
-            showThoughtBubble(message.text);
-        });
-        
-        socket.on('agent:activity', (activity) => {
-            addActivityLog(activity);
-            if (activity.type === 'making_coffee' || activity.type === 'making_tea') {
-                showSteamAnimation();
-            }
-        });
-        
-        socket.on('memory:stats', (stats) => {
-            updateMemoryStats(stats);
-        });
-        
-        socket.on('notes:list', (notes) => {
-            renderNotes(notes);
-        });
-        
-        socket.on('memorybook:data', (data) => {
-            renderMemoryBook(data);
-        });
-        
-        socket.on('avatars:list', (avatars) => {
-            availableAvatars = avatars;
-            renderAvatarGrid();
-        });
-        
-        socket.on('setup:done', () => {
-            closeSetupModal();
-        });
-        
-        socket.on('tools:result', (result) => {
-            console.log('Tool result:', result);
-        });
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Load config
-            const configRes = await fetch('/api/config');
-            config = await configRes.json();
-            
-            if (config.FIRST_RUN) {
-                showSetupModal();
-            }
-            
-            // Load avatars
-            socket.emit('avatars:get');
-            
-            // Load initial data
-            loadTools();
-            socket.emit('notes:get');
-        });
-        
-        // UI Functions
-        function updateAgentDisplay(state) {
-            document.getElementById('agentName').textContent = state.name || 'Celest';
-            
-            const activityInfo = state.activityInfo || { emoji: '😌', description: 'relaxing' };
-            document.getElementById('agentActivity').textContent = activityInfo.description;
-            
-            // Update avatar emoji and color
-            if (state.avatar) {
-                const avatarEl = document.getElementById('agentAvatar');
-                avatarEl.textContent = state.avatar.emoji;
-                if (state.avatar.color) {
-                    avatarEl.style.background = `linear-gradient(135deg, ${state.avatar.color} 0%, ${state.avatar.secondaryColor || state.avatar.color} 100%)`;
-                }
-            }
-        }
-        
-        function updateAgentPosition(location) {
-            const container = document.getElementById('agentContainer');
-            container.className = 'agent-container';
-            
-            const locationClasses = {
-                desk: 'at-desk',
-                sofa: 'at-sofa',
-                window: 'at-window',
-                kitchen: 'at-kitchen'
-            };
-            
-            if (locationClasses[location]) {
-                container.classList.add(locationClasses[location]);
-            }
-        }
-        
-        function clickAgent() {
-            socket.emit('agent:click');
-            const avatar = document.getElementById('agentAvatar');
-            avatar.style.transform = 'scale(0.9)';
-            setTimeout(() => avatar.style.transform = '', 150);
-        }
-        
-        function clickLocation(location) {
-            // Visual feedback only - agent doesn't move on click
-            // but we could add interaction here
-            console.log('Clicked location:', location);
-        }
-        
-        function showThoughtBubble(text) {
-            const bubble = document.getElementById('thoughtBubble');
-            bubble.textContent = text.substring(0, 50) + (text.length > 50 ? '...' : '');
-            bubble.classList.add('visible');
-            setTimeout(() => bubble.classList.remove('visible'), 4000);
-        }
-        
-        function showSteamAnimation() {
-            const steam = document.getElementById('steam');
-            steam.classList.add('visible');
-            setTimeout(() => steam.classList.remove('visible'), 2000);
-        }
-        
-        function addMessage(text, sender, isInitiative = false) {
-            const container = document.getElementById('chatMessages');
-            
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
-            
-            const message = document.createElement('div');
-            message.className = `message ${sender}${isInitiative ? ' initiative' : ''}`;
-            message.textContent = text;
-            container.appendChild(message);
-            container.scrollTop = container.scrollHeight;
-        }
-        
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
-            
-            if (!text) return;
-            
-            addMessage(text, 'user');
-            socket.emit('user:message', { message: text });
-            input.value = '';
-            
-            document.getElementById('typingIndicator').style.display = 'inline-flex';
-            setTimeout(() => {
-                document.getElementById('typingIndicator').style.display = 'none';
-            }, 1000);
-        }
-        
-        function handleKeyPress(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
-        
-        function updateMemoryStats(stats) {
-            document.getElementById('memoryCount').textContent = stats.totalMemories || 0;
-            document.getElementById('noteCount').textContent = stats.activeNotes || 0;
-        }
-        
-        function renderNotes(notes) {
-            const container = document.getElementById('notesContainer');
-            container.innerHTML = '';
-            
-            notes.forEach(note => {
-                const noteEl = document.createElement('div');
-                noteEl.className = `sticky-note ${note.location} ${note.status}`;
-                noteEl.style.background = note.color;
-                noteEl.style.setProperty('--rotation', (Math.random() * 6 - 3) + 'deg');
-                noteEl.textContent = note.content;
-                noteEl.onclick = () => markNoteRead(note.id);
-                container.appendChild(noteEl);
-            });
-        }
-        
-        function markNoteRead(id) {
-            socket.emit('notes:read', { id });
-        }
-        
-        function addActivityLog(activity) {
-            const container = document.getElementById('activityLog');
-            
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) emptyState.remove();
-            
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
-            const item = document.createElement('div');
-            item.className = 'activity-item';
-            item.innerHTML = `
-                <span class="activity-time">${time}</span>
-                <span>${activity.type || 'Unknown activity'}</span>
-            `;
-            
-            container.insertBefore(item, container.firstChild);
-            
-            while (container.children.length > 20) {
-                container.removeChild(container.lastChild);
-            }
-        }
-        
-        // Setup Wizard
-        let currentSetupStep = 1;
-        
-        function showSetupModal() {
-            document.getElementById('setupModal').classList.add('visible');
-        }
-        
-        function closeSetupModal() {
-            document.getElementById('setupModal').classList.remove('visible');
-        }
-        
-        function nextSetupStep() {
-            document.getElementById(`step${currentSetupStep}`).classList.remove('visible');
-            currentSetupStep++;
-            document.getElementById(`step${currentSetupStep}`).classList.add('visible');
-        }
-        
-        function prevSetupStep() {
-            document.getElementById(`step${currentSetupStep}`).classList.remove('visible');
-            currentSetupStep--;
-            document.getElementById(`step${currentSetupStep}`).classList.add('visible');
-        }
-        
-        function renderAvatarGrid() {
-            const grid = document.getElementById('avatarGrid');
-            grid.innerHTML = '';
-            
-            availableAvatars.forEach(avatar => {
-                const option = document.createElement('div');
-                option.className = 'avatar-option';
-                option.innerHTML = `
-                    <div class="emoji">${avatar.emoji}</div>
-                    <div class="name">${avatar.name}</div>
-                    <div class="desc">${avatar.description}</div>
-                `;
-                option.onclick = () => selectAvatar(avatar.key, option);
-                grid.appendChild(option);
-            });
-        }
-        
-        function selectAvatar(key, element) {
-            selectedAvatar = key;
-            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
-            element.classList.add('selected');
-        }
-        
-        function completeSetup() {
-            const name = document.getElementById('setupName').value || 'Friend';
-            const useClawBot = document.getElementById('useClawBot').checked;
-            
-            socket.emit('setup:complete', {
-                name,
-                avatarKey: selectedAvatar || 'robot',
-                useClawBot
-            });
-        }
-        
-        // Memory Book
-        function toggleMemoryBook() {
-            const modal = document.getElementById('memoryBookModal');
-            if (modal.classList.contains('visible')) {
-                closeMemoryBook();
-            } else {
-                modal.classList.add('visible');
-                socket.emit('memorybook:get');
-            }
-        }
-        
-        function closeMemoryBook() {
-            document.getElementById('memoryBookModal').classList.remove('visible');
-        }
-        
-        function renderMemoryBook(data) {
-            const statsEl = document.getElementById('memoryBookStats');
-            const timelineEl = document.getElementById('memoryTimeline');
-            
-            if (data.stats) {
-                statsEl.innerHTML = `
-                    <div class="memory-stats">
-                        <div class="stat-box">
-                            <div class="stat-value">${data.stats.totalDays || 0}</div>
-                            <div class="stat-label">Days Recorded</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value">${data.stats.streak || 0}</div>
-                            <div class="stat-label">Day Streak</div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            if (data.memories && data.memories.length > 0) {
-                timelineEl.innerHTML = data.memories.map(m => `
-                    <div class="memory-day">
-                        <div class="memory-day-date">${new Date(m.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
-                        <div class="memory-day-mood">Mood: ${m.mood || 'Not recorded'} | Rating: ${m.day_rating || '-'}/10</div>
-                        ${m.highlights ? `
-                            <div class="memory-day-highlights">
-                                ✨ ${JSON.parse(m.highlights || '[]').join(', ')}
+
+            <!-- The Agent -->
+            <div class="agent-container" id="agentContainer">
+                <div class="thought-bubble" id="thoughtBubble"></div>
+                <div class="activity-indicator" id="activityIndicator"></div>
+                <div class="agent" id="agent" onclick="clickAgent()">
+                    <div class="agent-body">
+                        <div class="agent-face">
+                            <div class="agent-eyes">
+                                <div class="agent-eye"></div>
+                                <div class="agent-eye"></div>
                             </div>
-                        ` : ''}
-                    </div>
-                `).join('');
-            }
-        }
-        
-        // Daily Check-in
-        function toggleDailyCheckin() {
-            const modal = document.getElementById('dailyCheckinModal');
-            modal.classList.add('visible');
-        }
-        
-        function closeDailyCheckin() {
-            document.getElementById('dailyCheckinModal').classList.remove('visible');
-        }
-        
-        function setDayRating(rating) {
-            currentDayRating = rating;
-            updateStarDisplay('dayRating', rating);
-        }
-        
-        function setModalDayRating(rating) {
-            currentDayRating = rating;
-            updateStarDisplay('modalDayRating', rating);
-        }
-        
-        function updateStarDisplay(containerId, rating) {
-            const stars = document.querySelectorAll(`#${containerId} .star`);
-            stars.forEach((star, index) => {
-                star.classList.toggle('active', index < rating);
-            });
-        }
-        
-        function submitModalDailyCheckin() {
-            const mood = document.getElementById('modalDailyMood').value;
-            const highlights = document.getElementById('dailyHighlights').value;
-            
-            socket.emit('daily:record', {
-                mood,
-                dayRating: currentDayRating,
-                highlights: highlights ? [highlights] : []
-            });
-            
-            closeDailyCheckin();
-            addMessage("Thanks for sharing! I've saved that memory. 💕", 'agent', true);
-        }
-        
-        // Tools
-        async function loadTools() {
-            try {
-                const response = await fetch('/api/tools');
-                const tools = await response.json();
-                
-                const container = document.getElementById('toolsList');
-                container.innerHTML = '';
-                
-                tools.forEach(tool => {
-                    const item = document.createElement('div');
-                    item.className = `tool-item${tool.enabled ? '' : ' disabled'}`;
-                    item.innerHTML = `
-                        <div class="tool-icon">${tool.icon}</div>
-                        <div class="tool-info">
-                            <div class="tool-name">${tool.name}</div>
-                            <div class="tool-status">${tool.enabled ? 'Active' : 'Disabled'}</div>
+                            <div class="agent-mouth"></div>
                         </div>
-                        <div class="tool-toggle ${tool.enabled ? 'active' : ''}" 
-                             onclick="toggleTool('${tool.id}', ${!tool.enabled})"></div>
-                    `;
-                    container.appendChild(item);
-                });
-            } catch (err) {
-                console.error('Failed to load tools:', err);
-            }
-        }
-        
-        async function toggleTool(id, enabled) {
-            try {
-                await fetch(`/api/tools/${id}/toggle`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ enabled })
-                });
-                loadTools();
-            } catch (err) {
-                console.error('Failed to toggle tool:', err);
-            }
-        }
-        
-        function toggleToolsPanel() {
-            loadTools();
-        }
-        
-        function toggleNotesPanel() {
-            socket.emit('notes:get');
-        }
-        
-        function showSettings() {
-            alert('Settings coming in v4.1! 🛠️');
-        }
-    </script>
+                    </div>
+                    <div class="agent-arms">
+                        <div class="agent-arm left"></div>
+                        <div class="agent-arm right"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-container">
+        <div class="message-history" id="messageHistory"></div>
+        <div class="chat-input-wrapper">
+            <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
+            <input type="text" class="chat-input" id="chatInput" placeholder="Talk to Celest..." onkeypress="handleKeyPress(event)">
+            <button class="chat-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <!-- Memory Panel Modal -->
+    <div class="modal-overlay" id="memoryModal" onclick="closeModal(event, 'memoryModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🧠 Memories</h2>
+                <button class="modal-close" onclick="closeModalDirect('memoryModal')">×</button>
+            </div>
+            <div class="memory-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="statTotal">0</div>
+                    <div class="stat-label">Total Memories</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="statRecent">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+            </div>
+            <div class="memory-list" id="memoryList">
+                <!-- Memories populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Panel Modal -->
+    <div class="modal-overlay" id="toolsModal" onclick="closeModal(event, 'toolsModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">🔧 Tools & Integrations</h2>
+                <button class="modal-close" onclick="closeModalDirect('toolsModal')">×</button>
+            </div>
+            <div class="tools-grid" id="toolsGrid">
+                <!-- Tools populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeModal(event, 'settingsModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">⚙️ Settings</h2>
+                <button class="modal-close" onclick="closeModalDirect('settingsModal')">×</button>
+            </div>
+
+            <div class="setting-item">
+                <div class="toggle">
+                    <span>Voice Responses</span>
+                    <div class="toggle-switch active" id="voiceToggle" onclick="toggleSetting('voice')"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="toggle">
+                    <span>Celest Initiates Conversation</span>
+                    <div class="toggle-switch active" id="initiativeToggle" onclick="toggleSetting('initiative')"></div>
+                </div>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Celest's Energy</span>
+                    <span class="setting-value" id="energyValue">Normal</span>
+                </div>
+                <input type="range" min="1" max="3" value="2" oninput="updateEnergy(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <script src="room-renderer.js"></script>
+    <script src="layer-panel.js"></script>
+    <script src="game.js"></script>
 </body>
 </html>
