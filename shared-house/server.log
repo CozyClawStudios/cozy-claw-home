@@ -1,0 +1,39 @@
+🏠 Cozy Claw Studio - Shared House Server v3.0
+🌐 Running at http://localhost:3000
+
+📡 API Endpoints:
+  POST /api/auth/register     - Create account (rate limited)
+  POST /api/auth/login        - Login (rate limited)
+  POST /api/auth/guest        - Guest login
+  GET  /api/player/profile    - Get profile
+  POST /api/player/daily-reward - Claim daily reward
+  GET  /api/shop              - Browse shop
+  POST /api/shop/buy          - Buy item
+  GET  /api/inventory         - View inventory
+  GET  /api/house             - Get your house
+  POST /api/house/decorate    - Update decorations
+  POST /api/house/furniture   - Place furniture
+  GET  /health                - Health check
+
+🔒 Security Features:
+  - Rate limiting on all endpoints
+  - Input sanitization (XSS protection)
+  - SQL injection prevention
+  - Duplicate player prevention
+  - Security headers
+
+Schema error: Error: SQLITE_CONSTRAINT: UNIQUE constraint failed: shop_items.id
+--> in Statement#run([Function (anonymous)])
+    at Database.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:76:19)
+    at Database.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/node_modules/sqlite3/lib/sqlite3.js:20:19)
+    at /home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1013:12
+    at Array.forEach (<anonymous>)
+    at initDatabase (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1012:16)
+    at Server.<anonymous> (/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/server.js:1069:5)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:531:35) {
+  errno: 19,
+  code: 'SQLITE_CONSTRAINT',
+  __augmented: true
+}
+✅ Database initialized

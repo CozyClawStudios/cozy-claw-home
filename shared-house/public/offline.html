@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline - The Shared House</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        p {
+            color: #888;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            max-width: 400px;
+            line-height: 1.6;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 154, 158, 0.4);
+        }
+        
+        .status {
+            margin-top: 30px;
+            padding: 15px 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .status.online {
+            background: rgba(78, 205, 196, 0.1);
+            color: #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="icon">📶❌</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. The Shared House needs a connection to sync with other players and agents.</p>
+    
+    <a href="/" class="btn">🔄 Try Again</a>
+    
+    <div id="status" class="status">
+        Checking connection status...
+    </div>
+    
+    <script>
+        // Check connection status
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            if (navigator.onLine) {
+                statusEl.textContent = '🟢 You are back online! Redirecting...';
+                statusEl.classList.add('online');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1500);
+            } else {
+                statusEl.textContent = '🔴 Waiting for internet connection...';
+            }
+        }
+        
+        updateStatus();
+        
+        // Listen for online event
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+        
+        // Check periodically
+        setInterval(updateStatus, 3000);
+    </script>
+</body>
+</html>

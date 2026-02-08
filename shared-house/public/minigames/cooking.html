@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooking Mini-Game 🍳 | Cozy Claw Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 20px;
+        }
+        
+        #gameContainer {
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border: 2px solid rgba(255,154,158,0.3);
+        }
+        
+        .recipe-selection {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .recipe-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .recipe-card:hover {
+            border-color: #ff9a9e;
+            background: rgba(255,154,158,0.1);
+            transform: translateY(-3px);
+        }
+        
+        .recipe-card.selected {
+            border-color: #ff9a9e;
+            background: rgba(255,154,158,0.2);
+        }
+        
+        .recipe-card .emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .recipe-card .name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .recipe-card .reward {
+            color: #ffd700;
+            font-size: 14px;
+        }
+        
+        .game-area {
+            display: none;
+        }
+        
+        .game-area.active {
+            display: block;
+        }
+        
+        .ingredients-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .ingredient {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 32px;
+            transition: all 0.2s;
+        }
+        
+        .ingredient:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+        
+        .ingredient.selected {
+            border-color: #4ecdc4;
+            background: rgba(78,205,196,0.2);
+        }
+        
+        .cooking-bar {
+            background: rgba(0,0,0,0.5);
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .cooking-progress {
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f);
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .target-zone {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            background: rgba(78,205,196,0.5);
+            border: 2px solid #4ecdc4;
+            border-radius: 20px;
+        }
+        
+        .timer {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff9a9e;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+            color: #1a1a2e;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,154,158,0.3);
+        }
+        
+        .result {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result .emoji {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .result.success {
+            color: #6bcf7f;
+        }
+        
+        .result.failure {
+            color: #ff6b6b;
+        }
+        
+        .coins-earned {
+            font-size: 24px;
+            color: #ffd700;
+            margin-top: 10px;
+        }
+        
+        .order-display {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .order-display .label {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        
+        .order-display .recipe-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff9a9e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🍳 Cooking Mini-Game</h1>
+    <p class="subtitle">Select a recipe and cook it perfectly!</p>
+    
+    <div id="gameContainer">
+        <!-- Recipe Selection -->
+        <div id="recipeSelection" class="recipe-selection">
+            <div class="recipe-card" data-recipe="pizza">
+                <div class="emoji">🍕</div>
+                <div class="name">Simple Pizza</div>
+                <div class="reward">10 coins</div>
+            </div>
+            <div class="recipe-card" data-recipe="salad">
+                <div class="emoji">🥗</div>
+                <div class="name">Fresh Salad</div>
+                <div class="reward">15 coins</div>
+            </div>
+            <div class="recipe-card" data-recipe="soup">
+                <div class="emoji">🍲</div>
+                <div class="name">Hearty Soup</div>
+                <div class="reward">25 coins</div>
+            </div>
+            <div class="recipe-card" data-recipe="cake">
+                <div class="emoji">🎂</div>
+                <div class="name">Birthday Cake</div>
+                <div class="reward">50 coins</div>
+            </div>
+        </div>
+        
+        <!-- Game Area -->
+        <div id="gameArea" class="game-area">
+            <div class="order-display">
+                <div class="label">Now Cooking:</div>
+                <div id="currentRecipeName" class="recipe-name"></div>
+            </div>
+            
+            <div id="ingredientsArea" class="ingredients-area">
+                <!-- Ingredients injected here -->
+            </div>
+            
+            <div id="cookingPhase" style="display: none;">
+                <div class="timer" id="timer">3.0</div>
+                
+                <div class="cooking-bar">
+                    <div id="cookingProgress" class="cooking-progress"></div>
+                    <div id="targetZone" class="target-zone"></div>
+                </div>
+                
+                <button id="cookBtn" class="btn btn-primary">🔥 COOK NOW!</button>
+            </div>
+        </div>
+        
+        <!-- Result -->
+        <div id="result" class="result">
+            <div id="resultEmoji" class="emoji"></div>
+            <div id="resultText"></div>
+            <div id="coinsEarned" class="coins-earned"></div>
+            <button id="playAgainBtn" class="btn btn-secondary" style="margin-top: 20px;">Play Again</button>
+        </div>
+        
+        <button id="backBtn" class="btn btn-secondary" style="margin-top: 20px; display: none;">← Back to House</button>
+    </div>
+
+    <script>
+        // Game State
+        let currentRecipe = null;
+        let selectedIngredients = [];
+        let gamePhase = 'selection'; // selection, ingredients, cooking, result
+        let cookingInterval = null;
+        let progress = 0;
+        let targetStart = 0;
+        let targetEnd = 0;
+        let timeLeft = 3.0;
+        
+        // Recipe Definitions
+        const recipes = {
+            pizza: {
+                name: 'Simple Pizza',
+                emoji: '🍕',
+                ingredients: ['🫓', '🍅', '🧀'],
+                allIngredients: ['🫓', '🍅', '🧀', '🥬', '🍄', '🍖'],
+                time: 3.0,
+                reward: 10,
+                targetZone: { start: 70, end: 85 }
+            },
+            salad: {
+                name: 'Fresh Salad',
+                emoji: '🥗',
+                ingredients: ['🥬', '🍅', '🥒'],
+                allIngredients: ['🥬', '🍅', '🥒', '🧅', '🥕', '🌽'],
+                time: 7.0,
+                reward: 15,
+                targetZone: { start: 60, end: 80 }
+            },
+            soup: {
+                name: 'Hearty Soup',
+                emoji: '🍲',
+                ingredients: ['🥣', '🥕', '🧅', '🍖'],
+                allIngredients: ['🥣', '🥕', '🧅', '🍖', '🥔', '🌿'],
+                time: 10.0,
+                reward: 25,
+                targetZone: { start: 75, end: 90 }
+            },
+            cake: {
+                name: 'Birthday Cake',
+                emoji: '🎂',
+                ingredients: ['🥚', '🌾', '🍬', '🧈'],
+                allIngredients: ['🥚', '🌾', '🍬', '🧈', '🥛', '🍫'],
+                time: 15.0,
+                reward: 50,
+                targetZone: { start: 80, end: 95 }
+            }
+        };
+        
+        // DOM Elements
+        const recipeCards = document.querySelectorAll('.recipe-card');
+        const gameArea = document.getElementById('gameArea');
+        const ingredientsArea = document.getElementById('ingredientsArea');
+        const cookingPhase = document.getElementById('cookingPhase');
+        const timer = document.getElementById('timer');
+        const cookingProgress = document.getElementById('cookingProgress');
+        const targetZone = document.getElementById('targetZone');
+        const cookBtn = document.getElementById('cookBtn');
+        const result = document.getElementById('result');
+        const backBtn = document.getElementById('backBtn');
+        
+        // Event Listeners
+        recipeCards.forEach(card => {
+            card.addEventListener('click', () => selectRecipe(card.dataset.recipe));
+        });
+        
+        cookBtn.addEventListener('click', finishCooking);
+        document.getElementById('playAgainBtn').addEventListener('click', resetGame);
+        backBtn.addEventListener('click', () => window.close());
+        
+        function selectRecipe(recipeId) {
+            currentRecipe = recipes[recipeId];
+            gamePhase = 'ingredients';
+            selectedIngredients = [];
+            
+            // Update UI
+            document.getElementById('recipeSelection').style.display = 'none';
+            gameArea.classList.add('active');
+            document.getElementById('currentRecipeName').textContent = currentRecipe.name;
+            backBtn.style.display = 'block';
+            
+            // Show ingredients
+            showIngredients();
+        }
+        
+        function showIngredients() {
+            ingredientsArea.innerHTML = '';
+            ingredientsArea.style.display = 'grid';
+            cookingPhase.style.display = 'none';
+            
+            currentRecipe.allIngredients.forEach(ing => {
+                const div = document.createElement('div');
+                div.className = 'ingredient';
+                div.textContent = ing;
+                div.addEventListener('click', () => toggleIngredient(div, ing));
+                ingredientsArea.appendChild(div);
+            });
+        }
+        
+        function toggleIngredient(el, ingredient) {
+            if (el.classList.contains('selected')) {
+                el.classList.remove('selected');
+                selectedIngredients = selectedIngredients.filter(i => i !== ingredient);
+            } else {
+                el.classList.add('selected');
+                selectedIngredients.push(ingredient);
+            }
+            
+            // Check if correct ingredients selected
+            checkIngredients();
+        }
+        
+        function checkIngredients() {
+            const allCorrect = currentRecipe.ingredients.every(ing => 
+                selectedIngredients.includes(ing)
+            );
+            const noExtras = selectedIngredients.every(ing => 
+                currentRecipe.ingredients.includes(ing)
+            );
+            
+            if (allCorrect && noExtras && selectedIngredients.length === currentRecipe.ingredients.length) {
+                startCooking();
+            }
+        }
+        
+        function startCooking() {
+            gamePhase = 'cooking';
+            ingredientsArea.style.display = 'none';
+            cookingPhase.style.display = 'block';
+            
+            // Set up target zone
+            targetStart = currentRecipe.targetZone.start;
+            targetEnd = currentRecipe.targetZone.end;
+            targetZone.style.left = targetStart + '%';
+            targetZone.style.width = (targetEnd - targetStart) + '%';
+            
+            // Start cooking timer
+            timeLeft = currentRecipe.time;
+            progress = 0;
+            
+            cookingInterval = setInterval(() => {
+                timeLeft -= 0.1;
+                progress += (100 / (currentRecipe.time * 10));
+                
+                timer.textContent = timeLeft.toFixed(1);
+                cookingProgress.style.width = progress + '%';
+                
+                if (timeLeft <= 0) {
+                    finishCooking(false);
+                }
+            }, 100);
+        }
+        
+        function finishCooking(manual = true) {
+            clearInterval(cookingInterval);
+            
+            const currentProgress = parseFloat(cookingProgress.style.width) || 0;
+            const inTargetZone = currentProgress >= targetStart && currentProgress <= targetEnd;
+            
+            showResult(inTargetZone);
+        }
+        
+        function showResult(success) {
+            gamePhase = 'result';
+            gameArea.style.display = 'none';
+            result.classList.add('show');
+            result.className = 'result show ' + (success ? 'success' : 'failure');
+            
+            const resultEmoji = document.getElementById('resultEmoji');
+            const resultText = document.getElementById('resultText');
+            const coinsEarned = document.getElementById('coinsEarned');
+            
+            if (success) {
+                resultEmoji.textContent = currentRecipe.emoji;
+                resultText.textContent = 'Delicious! Perfectly cooked!';
+                coinsEarned.textContent = `+${currentRecipe.reward} coins earned!`;
+                
+                // Notify parent window of reward
+                if (window.opener) {
+                    window.opener.postMessage({
+                        type: 'cooking_reward',
+                        coins: currentRecipe.reward
+                    }, '*');
+                }
+            } else {
+                resultEmoji.textContent = '💨';
+                resultText.textContent = 'Oh no! It burned!';
+                coinsEarned.textContent = 'No coins earned. Try again!';
+            }
+        }
+        
+        function resetGame() {
+            gamePhase = 'selection';
+            currentRecipe = null;
+            selectedIngredients = [];
+            progress = 0;
+            timeLeft = 3.0;
+            
+            document.getElementById('recipeSelection').style.display = 'grid';
+            gameArea.classList.remove('active');
+            gameArea.style.display = 'block';
+            result.classList.remove('show');
+            cookingPhase.style.display = 'none';
+            ingredientsArea.style.display = 'none';
+            cookingProgress.style.width = '0%';
+            timer.textContent = '3.0';
+            
+            // Clear selections
+            document.querySelectorAll('.recipe-card').forEach(c => c.classList.remove('selected'));
+        }
+    </script>
+</body>
+</html>

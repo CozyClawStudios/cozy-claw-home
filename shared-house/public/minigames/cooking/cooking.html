@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cooking Mini-Game - Cozy Claw Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .game-container {
+            background: rgba(40, 40, 40, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 95%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .game-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-header p {
+            color: #888;
+            font-size: 1.1em;
+        }
+
+        .coins-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 193, 7, 0.15);
+            border-radius: 50px;
+            border: 2px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .coins-display span {
+            color: #ffc107;
+        }
+
+        /* Recipe Selection Screen */
+        .recipe-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .recipe-card {
+            background: linear-gradient(145deg, #3d3d3d, #2d2d2d);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            border-color: #ff6b6b;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .recipe-card.selected {
+            border-color: #4ecdc4;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.4);
+        }
+
+        .recipe-card.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recipe-emoji {
+            font-size: 3em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .recipe-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .recipe-info {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .recipe-reward {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 50px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .start-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: none;
+        }
+
+        .game-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            background: #2d2d2d;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            display: block;
+            border: 3px solid #444;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .info-item {
+            background: rgba(60, 60, 60, 0.8);
+            padding: 10px 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .info-item span {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .timer {
+            color: #ff6b6b;
+        }
+
+        .timer.warning {
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Ingredient Bar */
+        .ingredient-display {
+            background: rgba(50, 50, 50, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ingredient-display h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #888;
+        }
+
+        .ingredients-list {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .ingredient-slot {
+            width: 70px;
+            height: 70px;
+            background: rgba(70, 70, 70, 0.8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .ingredient-slot.collected {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.2);
+            animation: bounce 0.5s ease;
+        }
+
+        .ingredient-slot.current {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px rgba(255, 107, 107, 0.5); }
+            to { box-shadow: 0 0 20px rgba(255, 107, 107, 0.8); }
+        }
+
+        /* Cooking Bar */
+        .cooking-section {
+            display: none;
+            text-align: center;
+        }
+
+        .cooking-bar {
+            width: 100%;
+            max-width: 500px;
+            height: 60px;
+            background: linear-gradient(90deg, #e74c3c 0%, #f39c12 30%, #2ecc71 45%, #2ecc71 55%, #f39c12 70%, #e74c3c 100%);
+            border-radius: 30px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .cooking-needle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 6px;
+            height: 100%;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transform: translateX(-50%);
+            transition: none;
+        }
+
+        .cooking-target-zone {
+            position: absolute;
+            top: 0;
+            left: 45%;
+            width: 10%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            border-left: 2px dashed rgba(255,255,255,0.7);
+            border-right: 2px dashed rgba(255,255,255,0.7);
+        }
+
+        .cooking-btn {
+            padding: 15px 50px;
+            font-size: 1.3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border: none;
+            border-radius: 50px;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+        }
+
+        .cooking-btn:active {
+            transform: scale(0.95);
+        }
+
+        .cooking-btn:hover {
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        /* Result Screen */
+        .result-screen {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .result-emoji {
+            font-size: 6em;
+            margin-bottom: 20px;
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-title {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .result-title.success {
+            color: #4ecdc4;
+        }
+
+        .result-title.failure {
+            color: #e74c3c;
+        }
+
+        .result-message {
+            font-size: 1.2em;
+            color: #888;
+            margin-bottom: 25px;
+        }
+
+        .result-reward {
+            font-size: 1.5em;
+            color: #ffc107;
+            margin-bottom: 30px;
+            padding: 15px 30px;
+            background: rgba(255, 193, 7, 0.15);
+            border-radius: 15px;
+            display: inline-block;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .result-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4ecdc4, #44a3aa);
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 2px solid #666;
+        }
+
+        .result-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* High Scores */
+        .high-scores {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 15px;
+        }
+
+        .high-scores h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #888;
+        }
+
+        .score-list {
+            list-style: none;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: rgba(60, 60, 60, 0.8);
+            border-radius: 10px;
+        }
+
+        .score-item.highlight {
+            background: rgba(78, 205, 196, 0.3);
+            border: 1px solid #4ecdc4;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: rgba(60, 60, 60, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .instructions h4 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #aaa;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #666;
+            border-radius: 25px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #888;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1>🍳 Cooking Mini-Game</h1>
+            <p>Master the art of cooking and earn coins!</p>
+        </div>
+
+        <div class="coins-display">
+            <span>🪙</span>
+            <span id="player-coins">Loading...</span>
+        </div>
+
+        <!-- Menu Screen -->
+        <div class="menu-screen" id="menu-screen">
+            <div class="instructions">
+                <h4>📋 How to Play:</h4>
+                <ul>
+                    <li>Select a recipe from the menu below</li>
+                    <li>Click the correct ingredients in order before time runs out</li>
+                    <li>Then, time your click when the needle is in the green zone</li>
+                    <li>Perfect timing = More coins!</li>
+                </ul>
+            </div>
+
+            <div class="recipe-selection" id="recipe-selection">
+                <!-- Recipes will be loaded dynamically -->
+            </div>
+
+            <button class="start-btn" id="start-btn" disabled>Start Cooking</button>
+
+            <div class="high-scores" id="high-scores">
+                <h3>🏆 Your Best Scores</h3>
+                <ul class="score-list" id="score-list">
+                    <li class="score-item">Loading scores...</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="game-screen">
+            <div class="game-info">
+                <div class="info-item">
+                    <label>Recipe</label>
+                    <span id="current-recipe">-</span>
+                </div>
+                <div class="info-item">
+                    <label>Time</label>
+                    <span class="timer" id="game-timer">--</span>
+                </div>
+                <div class="info-item">
+                    <label>Progress</label>
+                    <span id="progress-count">0/0</span>
+                </div>
+            </div>
+
+            <canvas class="game-canvas" id="game-canvas" width="600" height="400"></canvas>
+
+            <div class="ingredient-display" id="ingredient-display">
+                <h3>Required Ingredients:</h3>
+                <div class="ingredients-list" id="ingredients-list">
+                    <!-- Ingredient slots will be created here -->
+                </div>
+            </div>
+
+            <!-- Cooking Bar (shown during cooking phase) -->
+            <div class="cooking-section" id="cooking-section">
+                <h3>🔥 Time Your Cooking!</h3>
+                <p>Click when the needle is in the green zone</p>
+                <div class="cooking-bar">
+                    <div class="cooking-target-zone"></div>
+                    <div class="cooking-needle" id="cooking-needle"></div>
+                </div>
+                <button class="cooking-btn" id="cooking-btn">COOK!</button>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div class="result-screen" id="result-screen">
+            <div class="result-emoji" id="result-emoji">🍕</div>
+            <h2 class="result-title" id="result-title">Delicious!</h2>
+            <p class="result-message" id="result-message">You cooked the perfect pizza!</p>
+            <div class="result-reward" id="result-reward">+50 coins</div>
+            <div class="result-buttons">
+                <button class="result-btn btn-primary" id="play-again-btn">Play Again</button>
+                <button class="result-btn btn-secondary" id="back-to-menu-btn">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Loading game data...</p>
+        </div>
+    </div>
+
+    <script src="cooking.js"></script>
+</body>
+</html>
