@@ -27,6 +27,12 @@ Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 - [x] Git verification workflow documented
 - [x] GitHub Organization created: https://github.com/CozyClawStudios
 - [x] REPO_STRUCTURE.md created (repo-per-project policy)
+- [x] **All 5 repos created with proper visibility:**
+  - `cozy-claw-home` (🌐 Public) — https://github.com/CozyClawStudios/cozy-claw-home
+  - `website` (🌐 Public) — https://github.com/CozyClawStudios/website
+  - `cozy-claw-discord` (🔒 Private) — https://github.com/CozyClawStudios/cozy-claw-discord
+  - `agent-framework` (🔒 Private) — https://github.com/CozyClawStudios/agent-framework
+  - `studio-docs` (🔒 Private) — https://github.com/CozyClawStudios/studio-docs
 
 ### Categories Deployed
 | Category | Channels |
