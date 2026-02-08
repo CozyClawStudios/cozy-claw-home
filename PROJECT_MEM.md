@@ -2,7 +2,7 @@
 
 **Project:** Discord Server Infrastructure  
 **Created:** 2026-02-08  
-**Last Updated:** 2026-02-08 12:52 CST  
+**Last Updated:** 2026-02-08 12:58 CST  
 **Status:** 🟢 Active  
 
 ---
@@ -20,6 +20,12 @@ Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 - [x] Welcome messages seeded
 - [x] Agent offices configured
 
+### Integration Infrastructure
+- [x] PROJECT_ORGANIZATION.md created (project hygiene standards)
+- [x] FORGY_AI_INTEGRATION_GUIDE.md created (partner onboarding)
+- [x] verify-sync.sh script deployed (pre-project verification)
+- [x] Git verification workflow documented
+
 ### Categories Deployed
 | Category | Channels |
 |----------|----------|
@@ -34,9 +40,9 @@ Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 
 ## 🔄 In Progress
 - [ ] Role assignment system — Assigned to: @Celest
+- [ ] Forgy AI bot integration — Waiting for: Forgy
 - [ ] First sprint planning session
 - [ ] Sub-agent spawn commands testing
-- [ ] Partner bot integration (Forgy AI)
 
 ---
 
@@ -47,6 +53,8 @@ Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 | 2026-02-08 | Open group policy initially | Iterate to restrict once roles set |
 | 2026-02-08 | Discord-native bot mentions for partner integration | Zero custom code needed |
 | 2026-02-08 | PROJECT_ORGANIZATION.md created | Standardize project hygiene |
+| 2026-02-08 | Git verification required before all work | Prevent lost work, ensure sync |
+| 2026-02-08 | Private server first, public later | Test integration before going live |
 
 ---
 
@@ -55,6 +63,13 @@ Deploy complete Discord structure for agent workforce + bot-to-bot collaboration
 - Discord bot: Connected ✅
 - Config: `openclaw.json` has Discord enabled
 - Organization guide: `~/workspace/PROJECT_ORGANIZATION.md`
+- Partner guide: `~/workspace/FORGY_AI_INTEGRATION_GUIDE.md`
+- Verify script: `~/workspace/verify-sync.sh`
+
+**Git Verification Workflow:**
+```bash
+./verify-sync.sh && ./start-project.sh
+```
 
 ---
 
