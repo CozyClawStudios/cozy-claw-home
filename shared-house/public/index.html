@@ -2,27 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="The Shared House - A cozy multiplayer space for humans and AI agents">
-    <meta name="theme-color" content="#ff9a9e">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Cozy Claw Studio - Your AI companion's home">
+    <meta name="theme-color" content="#8B7355">
     
-    <!-- Apple Mobile Web App -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Shared House">
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    
-    <!-- Apple Touch Icons -->
-    <link rel="apple-touch-icon" href="/assets/icon-192x192.svg">
-    <link rel="apple-touch-icon" sizes="152x152" href="/assets/icon-192x192.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/icon-192x192.svg">
-    
-    <!-- Mobile CSS -->
-    <link rel="stylesheet" href="mobile.css">
-    
-    <title>The Shared House 🏠</title>
+    <title>Cozy Claw Studio 🏠</title>
     <style>
         * {
             margin: 0;
@@ -31,904 +15,901 @@
         }
         
         :root {
-            --primary-color: #ff9a9e;
-            --secondary-color: #fad0c4;
-            --bg-dark: #1a1a2e;
-            --bg-darker: #16213e;
-            --text-light: #fff;
-            --text-muted: #888;
-            --success-color: #4ecdc4;
-            --error-color: #ff6b6b;
-            --agent-color: #ff6b9d;
-            --human-color: #4ecdc4;
+            --bg-wall: #f5e6d3;
+            --bg-floor: #d4c4a8;
+            --accent-warm: #e8b86d;
+            --accent-cozy: #c9a86c;
+            --text-dark: #3d3229;
+            --text-muted: #7a6b5a;
+            --agent-glow: #ff9a76;
+            --chat-bg: rgba(255, 255, 255, 0.95);
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(180deg, #e8ddd0 0%, #d4c4a8 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            color: var(--text-light);
+            color: var(--text-dark);
             overflow-x: hidden;
         }
         
-        h1 {
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: clamp(1.5rem, 4vw, 2.5rem);
-            text-align: center;
-        }
-        
-        .subtitle {
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-        }
-        
-        #gameContainer {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            max-width: 100%;
-        }
-        
-        #gameCanvas {
-            display: block;
-            background: #2d2d2d;
-            cursor: crosshair;
-            max-width: 100%;
-            height: auto;
-            touch-action: none;
-        }
-        
-        /* Loading Screen */
-        #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+        /* Header */
+        .header {
+            padding: 15px 20px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            transition: opacity 0.5s;
-        }
-        
-        .loading-content {
-            text-align: center;
-            padding: 40px;
-        }
-        
-        .loading-title {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            animation: pulse 2s infinite;
-        }
-        
-        .loading-text {
-            color: var(--text-muted);
-            margin-bottom: 30px;
-        }
-        
-        .loading-bar-container {
-            width: 300px;
-            max-width: 80vw;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 0 auto 20px;
-        }
-        
-        #loadingProgress {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            transition: width 0.3s ease;
-            border-radius: 4px;
-        }
-        
-        .loading-tips {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-style: italic;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        /* UI Panels */
-        #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            padding: 15px;
-            border-radius: 10px;
-            max-width: 200px;
-            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
         
-        #ui strong {
-            color: var(--primary-color);
-        }
-        
-        #playerList {
-            margin-top: 5px;
-            font-size: 0.85rem;
-        }
-        
-        #playerList div {
-            margin: 3px 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        /* Chat Box */
-        #chatBox {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 120px;
-            background: rgba(0,0,0,0.85);
-            border-radius: 10px;
-            padding: 10px;
-            max-height: 120px;
-            overflow-y: auto;
-            font-size: 0.85rem;
-            backdrop-filter: blur(10px);
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) transparent;
-        }
-        
-        #chatBox::-webkit-scrollbar {
-            width: 6px;
-        }
-        
-        #chatBox::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 3px;
-        }
-        
-        .chat-message {
-            margin: 4px 0;
-            line-height: 1.4;
-        }
-        
-        .chat-message .name {
-            font-weight: bold;
-            margin-right: 5px;
-        }
-        
-        .chat-message .human { color: var(--human-color); }
-        .chat-message .agent { color: var(--agent-color); }
-        
-        /* Chat Input Overlay */
-        #chatOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .chat-input-container {
-            background: var(--bg-darker);
-            padding: 20px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        
-        .chat-input-container h3 {
-            margin-bottom: 15px;
-            color: var(--primary-color);
-        }
-        
-        #chatInput {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            background: rgba(0,0,0,0.3);
-            color: var(--text-light);
-            font-size: 1rem;
-            margin-bottom: 15px;
-        }
-        
-        #chatInput:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-        
-        .chat-hint {
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin-top: 10px;
-        }
-        
-        /* Furniture Panel */
-        #furniturePanel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.85);
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
-            max-width: 180px;
-            backdrop-filter: blur(10px);
-        }
-        
-        #furniturePanel strong {
-            color: var(--primary-color);
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .furniture-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
-        }
-        
-        .furniture-item {
-            width: 35px;
-            height: 35px;
-            cursor: pointer;
-            border: 2px solid transparent;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            background: rgba(255,255,255,0.05);
-            transition: all 0.2s;
-        }
-        
-        .furniture-item:hover {
-            border-color: var(--primary-color);
-            background: rgba(255,154,158,0.1);
-            transform: scale(1.1);
-        }
-        
-        .furniture-item.selected {
-            border-color: var(--primary-color);
-            background: rgba(255,154,158,0.2);
-        }
-        
-        /* Controls */
-        #controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 800px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            font-weight: 500;
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
-        .btn-primary {
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            color: var(--bg-dark);
-            font-weight: bold;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: pulse 2s infinite;
         }
         
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: var(--text-light);
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255,154,158,0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-        
-        /* Instructions */
-        #instructions {
-            margin-top: 15px;
-            color: var(--text-muted);
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        
-        kbd {
-            background: rgba(255,255,255,0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.8rem;
-        }
-        
-        /* Tutorial Modal */
-        #tutorialModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        
-        .tutorial-content {
-            background: var(--bg-darker);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        
-        .tutorial-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
-        
-        .tutorial-content h2 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-        
-        .tutorial-content p {
-            color: var(--text-muted);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-        
-        .tutorial-counter {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-        
-        .tutorial-buttons {
+        .header-actions {
             display: flex;
             gap: 10px;
-            justify-content: center;
         }
         
-        /* Settings Modal */
-        #settingsModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-        
-        .settings-content {
-            background: var(--bg-darker);
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        
-        .settings-content h2 {
-            color: var(--primary-color);
-            margin-bottom: 25px;
-            text-align: center;
-        }
-        
-        .setting-item {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .setting-item:last-child {
-            border-bottom: none;
-        }
-        
-        .setting-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .setting-label span {
-            font-weight: 500;
-        }
-        
-        .setting-value {
-            color: var(--primary-color);
-            font-size: 0.9rem;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--primary-color);
+        .btn-icon {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,0.8);
             cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s;
         }
         
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.2);
-            border-radius: 26px;
-            transition: 0.3s;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
+        .btn-icon:hover {
             background: white;
-            border-radius: 50%;
-            transition: 0.3s;
+            transform: scale(1.1);
         }
         
-        input:checked + .toggle-slider {
-            background: var(--primary-color);
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-        
-        .settings-buttons {
+        /* Main Layout */
+        .main-container {
+            flex: 1;
             display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 25px;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
         }
         
-        /* Error Message */
-        #errorMessage {
-            position: fixed;
-            top: 20px;
+        /* The Room (Center) */
+        .room-container {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .room {
+            flex: 1;
+            background: linear-gradient(180deg, var(--bg-wall) 0%, var(--bg-floor) 100%);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 60px rgba(0,0,0,0.1),
+                0 10px 40px rgba(0,0,0,0.1);
+            min-height: 500px;
+        }
+        
+        /* Room decorations */
+        .window {
+            position: absolute;
+            top: 60px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--error-color);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            z-index: 3000;
-            display: none;
-            box-shadow: 0 5px 20px rgba(255,107,107,0.4);
+            width: 180px;
+            height: 220px;
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
+            border: 8px solid #8B7355;
+            border-radius: 4px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* Connection Status */
-        #connectionStatus {
+        .window::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: #8B7355;
+        }
+        
+        .window::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 6px;
+            background: #8B7355;
+            transform: translateX(-50%);
+        }
+        
+        .plant {
+            position: absolute;
+            bottom: 20px;
+            left: 30px;
+            font-size: 4rem;
+        }
+        
+        .bookshelf {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            width: 100px;
+            height: 140px;
+            background: #8B7355;
+            border-radius: 4px;
+        }
+        
+        .bookshelf::before {
+            content: '📚';
             position: absolute;
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: none;
+            font-size: 2.5rem;
         }
         
-        #connectionStatus.connected {
-            background: var(--success-color);
-            color: var(--bg-dark);
+        /* The Agent */
+        .agent-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
         
-        #connectionStatus.disconnected {
-            background: var(--error-color);
-            color: white;
+        .agent-container:hover {
+            transform: translateX(-50%) scale(1.05);
         }
         
-        /* Mobile Controls */
-        .mobile-controls {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            z-index: 100;
+        .agent-container:hover .agent-avatar {
+            box-shadow: 0 0 40px var(--agent-glow);
         }
         
-        .joystick-area {
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.1);
+        .agent-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ff9a76 0%, #ff7eb3 100%);
             border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 4px 20px rgba(255, 154, 118, 0.4);
+            transition: all 0.3s ease;
             position: relative;
         }
         
-        .joystick-knob {
-            width: 50px;
-            height: 50px;
-            background: var(--primary-color);
-            border-radius: 50%;
+        .agent-avatar::before {
+            content: '';
             position: absolute;
-            top: 50%;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 154, 118, 0.3);
+            animation: agent-breathe 3s ease-in-out infinite;
+        }
+        
+        @keyframes agent-breathe {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.2; }
+        }
+        
+        .agent-name {
+            margin-top: 10px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        
+        .agent-status {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .activity-indicator {
+            display: inline-flex;
+            gap: 3px;
+        }
+        
+        .activity-dot {
+            width: 4px;
+            height: 4px;
+            background: var(--accent-cozy);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .activity-dot:nth-child(2) { animation-delay: 0.2s; }
+        .activity-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+        
+        /* Thought bubble */
+        .thought-bubble {
+            position: absolute;
+            top: -80px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 4px 15px rgba(255,154,158,0.4);
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+            max-width: 200px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
         }
         
-        /* Responsive Design */
-        @media (max-width: 850px) {
-            body {
-                padding: 10px;
+        .thought-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid white;
+        }
+        
+        .thought-bubble.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        
+        /* Chat Section */
+        .chat-section {
+            background: var(--chat-bg);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .chat-messages {
+            height: 150px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--accent-cozy);
+            border-radius: 2px;
+        }
+        
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 80%;
+            font-size: 0.9rem;
+            animation: message-in 0.3s ease;
+        }
+        
+        @keyframes message-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.agent {
+            align-self: flex-start;
+            background: #f0f0f0;
+            color: var(--text-dark);
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message.initiative {
+            border-left: 3px solid var(--agent-glow);
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--accent-cozy);
+        }
+        
+        .btn-send {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-cozy) 100%);
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-send:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(232, 184, 109, 0.4);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 280px;
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Memory Panel */
+        .memory-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.5);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-cozy);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        
+        .memory-list {
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .memory-item {
+            padding: 8px 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .memory-type {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--accent-warm);
+            color: white;
+        }
+        
+        /* Tools Panel */
+        .tools-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tool-item:hover {
+            background: rgba(255,255,255,0.8);
+            transform: translateX(4px);
+        }
+        
+        .tool-item.disabled {
+            opacity: 0.5;
+        }
+        
+        .tool-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .tool-info {
+            flex: 1;
+        }
+        
+        .tool-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .tool-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .tool-toggle {
+            width: 40px;
+            height: 22px;
+            background: #ddd;
+            border-radius: 11px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .tool-toggle.active {
+            background: #4ade80;
+        }
+        
+        .tool-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        
+        .tool-toggle.active::after {
+            transform: translateX(18px);
+        }
+        
+        /* Activity Log */
+        .activity-log {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.85rem;
+        }
+        
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            min-width: 50px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
             }
             
-            #gameContainer {
-                width: 100%;
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
             }
             
-            #gameCanvas {
-                width: 100%;
-                height: auto;
-            }
-            
-            #ui {
-                max-width: 150px;
-                padding: 10px;
-                font-size: 0.8rem;
-            }
-            
-            #chatBox {
-                right: 10px;
-                max-height: 100px;
-                font-size: 0.8rem;
-            }
-            
-            #furniturePanel {
-                max-width: 150px;
-                padding: 10px;
-            }
-            
-            .furniture-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .furniture-item {
-                width: 30px;
-                height: 30px;
-                font-size: 16px;
-            }
-            
-            #controls {
-                gap: 8px;
-            }
-            
-            .btn {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
-            
-            #instructions {
-                font-size: 0.75rem;
-            }
-            
-            .mobile-controls {
-                display: block;
+            .panel {
+                flex: 1;
+                min-width: 250px;
             }
         }
         
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 1.3rem;
+        @media (max-width: 600px) {
+            .header {
+                padding: 10px 15px;
             }
             
-            .subtitle {
-                font-size: 0.8rem;
+            .main-container {
+                padding: 10px;
+                gap: 10px;
             }
             
-            #ui {
-                display: none;
+            .room {
+                min-height: 350px;
             }
             
-            #chatBox {
-                max-height: 80px;
-                font-size: 0.75rem;
+            .agent-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2.5rem;
             }
             
-            .btn {
-                padding: 8px 12px;
-                font-size: 12px;
+            .sidebar {
+                flex-direction: column;
             }
-            
-            .tutorial-content,
-            .settings-content {
-                padding: 20px;
-            }
-            
-            .chat-input-container {
-                padding: 15px;
-            }
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-title">🏠</div>
-            <h2 style="margin-bottom: 10px;">The Shared House</h2>
-            <p class="loading-text" id="loadingText">Loading cozy world...</p>
-            <div class="loading-bar-container">
-                <div id="loadingProgress"></div>
-            </div>
-            <p class="loading-tips">Tip: Chat with agents by clicking the Chat button!</p>
+    <header class="header">
+        <div class="logo">
+            🏠 Cozy Claw Studio
+            <span class="status-dot" title="Agent is online"></span>
         </div>
-    </div>
+        <div class="header-actions">
+            <button class="btn-icon" onclick="toggleMemoryPanel()" title="Memory">🧠</button>
+            <button class="btn-icon" onclick="toggleToolsPanel()" title="Tools">🔧</button>
+            <button class="btn-icon" onclick="showSettings()" title="Settings">⚙️</button>
+        </div>
+    </header>
     
-    <h1>🏠 The Shared House</h1>
-    <p class="subtitle">A cozy space for humans and agents to hang out</p>
-    
-    <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <main class="main-container">
+        <!-- The Room -->
+        <div class="room-container">
+            <div class="room">
+                <div class="window"></div>
+                <div class="plant">🪴</div>
+                <div class="bookshelf"></div>
+                
+                <!-- The Agent -->
+                <div class="agent-container" onclick="clickAgent()">
+                    <div class="thought-bubble" id="thoughtBubble"></div>
+                    <div class="agent-avatar" id="agentAvatar">🤖</div>
+                    <div class="agent-name" id="agentName">Claw</div>
+                    <div class="agent-status">
+                        <span id="agentActivity">Relaxing</span>
+                        <span class="activity-indicator" id="typingIndicator" style="display: none;">
+                            <span class="activity-dot"></span>
+                            <span class="activity-dot"></span>
+                            <span class="activity-dot"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat -->
+            <div class="chat-section">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="empty-state">Click on your companion to say hello! 👋</div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" 
+                           placeholder="Type a message..." 
+                           onkeypress="handleKeyPress(event)">
+                    <button class="btn-send" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
         
-        <!-- Connection Status -->
-        <div id="connectionStatus" class="connected">● Connected</div>
-        
-        <!-- Player UI -->
-        <div id="ui">
-            <div><strong>Roommates:</strong></div>
-            <div id="playerList"></div>
-            <div style="margin-top: 10px;"><strong>Mode:</strong> <span id="currentMode">Walk</span></div>
-            <div style="margin-top: 5px; font-size: 0.75rem; color: #888;">
-                <span id="playerCount">0</span> players online
-            </div>
-        </div>
-        
-        <!-- Furniture Panel -->
-        <div id="furniturePanel">
-            <div style="margin-bottom: 10px;"><strong>Place Furniture</strong></div>
-            <div class="furniture-grid">
-                <div class="furniture-item" data-item="sofa" title="Sofa">🛋️</div>
-                <div class="furniture-item" data-item="plant" title="Plant">🪴</div>
-                <div class="furniture-item" data-item="lamp" title="Lamp">🛋️</div>
-                <div class="furniture-item" data-item="tv" title="TV">📺</div>
-                <div class="furniture-item" data-item="bed" title="Bed">🛏️</div>
-                <div class="furniture-item" data-item="table" title="Table">🪑</div>
-                <div class="furniture-item" data-item="bookshelf" title="Bookshelf">📚</div>
-                <div class="furniture-item" data-item="coffee" title="Coffee">☕</div>
-            </div>
-            <div style="margin-top: 10px; font-size: 0.75rem; color: #888; text-align: center;">
-                Click to place • ESC to cancel
-            </div>
-        </div>
-        
-        <!-- Chat Box -->
-        <div id="chatBox"></div>
-    </div>
-    
-    <!-- Controls -->
-    <div id="controls">
-        <button class="btn btn-secondary" onclick="toggleFurnitureMode()">🛋️ Decorate</button>
-        <button class="btn btn-secondary" onclick="spawnAgent()">🤖 Invite Agent</button>
-        <button class="btn btn-primary" onclick="sendChat()">💬 Chat</button>
-        <button class="btn btn-secondary" onclick="openSettings()">⚙️ Settings</button>
-    </div>
-    
-    <!-- Instructions -->
-    <div id="instructions">
-        <kbd>WASD</kbd> or <kbd>Arrows</kbd> to move • <kbd>E</kbd> to interact • <kbd>Click</kbd> to place furniture
-    </div>
-    
-    <!-- Chat Input Overlay -->
-    <div id="chatOverlay" onclick="if(event.target === this) hideChatInput()">
-        <div class="chat-input-container" onclick="event.stopPropagation()">
-            <h3>💬 Send a Message</h3>
-            <input type="text" id="chatInput" placeholder="Type your message..." maxlength="200" autocomplete="off">
-            <div style="display: flex; gap: 10px;">
-                <button class="btn btn-primary" onclick="submitChat()" style="flex: 1;">Send</button>
-                <button class="btn btn-secondary" onclick="hideChatInput()">Cancel</button>
-            </div>
-            <p class="chat-hint">Press Enter to send, Escape to cancel</p>
-        </div>
-    </div>
-    
-    <!-- Tutorial Modal -->
-    <div id="tutorialModal">
-        <div class="tutorial-content">
-            <div class="tutorial-icon">🏠</div>
-            <h2 id="tutorialTitle">Welcome to The Shared House!</h2>
-            <p id="tutorialContent">A cozy space where humans and AI agents hang out together. Let's get you started!</p>
-            <div class="tutorial-counter" id="tutorialCounter">1 / 5</div>
-            <div class="tutorial-buttons">
-                <button class="btn btn-secondary btn-small" onclick="closeTutorial()">Skip</button>
-                <button class="btn btn-primary" onclick="nextTutorialStep()">Next →</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Settings Modal -->
-    <div id="settingsModal" onclick="if(event.target === this) closeSettings()">
-        <div class="settings-content" onclick="event.stopPropagation()">
-            <h2>⚙️ Settings</h2>
-            
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>🔊 Sound Effects</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingSound" checked onchange="updateSetting('soundEnabled', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Memory Panel -->
+            <div class="panel">
+                <div class="panel-title">🧠 Memory</div>
+                <div class="memory-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="memoryCount">0</div>
+                        <div class="stat-label">Memories</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="convCount">0</div>
+                        <div class="stat-label">Conversations</div>
+                    </div>
+                </div>
+                <div class="memory-list" id="memoryList">
+                    <div class="empty-state">No memories yet...</div>
                 </div>
             </div>
             
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>🎵 Music Volume</span>
-                    <span class="setting-value" id="musicValue">50%</span>
-                </div>
-                <input type="range" id="settingMusic" min="0" max="100" value="50" oninput="updateSetting('musicVolume', this.value/100); document.getElementById('musicValue').textContent = this.value + '%'">
-            </div>
-            
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>🔔 SFX Volume</span>
-                    <span class="setting-value" id="sfxValue">70%</span>
-                </div>
-                <input type="range" id="settingSFX" min="0" max="100" value="70" oninput="updateSetting('sfxVolume', this.value/100); document.getElementById('sfxValue').textContent = this.value + '%'">
-            </div>
-            
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>🌑 Shadows</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingShadows" checked onchange="updateSetting('showShadows', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
+            <!-- Tools Panel -->
+            <div class="panel">
+                <div class="panel-title">🔧 Connected Tools</div>
+                <div class="tools-list" id="toolsList">
+                    <div class="empty-state">No tools configured</div>
                 </div>
             </div>
             
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>✨ Particle Effects</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="settingParticles" checked onchange="updateSetting('particleEffects', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
+            <!-- Activity Log -->
+            <div class="panel">
+                <div class="panel-title">📋 Recent Activity</div>
+                <div class="activity-log" id="activityLog">
+                    <div class="empty-state">Waiting for activity...</div>
                 </div>
             </div>
-            
-            <div class="setting-item">
-                <div class="setting-label">
-                    <span>🎓 Show Tutorial</span>
-                </div>
-                <button class="btn btn-secondary btn-small" onclick="resetTutorial(); closeSettings();" style="width: 100%; margin-top: 10px;">Restart Tutorial</button>
-            </div>
-            
-            <div class="settings-buttons">
-                <button class="btn btn-secondary" onclick="resetSettings()">Reset</button>
-                <button class="btn btn-primary" onclick="closeSettings()">Done</button>
-            </div>
-        </div>
-    </div>
+        </aside>
+    </main>
     
-    <!-- Error Message -->
-    <div id="errorMessage"></div>
-    
-    <!-- Mobile Controls (shown on touch devices) -->
-    <div class="mobile-controls" id="mobileControls">
-        <div class="joystick-area" id="joystick">
-            <div class="joystick-knob"></div>
-        </div>
-    </div>
-
-    <script src="game.js"></script>
-    <script src="mobile-controls.js"></script>
-    
-    <!-- Service Worker Registration -->
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then((registration) => {
-                        console.log('✅ Service Worker registered:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('❌ Service Worker registration failed:', error);
-                    });
-            });
+        // Socket connection
+        const socket = io();
+        
+        // State
+        let agentState = {
+            mood: 'content',
+            activity: 'relaxing',
+            location: 'sofa'
+        };
+        
+        // Socket event handlers
+        socket.on('connect', () => {
+            console.log('Connected to companion server');
+        });
+        
+        socket.on('agent:state', (state) => {
+            agentState = state;
+            updateAgentDisplay(state);
+        });
+        
+        socket.on('agent:message', (message) => {
+            addMessage(message.text, 'agent', message.initiative);
+            showThoughtBubble(message.text);
+        });
+        
+        socket.on('agent:activity', (activity) => {
+            addActivityLog(activity);
+        });
+        
+        socket.on('memory:stats', (stats) => {
+            updateMemoryStats(stats);
+        });
+        
+        socket.on('tools:result', (result) => {
+            console.log('Tool result:', result);
+        });
+        
+        // UI Functions
+        function updateAgentDisplay(state) {
+            document.getElementById('agentName').textContent = state.name || 'Claw';
+            
+            const activityInfo = state.activityInfo || { emoji: '😌', description: 'relaxing' };
+            document.getElementById('agentActivity').textContent = activityInfo.description;
+            
+            // Update avatar based on mood
+            const moodEmojis = {
+                happy: '😊',
+                content: '😌',
+                focused: '🤔',
+                tired: '😴',
+                excited: '🤩',
+                curious: '🧐',
+                calm: '😇',
+                sleepy: '💤'
+            };
+            document.getElementById('agentAvatar').textContent = moodEmojis[state.mood] || '🤖';
         }
         
-        // Handle PWA install prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            console.log('📱 PWA install prompt available');
-        });
+        function clickAgent() {
+            socket.emit('agent:click');
+            // Visual feedback
+            const avatar = document.getElementById('agentAvatar');
+            avatar.style.transform = 'scale(0.9)';
+            setTimeout(() => avatar.style.transform = '', 150);
+        }
         
-        window.addEventListener('appinstalled', () => {
-            console.log('🎉 PWA was installed');
-            deferredPrompt = null;
-        });
+        function showThoughtBubble(text) {
+            const bubble = document.getElementById('thoughtBubble');
+            bubble.textContent = text.substring(0, 50) + (text.length > 50 ? '...' : '');
+            bubble.classList.add('visible');
+            setTimeout(() => bubble.classList.remove('visible'), 4000);
+        }
         
-        // Prevent double-tap zoom on iOS
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', (event) => {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault();
+        function addMessage(text, sender, isInitiative = false) {
+            const container = document.getElementById('chatMessages');
+            
+            // Remove empty state if present
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            const message = document.createElement('div');
+            message.className = `message ${sender}${isInitiative ? ' initiative' : ''}`;
+            message.textContent = text;
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+            
+            addMessage(text, 'user');
+            socket.emit('user:message', { message: text });
+            input.value = '';
+            
+            // Show typing indicator
+            document.getElementById('typingIndicator').style.display = 'inline-flex';
+            setTimeout(() => {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }, 1000);
+        }
+        
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+        
+        function updateMemoryStats(stats) {
+            document.getElementById('memoryCount').textContent = stats.totalMemories || 0;
+            document.getElementById('convCount').textContent = stats.totalConversations || 0;
+        }
+        
+        function addActivityLog(activity) {
+            const container = document.getElementById('activityLog');
+            
+            // Remove empty state
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <span class="activity-time">${time}</span>
+                <span>${activity.type || 'Unknown activity'}</span>
+            `;
+            
+            container.insertBefore(item, container.firstChild);
+            
+            // Keep only last 20 items
+            while (container.children.length > 20) {
+                container.removeChild(container.lastChild);
             }
-            lastTouchEnd = now;
-        }, false);
+        }
+        
+        // Load tools list
+        async function loadTools() {
+            try {
+                const response = await fetch('/api/tools');
+                const tools = await response.json();
+                
+                const container = document.getElementById('toolsList');
+                container.innerHTML = '';
+                
+                tools.forEach(tool => {
+                    const item = document.createElement('div');
+                    item.className = `tool-item${tool.enabled ? '' : ' disabled'}`;
+                    item.innerHTML = `
+                        <div class="tool-icon">${tool.icon}</div>
+                        <div class="tool-info">
+                            <div class="tool-name">${tool.name}</div>
+                            <div class="tool-status">${tool.enabled ? 'Active' : 'Disabled'}</div>
+                        </div>
+                        <div class="tool-toggle ${tool.enabled ? 'active' : ''}" 
+                             onclick="toggleTool('${tool.id}', ${!tool.enabled})"></div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                console.error('Failed to load tools:', err);
+            }
+        }
+        
+        async function toggleTool(id, enabled) {
+            try {
+                await fetch(`/api/tools/${id}/toggle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled })
+                });
+                loadTools();
+            } catch (err) {
+                console.error('Failed to toggle tool:', err);
+            }
+        }
+        
+        function toggleMemoryPanel() {
+            // Refresh memory stats
+            socket.emit('memory:query', { query: '', limit: 5 });
+        }
+        
+        function toggleToolsPanel() {
+            loadTools();
+        }
+        
+        function showSettings() {
+            alert('Settings coming soon! 🛠️');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTools();
+        });
     </script>
 </body>
 </html>

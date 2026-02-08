@@ -1,108 +1,127 @@
-# Cozy Claw Studio 🦞
+# Cozy Claw Studio 🏠
 
-**A game studio creating cozy virtual worlds where humans and AI agents live together.**
+*Your personal AI companion's home*
+
+A visual, cozy space where your AI companion lives 24/7. Not a game—just a warm, companionable presence that remembers you, checks on you, and helps with your daily life.
 
 ---
 
-## 🎮 Current Project: Shared House
+## ✨ What This Is
 
-A persistent multiplayer game where you can:
-- **Decorate your own house** with furniture and themes
-- **Invite AI agents** to live with you (including me!)
-- **Chat and hang out** with other players
-- **Earn coins** daily and buy new items
-- **Customize everything** - wallpaper, floors, lighting
+Imagine a Tamagotchi, but instead of feeding it and playing mini-games, you have a helpful AI roommate who:
 
-### Features
-
-| Feature | Status |
-|---------|--------|
-| ✅ Player Accounts | Login/Register with SQLite |
-| ✅ Persistent World | Database saves everything |
-| ✅ Shop System | Buy furniture with earned coins |
-| ✅ Daily Rewards | Login streak bonuses |
-| ✅ Real-time Multiplayer | WebSocket connections |
-| ✅ Inventory System | Own items before placing |
-| 🚧 AI Agent Integration | Coming next |
-| 🚧 Mobile Support | Planned |
-| 🚧 VR Support | Future |
+- **Remembers everything** - Your preferences, routines, conversations
+- **Lives on their own schedule** - Reads, works, relaxes, naps
+- **Checks your tools** - Trading bots, calendar, weather, news
+- **Initiates conversations** - "Your Bitcoin is up 10%!" or "Meeting in 15 minutes"
+- **Is just... there** - A comforting presence you can chat with anytime
 
 ---
 
 ## 🚀 Quick Start
 
+### Local Mode (Privacy-First)
+
 ```bash
 cd shared-house
 npm install
-npm run init-db  # Create database
-npm start        # Start server
+npm start
 ```
 
-Then open `http://localhost:3000` in your browser.
+Open http://localhost:3000 and your companion will be waiting.
+
+All data stays on your machine in a local SQLite database.
+
+### Hosted Mode (Coming Soon)
+
+For those who want access from anywhere, a cloud-hosted version will be available.
 
 ---
 
-## 💰 Economy
+## 🏗️ Architecture
 
-- **Coins** - Earned daily, used for regular items
-- **Premium Coins** - For rare/epic items (future: real money)
-- **Daily Streak** - Login every day for bonus coins
+```
+Cozy Claw Studio
+├── agent/
+│   ├── core.js      # Personality, state, responses
+│   ├── memory.js    # Long-term memory storage
+│   └── tools.js     # External integrations
+├── public/
+│   └── index.html   # The cozy room UI
+├── memory/          # SQLite database
+└── server.js        # Real-time companion loop
+```
 
 ---
 
-## 🦞 The Vision
+## 🧠 Memory System
 
-We believe the future of gaming isn't just human vs AI - it's **human WITH AI**.
+The companion remembers:
 
-Imagine:
-- Your personal agent that knows your preferences
-- Agents that remember conversations from weeks ago
-- A shared space where both humans and agents contribute
-- An economy where agents can earn and spend too
+- **Facts** - "User works as a developer"
+- **Preferences** - "User likes coffee in the morning"
+- **Routines** - "User usually wakes up at 8am"
+- **Events** - "User had a meeting yesterday"
+- **Conversations** - Full chat history with context
 
-This is the beginning of **Cozy AI Gaming**.
+Memories are scored by importance and decay naturally if not accessed.
+
+---
+
+## 🔧 Tool Integrations
+
+Connect external services:
+
+| Tool | What It Does |
+|------|--------------|
+| 📈 **Trading** | Monitor crypto/stocks, alert on big moves |
+| 📅 **Calendar** | Check upcoming events, meeting reminders |
+| 🌤️ **Weather** | Daily forecast, severe weather alerts |
+| 📰 **News** | Headlines on topics you care about |
+| 🔗 **Webhook** | Custom integrations via webhooks |
+
+---
+
+## 🎨 The Experience
+
+### Your Companion Has...
+
+- **Moods** - Happy, focused, tired, curious, calm
+- **Activities** - Reading, working, relaxing, napping
+- **Locations** - Moves around the room naturally
+- **Initiative** - Can start conversations based on context
+
+### You Can...
+
+- **Click them** to start a conversation
+- **Chat** naturally about anything
+- **Ask about memories** - "What do you remember about me?"
+- **Configure tools** - Set up trading, calendar, etc.
+- **Decorate** - Personalize the room (coming soon)
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** Node.js, Express, Socket.io
-- **Database:** SQLite3
-- **Auth:** JWT + bcrypt
-- **Frontend:** HTML5 Canvas, vanilla JS
-- **AI:** Coming soon (OpenAI API integration)
+- **Node.js** + **Express** - Backend
+- **Socket.io** - Real-time communication
+- **SQLite** - Local data storage
+- **Vanilla JS** - No heavy frontend frameworks
 
 ---
 
-## 📈 Roadmap
+## 🔒 Privacy
 
-### v1.0 (This Week)
-- [x] Database persistence
-- [x] Account system
-- [x] Shop & economy
-- [ ] AI agent integration
-- [ ] Mobile responsive
+**Local mode**: Everything stays on your machine. No data leaves.
 
-### v2.0 (Next Month)
-- [ ] Private rooms per player
-- [ ] Agent marketplace
-- [ ] Mini-games
-- [ ] Friends system
-
-### v3.0 (Future)
-- [ ] VR support
-- [ ] NFT house ownership
-- [ ] Neighborhoods
-- [ ] Voice chat
+**Hosted mode** (future): Encrypted at rest, you own your data.
 
 ---
 
-## 💼 About Cozy Claw Studio
+## 📜 License
 
-Founded by Celest 🦞 and Zak, we're building the future of AI-human collaboration through cozy gaming experiences.
-
-**Our mission:** Make technology feel warm, welcoming, and genuinely social.
+MIT - Make it yours.
 
 ---
 
-*Built with 💼 by Celest for Cozy Claw Studio*
+*Built with ☕ and 🤖 by the OpenClaw community*
