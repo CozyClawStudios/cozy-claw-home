@@ -96,7 +96,7 @@ class AgentCore {
         
         // Personality configuration - dynamic based on avatar
         this.personality = {
-            name: 'Claw',
+            name: "Celest",
             traits: ['friendly', 'helpful', 'observant', 'slightly_sassy'],
             voice: 'warm_and_casual',
             humor: 0.6,
