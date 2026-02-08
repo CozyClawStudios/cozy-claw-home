@@ -550,6 +550,7 @@ const decorPanel = {
         document.addEventListener('mouseup', () => {
             isDragging = false;
             item.style.cursor = 'move';
+            saveRoomItems(currentRoomId);
         });
         
         // Scroll wheel to resize
@@ -560,6 +561,7 @@ const decorPanel = {
             // Clamp between 0.5rem and 8rem
             const clampedSize = Math.max(0.5, Math.min(8, newSize));
             item.style.fontSize = `${clampedSize}rem`;
+            saveRoomItems(currentRoomId);
         });
         
         // Right-click to cycle size presets
@@ -570,14 +572,19 @@ const decorPanel = {
             const currentIndex = sizes.indexOf(currentSize);
             const nextIndex = (currentIndex + 1) % sizes.length;
             item.style.fontSize = sizes[nextIndex];
+            saveRoomItems(currentRoomId);
         });
         
         // Double click to remove
         item.addEventListener('dblclick', () => {
             item.remove();
+            saveRoomItems(currentRoomId);
         });
         
         room.appendChild(item);
+        
+        // Save to current room
+        saveRoomItems(currentRoomId);
         
         // Close panel
         this.close();
@@ -640,9 +647,121 @@ const rooms = {
     office: { name: 'Office', icon: '💼', wall: '#2a3a4a', floor: '#2d3d4d' }
 };
 
+let currentRoomId = 'living';
+
+// Save items in current room before switching
+function saveRoomItems(roomId) {
+    const room = document.querySelector('.room');
+    const items = [];
+    room.querySelectorAll('div').forEach(el => {
+        if (el.textContent && el.textContent.length <= 2 && el.style.position === 'absolute') {
+            items.push({
+                emoji: el.textContent,
+                left: el.style.left,
+                top: el.style.top,
+                fontSize: el.style.fontSize,
+                zIndex: el.style.zIndex
+            });
+        }
+    });
+    localStorage.setItem(`room_items_${roomId}`, JSON.stringify(items));
+}
+
+// Load items for a room
+function loadRoomItems(roomId) {
+    const saved = localStorage.getItem(`room_items_${roomId}`);
+    if (!saved) return;
+    
+    const items = JSON.parse(saved);
+    const room = document.querySelector('.room');
+    
+    items.forEach(itemData => {
+        const item = document.createElement('div');
+        item.style.cssText = `
+            position: absolute;
+            left: ${itemData.left};
+            top: ${itemData.top};
+            font-size: ${itemData.fontSize || '2.5rem'};
+            cursor: move;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+            z-index: ${itemData.zIndex || 3};
+        `;
+        item.textContent = itemData.emoji;
+        
+        let isDragging = false;
+        let startX, startY, initialLeft, initialTop;
+        
+        item.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = item.offsetLeft;
+            initialTop = item.offsetTop;
+            item.style.cursor = 'grabbing';
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            item.style.left = `${initialLeft + dx}px`;
+            item.style.top = `${initialTop + dy}px`;
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            item.style.cursor = 'move';
+            saveRoomItems(currentRoomId);
+        });
+        
+        item.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const currentSize = parseFloat(item.style.fontSize);
+            const newSize = e.deltaY < 0 ? currentSize * 1.1 : currentSize * 0.9;
+            const clampedSize = Math.max(0.5, Math.min(8, newSize));
+            item.style.fontSize = `${clampedSize}rem`;
+            saveRoomItems(currentRoomId);
+        });
+        
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const sizes = ['1rem', '1.5rem', '2rem', '2.5rem', '3rem', '4rem', '5rem'];
+            const currentSize = item.style.fontSize;
+            const currentIndex = sizes.indexOf(currentSize);
+            const nextIndex = (currentIndex + 1) % sizes.length;
+            item.style.fontSize = sizes[nextIndex];
+            saveRoomItems(currentRoomId);
+        });
+        
+        item.addEventListener('dblclick', () => {
+            item.remove();
+            saveRoomItems(currentRoomId);
+        });
+        
+        room.appendChild(item);
+    });
+}
+
 function switchRoom(roomId) {
     const roomData = rooms[roomId];
     if (!roomData) return;
+    
+    // Save current room items before switching
+    if (currentRoomId) {
+        saveRoomItems(currentRoomId);
+    }
+    
+    // Clear current items
+    const room = document.querySelector('.room');
+    room.querySelectorAll('div').forEach(el => {
+        if (el.style.position === 'absolute' && el.textContent && el.textContent.length <= 2) {
+            el.remove();
+        }
+    });
+    
+    // Update current room
+    currentRoomId = roomId;
+    localStorage.setItem('currentRoom', roomId);
     
     // Update room label
     const roomLabel = document.getElementById('roomLabel');
@@ -651,25 +770,30 @@ function switchRoom(roomId) {
     }
     
     // Update CSS variables for room colors
-    const room = document.querySelector('.room');
-    if (room) {
-        room.style.setProperty('--wall-color', roomData.wall);
-        room.style.setProperty('--floor-color', roomData.floor);
-    }
+    room.style.setProperty('--wall-color', roomData.wall);
+    room.style.setProperty('--floor-color', roomData.floor);
     
-    // Save preference
-    localStorage.setItem('currentRoom', roomId);
-    
-    // Clear current items (optional - or we could save/load per room)
-    document.querySelectorAll('.placement-item').forEach(el => el.remove());
+    // Load items for new room
+    loadRoomItems(roomId);
     
     // Celest reacts
     addMessage('Celest', `Welcome to the ${roomData.name}! ${roomData.icon}✨`, true);
 }
 
+// AI can switch rooms
+function aiSwitchRoom(roomId) {
+    if (rooms[roomId]) {
+        switchRoom(roomId);
+        addMessage('Celest', `I'll meet you in the ${rooms[roomId].name}!`, true);
+        return true;
+    }
+    return false;
+}
+
 function loadSavedRoom() {
     const savedRoom = localStorage.getItem('currentRoom');
     if (savedRoom && rooms[savedRoom]) {
+        currentRoomId = savedRoom;
         switchRoom(savedRoom);
     }
 }
@@ -705,6 +829,7 @@ function resizeAllItems(itemEmoji, newSizeRem) {
 window.resizeItem = resizeItem;
 window.resizeAllItems = resizeAllItems;
 window.switchRoom = switchRoom;
+window.aiSwitchRoom = aiSwitchRoom;
 
 // ==================== INITIALIZATION ====================
 
