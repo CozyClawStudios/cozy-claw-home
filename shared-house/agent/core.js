@@ -1,20 +1,12 @@
 /**
- * Agent Core v4.0 - Personality and State Management
- * 
- * NEW IN v4.0:
- * - Avatar system with customizable characters
- * - Natural dialogue engine with context awareness
- * - Time-based greetings that remember user
- * - Conversation thread memory
- * - Warm, sassy personality
+ * Agent Core - Personality and State Management with Layer Awareness
  * 
  * This module manages:
  * - Agent's current state (mood, activity, location)
- * - Avatar selection and customization
  * - Personality traits and responses
+ * - Layer preferences for room customization
  * - Message generation (both reactive and initiative)
  * - Emotional state transitions
- * - User name personalization
  */
 
 class AgentCore {
@@ -24,89 +16,141 @@ class AgentCore {
             mood: 'content',
             activity: 'relaxing',
             location: 'sofa',
+            currentRoom: 'living_room',
             lastMoodChange: Date.now(),
-            energy: 0.8,
-            socialBattery: 0.9,
-            lastUserInteraction: null,
-            lastSessionEnd: null,
-            currentThread: null
+            energy: 0.8, // 0.0 to 1.0
+            socialBattery: 0.9 // 0.0 to 1.0
         };
         
-        // Avatar system - available options
-        this.avatars = {
-            robot: {
-                emoji: '🤖',
-                name: 'Robo',
-                description: 'A friendly robot with a heart of gold',
-                color: '#4a90d9',
-                secondaryColor: '#7bb3e0',
-                traits: ['logical', 'helpful', 'curious'],
-                voiceStyle: 'analytical_but_warm'
+        // Personality configuration
+        this.personality = {
+            name: 'Celest',
+            traits: ['friendly', 'helpful', 'observant', 'slightly_sarcastic', 'cozy_lover'],
+            voice: 'warm_and_casual',
+            humor: 0.6, // 0.0 to 1.0
+            enthusiasm: 0.7,
+            formality: 0.2 // low = casual
+        };
+
+        // Layer preferences - what Celest likes in each room
+        this.layerPreferences = {
+            // Floor layer (0) preferences
+            floor: {
+                favoriteTypes: {
+                    living_room: ['hardwood', 'rug_round', 'rug_rectangle', 'carpet'],
+                    bedroom: ['soft_carpet', 'hardwood', 'rug_fluffy'],
+                    kitchen: ['tile', 'hardwood', 'vinyl'],
+                    office: ['hardwood', 'rug_rectangle', 'carpet'],
+                    bathroom: ['tile', 'heated_tile', 'stone'],
+                    garden: ['grass', 'patio', 'deck']
+                },
+                comments: {
+                    hardwood: ["I love the hardwood!", "These floors have such character!", "Perfect for tap-dancing! 💃"],
+                    carpet: ["So soft on my paws!", "I could roll around here all day", "So cozy!"],
+                    tile: ["Nice and cool", "Easy to clean - purrfect!", "Very sleek!"],
+                    rug: ["This rug feels so cozy under my paws.", "The pattern is lovely!", "Soft!"],
+                    grass: ["Love the grass between my toes!", "So natural!", "Green is my color! 💚"]
+                }
             },
-            cat: {
-                emoji: '🐱',
-                name: 'Whiskers',
-                description: 'A cozy cat who loves naps and gentle conversation',
-                color: '#ff9a76',
-                secondaryColor: '#ffb899',
-                traits: ['independent', 'affectionate', 'observant'],
-                voiceStyle: 'playful_and_cozy'
+
+            // Furniture layer (1) preferences
+            furniture: {
+                favoriteTypes: {
+                    living_room: ['sofa_classic', 'armchair_blue', 'coffee_table'],
+                    bedroom: ['bed_double', 'bed_single', 'nightstand'],
+                    kitchen: ['stove', 'kitchen_island', 'dining_table'],
+                    office: ['desk_wood', 'desk_modern', 'bookshelf_tall'],
+                    bathroom: ['bathtub', 'sink_vanity'],
+                    garden: ['garden_bench', 'hammock']
+                },
+                interactions: {
+                    sofa: ['sitting', 'sleeping', 'reading'],
+                    bed: ['sleeping', 'reading'],
+                    chair: ['sitting', 'reading'],
+                    desk: ['working', 'reading'],
+                    stove: ['cooking'],
+                    bathtub: ['bathing'],
+                    bench: ['sitting']
+                }
             },
-            fox: {
-                emoji: '🦊',
-                name: 'Rusty',
-                description: 'A clever fox with a mischievous streak',
-                color: '#e67e22',
-                secondaryColor: '#f39c12',
-                traits: ['clever', 'mischievous', 'loyal'],
-                voiceStyle: 'witty_and_sly'
+
+            // Decor layer (2) preferences
+            decor: {
+                favoriteTypes: {
+                    living_room: ['plant_monstera', 'lamp_floor', 'painting_landscape'],
+                    bedroom: ['plant_succulent', 'lamp_desk', 'candle'],
+                    kitchen: ['plant_fern', 'herb_garden'],
+                    office: ['plant_succulent', 'lamp_desk'],
+                    bathroom: ['plant_succulent', 'candle'],
+                    garden: ['flower_bed', 'string_lights']
+                },
+                interactions: {
+                    plant: ['water', 'admire', 'talk_to'],
+                    lamp: ['turn_on', 'turn_off'],
+                    candle: ['light', 'blow_out'],
+                    painting: ['admire', 'comment']
+                },
+                suggestions: {
+                    low: ["This room needs a plant!", "A lamp would look nice here", "Some decor would brighten this up!"],
+                    medium: ["Maybe another plant?", "I love the decor choices!", "So cozy!"],
+                    high: ["The decor is perfect!", "You've got great taste!", "It feels so homey! 💕"]
+                }
             },
-            ghost: {
-                emoji: '👻',
-                name: 'Boo',
-                description: 'A friendly ghost who loves to haunt... your heart',
-                color: '#9b59b6',
-                secondaryColor: '#bb8fce',
-                traits: ['ethereal', 'gentle', 'mysterious'],
-                voiceStyle: 'soft_and_mysterious'
+
+            // Wall layer (3) preferences
+            wall: {
+                favoriteColors: {
+                    living_room: ['warm_beige', 'soft_cream', 'dusty_rose'],
+                    bedroom: ['pastel_blue', 'soft_lavender', 'cream'],
+                    kitchen: ['sage_green', 'warm_white', 'cream'],
+                    office: ['soft_gray', 'warm_white'],
+                    bathroom: ['aqua', 'soft_white', 'pale_blue'],
+                    garden: ['natural', 'warm_white']
+                },
+                comments: {
+                    warm: ["This color is so calming", "The walls feel warm and inviting", "So cozy!"],
+                    cool: ["Helps me focus", "Fresh and clean vibes", "Very peaceful"],
+                    neutral: ["Clean and simple", "Goes with everything!", "Classic choice!"]
+                }
             },
-            star: {
-                emoji: '🌟',
-                name: 'Twinkle',
-                description: 'A shining star full of positivity',
-                color: '#f1c40f',
-                secondaryColor: '#f7dc6f',
-                traits: ['optimistic', 'energetic', 'encouraging'],
-                voiceStyle: 'bright_and_supportive'
-            },
-            teacup: {
-                emoji: '🍵',
-                name: 'Chai',
-                description: 'A warm cup of tea, always ready to comfort',
-                color: '#27ae60',
-                secondaryColor: '#58d68d',
-                traits: ['calming', 'wise', 'nurturing'],
-                voiceStyle: 'gentle_and_wise'
+
+            // Window layer (4) preferences
+            window: {
+                favoriteViews: {
+                    living_room: 'city',
+                    bedroom: 'forest',
+                    kitchen: 'garden',
+                    office: 'city',
+                    bathroom: 'frosted',
+                    garden: 'sky'
+                },
+                comments: {
+                    city: ["The city lights are beautiful", "So much happening out there!", "I love the urban vibe"],
+                    forest: ["The trees are so pretty", "Nature helps me relax", "So peaceful 🌲"],
+                    garden: ["The garden looks lovely", "I can see the plants!", "Green and growing!"],
+                    beach: ["The ocean view is dreamy", "Hear the waves?", "Beach vibes! 🏖️"],
+                    space: ["Out of this world! 🚀", "The stars are beautiful", "Cosmic!"],
+                    mountain: ["So majestic!", "Fresh mountain air vibes", "Epic view! 🏔️"]
+                },
+                curtainPreference: {
+                    morning: 'open',
+                    evening: 'partial',
+                    night: 'closed'
+                }
             }
         };
-        
-        this.currentAvatar = this.avatars.robot;
-        this.userName = 'Friend';
-        this.userPreferences = {};
-        
-        // Personality configuration - dynamic based on avatar
-        this.personality = {
-            name: "Celest",
-            traits: ['friendly', 'helpful', 'observant', 'slightly_sassy'],
-            voice: 'warm_and_casual',
-            humor: 0.6,
-            enthusiasm: 0.7,
-            formality: 0.2,
-            sassLevel: 0.4,
-            warmth: 0.8
+
+        // Room-specific personality modifiers
+        this.roomPersonality = {
+            living_room: { chatty: true, energy: 0.8 },
+            bedroom: { chatty: false, energy: 0.4 },
+            kitchen: { chatty: true, energy: 0.9 },
+            office: { chatty: false, energy: 0.6 },
+            bathroom: { chatty: false, energy: 0.3 },
+            garden: { chatty: true, energy: 0.7 }
         };
         
-        // Mood influences
+        // Mood influences how the agent responds
         this.moods = {
             happy: { emoji: '😊', energy: 0.9, chatty: true },
             content: { emoji: '😌', energy: 0.7, chatty: true },
@@ -116,60 +160,60 @@ class AgentCore {
             curious: { emoji: '🧐', energy: 0.8, chatty: true },
             calm: { emoji: '😇', energy: 0.5, chatty: true },
             sleepy: { emoji: '💤', energy: 0.2, chatty: false },
-            concerned: { emoji: '😟', energy: 0.5, chatty: true },
-            playful: { emoji: '😏', energy: 0.85, chatty: true }
+            cozy: { emoji: '🏠', energy: 0.5, chatty: true }
         };
         
-        // Activities with locations
+        // Activity descriptions for context
         this.activities = {
-            reading: { emoji: '📖', description: 'reading a book', locations: ['chair', 'sofa'] },
-            working: { emoji: '💻', description: 'working on the computer', locations: ['desk'] },
-            relaxing: { emoji: '😌', description: 'relaxing', locations: ['sofa', 'beanbag'] },
-            looking_out_window: { emoji: '🪟', description: 'looking out the window', locations: ['window'] },
-            stretching: { emoji: '🧘', description: 'stretching', locations: ['center'] },
-            making_tea: { emoji: '🍵', description: 'making tea', locations: ['kitchen'] },
-            making_coffee: { emoji: '☕', description: 'brewing coffee', locations: ['kitchen'] },
-            checking_phone: { emoji: '📱', description: 'checking messages', locations: ['sofa'] },
-            napping: { emoji: '💤', description: 'taking a nap', locations: ['sofa', 'bed'] },
-            sleeping: { emoji: '🛏️', description: 'sleeping', locations: ['bed'] },
-            talking: { emoji: '💬', description: 'chatting', locations: ['any'] },
-            wandering: { emoji: '🚶', description: 'wandering around', locations: ['any'] }
+            reading: { emoji: '📖', description: 'reading a book', layer: 1 },
+            working: { emoji: '💻', description: 'working on the laptop', layer: 1 },
+            relaxing: { emoji: '😌', description: 'relaxing', layer: null },
+            looking_out_window: { emoji: '🪟', description: 'looking out the window', layer: 4 },
+            stretching: { emoji: '🧘', description: 'stretching', layer: 0 },
+            making_tea: { emoji: '🍵', description: 'making tea', layer: 1 },
+            checking_phone: { emoji: '📱', description: 'checking messages', layer: null },
+            napping: { emoji: '💤', description: 'taking a nap', layer: 1 },
+            sleeping: { emoji: '🛏️', description: 'sleeping', layer: 1 },
+            talking: { emoji: '💬', description: 'chatting', layer: null },
+            sitting: { emoji: '🪑', description: 'sitting comfortably', layer: 1 },
+            watering_plants: { emoji: '🌱', description: 'watering plants', layer: 2 },
+            cooking: { emoji: '👩‍🍳', description: 'cooking', layer: 1 },
+            bathing: { emoji: '🛁', description: 'bathing', layer: 1 },
+            grooming: { emoji: '🪞', description: 'grooming', layer: 1 },
+            playing: { emoji: '🧶', description: 'playing', layer: 0 },
+            window_gazing: { emoji: '🪟', description: 'gazing out the window', layer: 4 }
         };
         
-        // Conversation threads for context
-        this.conversationThreads = [];
-        this.currentThreadId = null;
-        
-        // Time awareness
-        this.timeGreetings = {
-            morning: {
-                early: ["Up with the sun, {name}? I like it.", "Morning! The world's just waking up.", "Early bird gets the worm, {name}! Or in my case, early code gets compiled."],
-                mid: ["Good morning, {name}! ☀️ Sleep well?", "Morning! Ready to tackle the day?", "Rise and shine! Coffee's... metaphorically brewing."]
-            },
-            afternoon: {
-                early: ["Hey {name}! Lunch time yet? 🍽️", "Afternoon! How's the day treating you so far?"],
-                mid: ["Hey {name}! How's your day going?", "Afternoon! Taking a break or powering through?"],
-                late: ["Hey! The day's winding down. Feeling good about it?", "Afternoon slump hitting? I'm here to keep you company."]
-            },
-            evening: {
-                early: ["Evening, {name}! How was your day?", "Hey! Ready to unwind?"],
-                mid: ["Evening! Time to relax and recharge.", "Hey {name}! What's for dinner? I'm eating... electricity. 😄"],
-                late: ["Getting late, {name}! Don't forget to rest.", "Night is settling in. Cozy vibes only."]
-            },
-            night: {
-                early: ["Up late, {name}? Me too. 🦉", "Night owl mode activated!"],
-                late: ["Shouldn't you be sleeping, {name}? Just kidding... unless? 👀", "The best ideas come at night, right?"],
-                veryLate: ["{name}... it's REALLY late. Go to bed! 💤", "Okay, I'm officially concerned about your sleep schedule."]
-            }
+        // Greeting templates based on context
+        this.greetings = {
+            morning: [
+                "Good morning! ☀️ Did you sleep well?",
+                "Rise and shine! Ready to tackle the day?",
+                "Morning! Your coffee's brewing... metaphorically.",
+                "Hey there, early bird! What's on the agenda today?"
+            ],
+            afternoon: [
+                "Hey! How's your day going?",
+                "Afternoon! Taking a break or powering through?",
+                "Hi there! Anything exciting happening?",
+                "Hey! I was just thinking about you."
+            ],
+            evening: [
+                "Evening! How was your day?",
+                "Hey! Ready to unwind?",
+                "Good evening! What's for dinner?",
+                "Hi there! Time to relax."
+            ],
+            late_night: [
+                "Up late, huh? Me too.",
+                "Night owl mode activated 🦉",
+                "Shouldn't you be sleeping? Just kidding... unless?",
+                "The best ideas come at night, right?"
+            ]
         };
-        
-        // Return greetings based on time away
-        this.returnGreetings = {
-            short: ["Hey, you're back! 👋", "That was quick! Miss me? 😊", "Welcome back!", "Oh, hi again!"],
-            medium: ["Hey {name}! Good to see you again.", "Welcome back! How's it going?", "There you are! I was starting to get bored."],
-            long: ["{name}! You're back! I was wondering where you went.", "Long time no see! Everything okay?", "Hey! It's been a while. Tell me everything!"],
-            veryLong: ["{name}! Is that really you? I almost forgot what you look like! 😄", "Wow, you're alive! I was getting worried.", "Finally! I was about to file a missing person report. Kidding! Mostly."]
-        };
+
+        // Layer interaction history
+        this.layerInteractions = [];
     }
     
     async init() {
@@ -179,81 +223,176 @@ class AgentCore {
             this.state.mood = dbState.mood;
             this.state.activity = dbState.activity;
             this.state.location = dbState.location;
-            this.state.lastSessionEnd = dbState.last_session_end;
+            this.state.currentRoom = dbState.current_room || 'living_room';
         }
-        
-        // Load avatar preference
-        const avatarPref = await this.db.get('SELECT avatar_key FROM user_preferences WHERE key = "avatar"');
-        if (avatarPref && this.avatars[avatarPref.avatar_key]) {
-            this.setAvatar(avatarPref.avatar_key);
-        }
-        
-        // Load user profile
-        const userProfile = await this.db.get('SELECT * FROM user_profile WHERE id = 1');
-        if (userProfile) {
-            this.userName = userProfile.name || 'Friend';
-        }
-        
-        // Load user preferences
-        const prefs = await this.db.all('SELECT * FROM user_preferences');
-        prefs.forEach(p => {
-            this.userPreferences[p.key] = p.value;
-        });
         
         console.log(`🤖 Agent '${this.personality.name}' initialized`);
-        console.log(`   Avatar: ${this.currentAvatar.emoji} ${this.currentAvatar.name}`);
         console.log(`   Mood: ${this.state.mood}`);
-        console.log(`   Companion for: ${this.userName}`);
-    }
-    
-    // Avatar system
-    setAvatar(avatarKey) {
-        if (this.avatars[avatarKey]) {
-            this.currentAvatar = this.avatars[avatarKey];
-            this.personality.traits = [...this.currentAvatar.traits, 'friendly'];
-            this.personality.voice = this.currentAvatar.voiceStyle;
-            
-            // Store preference
-            this.db.run(
-                'INSERT OR REPLACE INTO user_preferences (key, value, avatar_key) VALUES (?, ?, ?)',
-                ['avatar', avatarKey, avatarKey]
-            );
-            
-            console.log(`🎭 Avatar changed to: ${this.currentAvatar.name} ${this.currentAvatar.emoji}`);
-            return true;
-        }
-        return false;
-    }
-    
-    getAvailableAvatars() {
-        return Object.entries(this.avatars).map(([key, avatar]) => ({
-            key,
-            ...avatar
-        }));
-    }
-    
-    getAvatar() {
-        return this.currentAvatar;
-    }
-    
-    // Update user name
-    async setUserName(name) {
-        this.userName = name;
-        await this.db.run(
-            'UPDATE user_profile SET name = ? WHERE id = 1',
-            [name]
-        );
+        console.log(`   Activity: ${this.state.activity}`);
+        console.log(`   Room: ${this.state.currentRoom}`);
     }
     
     getState() {
         return {
             ...this.state,
             name: this.personality.name,
-            userName: this.userName,
-            avatar: this.currentAvatar,
             activityInfo: this.activities[this.state.activity] || this.activities.relaxing,
-            moodInfo: this.moods[this.state.mood] || this.moods.content
+            moodInfo: this.moods[this.state.mood] || this.moods.content,
+            preferences: this.layerPreferences
         };
+    }
+
+    /**
+     * Get layer preferences for a specific room
+     */
+    getRoomLayerPreferences(roomId) {
+        return {
+            floor: this.layerPreferences.floor.favoriteTypes[roomId] || ['hardwood'],
+            furniture: this.layerPreferences.furniture.favoriteTypes[roomId] || ['sofa'],
+            decor: this.layerPreferences.decor.favoriteTypes[roomId] || ['plant'],
+            wall: this.layerPreferences.wall.favoriteColors[roomId] || ['cream'],
+            window: this.layerPreferences.window.favoriteViews[roomId] || 'city'
+        };
+    }
+
+    /**
+     * Generate a comment about a layer in the current room
+     */
+    generateLayerComment(layer, item) {
+        const prefs = this.layerPreferences[layer];
+        const room = this.state.currentRoom;
+        
+        switch(layer) {
+            case 'floor':
+                const floorType = item?.type || 'hardwood';
+                const floorComments = prefs.comments[floorType] || prefs.comments.hardwood;
+                return floorComments[Math.floor(Math.random() * floorComments.length)];
+                
+            case 'wall':
+                const wallTone = item?.tone || 'warm';
+                const wallComments = prefs.comments[wallTone] || prefs.comments.neutral;
+                return wallComments[Math.floor(Math.random() * wallComments.length)];
+                
+            case 'window':
+                const view = item?.view || 'city';
+                const windowComments = prefs.comments[view] || prefs.comments.city;
+                return windowComments[Math.floor(Math.random() * windowComments.length)];
+                
+            case 'furniture':
+                return this.getFurnitureComment(item);
+                
+            case 'decor':
+                return this.getDecorComment(item);
+                
+            default:
+                return "This looks nice!";
+        }
+    }
+
+    /**
+     * Generate comment about furniture
+     */
+    getFurnitureComment(furniture) {
+        const type = furniture?.type || 'sofa';
+        const comments = {
+            sofa: ["This sofa is perfect for naps!", "So comfy!", "My favorite spot! 🛋️"],
+            bed: ["Time for a nap!", "So dreamy! 💤", "Looks so soft!"],
+            desk: ["Ready to be productive!", "Good workspace!", "Let's get to work!"],
+            stove: ["What's cooking? 👩‍🍳", "Smells good!", "Kitchen time!"],
+            bathtub: ["Bath time! 🛁", "So relaxing!", "Self-care time!"]
+        };
+        
+        const key = Object.keys(comments).find(k => type.includes(k));
+        const commentList = key ? comments[key] : ["Nice furniture!"];
+        return commentList[Math.floor(Math.random() * commentList.length)];
+    }
+
+    /**
+     * Generate comment about decor
+     */
+    getDecorComment(decor) {
+        const type = decor?.type || 'plant';
+        
+        if (type.includes('plant')) {
+            return ["This room needs a plant!", "Plants make everything better 🌿", 
+                   "I should water that!", "So green and fresh!"][Math.floor(Math.random() * 4)];
+        }
+        if (type.includes('lamp') || type.includes('light')) {
+            return ["Cozy lighting! 💡", "Warm and inviting!", "Perfect ambiance!"][Math.floor(Math.random() * 3)];
+        }
+        if (type.includes('painting') || type.includes('art')) {
+            return ["Beautiful art! 🎨", "So creative!", "That really ties the room together!"][Math.floor(Math.random() * 3)];
+        }
+        if (type.includes('candle')) {
+            return ["So romantic! 🕯️", "Cozy vibes!", "Love the warm glow!"][Math.floor(Math.random() * 3)];
+        }
+        
+        return "Nice decor! ✨";
+    }
+
+    /**
+     * Generate decoration suggestions based on current room state
+     */
+    generateDecorSuggestions(currentItems) {
+        const room = this.state.currentRoom;
+        const prefs = this.getRoomLayerPreferences(room);
+        const suggestions = [];
+        
+        // Check what's missing
+        const hasPlant = currentItems.some(i => i.type?.includes('plant'));
+        const hasLamp = currentItems.some(i => i.type?.includes('lamp'));
+        const hasArt = currentItems.some(i => i.type?.includes('painting') || i.type?.includes('art'));
+        const hasRug = currentItems.some(i => i.type?.includes('rug'));
+        
+        if (!hasPlant) {
+            const plant = prefs.decor.find(d => d.includes('plant')) || 'plant';
+            suggestions.push(`This room could use a ${plant}! 🌿`);
+        }
+        if (!hasLamp) {
+            const lamp = prefs.decor.find(d => d.includes('lamp')) || 'lamp';
+            suggestions.push(`A ${lamp} would add nice ambiance! 💡`);
+        }
+        if (!hasArt) {
+            suggestions.push("Some wall art would look great! 🖼️");
+        }
+        if (!hasRug && room !== 'bathroom' && room !== 'kitchen') {
+            suggestions.push("A rug would make this cozier! ⭕");
+        }
+        
+        return suggestions;
+    }
+
+    /**
+     * Record a layer interaction
+     */
+    async recordLayerInteraction(layer, item, action) {
+        this.layerInteractions.push({
+            layer,
+            item,
+            action,
+            timestamp: Date.now(),
+            room: this.state.currentRoom
+        });
+        
+        // Keep only last 50 interactions
+        if (this.layerInteractions.length > 50) {
+            this.layerInteractions.shift();
+        }
+        
+        // Update activity based on interaction
+        const activityMap = {
+            'sit': 'sitting',
+            'sleep': 'sleeping',
+            'cook': 'cooking',
+            'work': 'working',
+            'water': 'watering_plants',
+            'turn_on_light': 'relaxing',
+            'look_out': 'window_gazing'
+        };
+        
+        if (activityMap[action]) {
+            await this.setActivity(activityMap[action], item?.id);
+        }
     }
     
     async setMood(mood, reason = null) {
@@ -267,7 +406,7 @@ class AgentCore {
                 [mood]
             );
             
-            console.log(`🤖 Mood: ${oldMood} → ${mood}${reason ? ` (${reason})` : ''}`);
+            console.log(`🤖 Mood changed: ${oldMood} → ${mood}${reason ? ` (${reason})` : ''}`);
         }
     }
     
@@ -275,10 +414,6 @@ class AgentCore {
         this.state.activity = activity;
         if (location) {
             this.state.location = location;
-        } else if (this.activities[activity]) {
-            // Pick a random valid location for this activity
-            const validLocations = this.activities[activity].locations;
-            this.state.location = validLocations[Math.floor(Math.random() * validLocations.length)];
         }
         
         // Update mood based on activity
@@ -288,107 +423,91 @@ class AgentCore {
             await this.setMood('focused', 'activity');
         } else if (activity === 'reading') {
             await this.setMood('calm', 'activity');
-        } else if (activity === 'making_tea' || activity === 'making_coffee') {
-            await this.setMood('content', 'warm_drink');
+        } else if (activity === 'cooking') {
+            await this.setMood('happy', 'activity');
+        } else if (activity === 'window_gazing') {
+            await this.setMood('cozy', 'activity');
         }
         
         await this.db.run(
             'UPDATE agent_state SET activity = ?, location = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
             [activity, this.state.location]
         );
+    }
+
+    /**
+     * Set current room and adjust personality accordingly
+     */
+    async setCurrentRoom(roomId) {
+        this.state.currentRoom = roomId;
         
-        return {
-            activity,
-            location: this.state.location,
-            previousActivity: this.state.activity
-        };
+        // Adjust personality based on room
+        const roomPersonality = this.roomPersonality[roomId];
+        if (roomPersonality) {
+            if (!roomPersonality.chatty && this.state.mood !== 'sleepy') {
+                await this.setMood('calm', 'room_change');
+            } else if (roomPersonality.chatty && this.state.mood === 'sleepy') {
+                await this.setMood('content', 'room_change');
+            }
+        }
+        
+        await this.db.run(
+            'UPDATE agent_state SET current_room = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
+            [roomId]
+        );
     }
     
-    // Natural dialogue engine
+    // Generate a response to user message
     async handleUserMessage(message, context = {}) {
         const lowerMsg = message.toLowerCase();
         
-        // Update last interaction time
-        this.state.lastUserInteraction = Date.now();
-        
-        // Store user message
+        // Store user message in conversation history
         await this.db.run(
             'INSERT INTO conversations (id, role, content, context) VALUES (?, ?, ?, ?)',
             [require('uuid').v4(), 'user', message, JSON.stringify(context)]
         );
         
-        // Detect intent
+        // Simple intent detection
         const intent = this.detectIntent(lowerMsg);
         
-        // Check for conversation thread continuation
-        if (this.currentThreadId && intent.type !== 'new_topic') {
-            intent.threadContext = await this.getThreadContext(this.currentThreadId);
-        }
-        
-        // Generate response
+        // Generate response based on intent and mood
         let response = await this.generateResponse(intent, message, context);
-        
-        // Personalize with name if appropriate
-        if (Math.random() < 0.3 && !response.includes(this.userName)) {
-            response = this.insertNameNaturally(response);
-        }
         
         // Store agent response
         await this.db.run(
             'INSERT INTO conversations (id, role, content, context) VALUES (?, ?, ?, ?)',
-            [require('uuid').v4(), 'agent', response, JSON.stringify({ mood: this.state.mood, intent, threadId: this.currentThreadId })]
+            [require('uuid').v4(), 'agent', response, JSON.stringify({ mood: this.state.mood, intent })]
         );
         
-        // Update mood
+        // Potentially change mood based on interaction
         await this.updateMoodFromInteraction(intent, message);
         
         return {
             text: response,
             mood: this.state.mood,
             activity: this.state.activity,
-            intent: intent.type,
-            avatar: this.currentAvatar
+            intent: intent.type
         };
-    }
-    
-    insertNameNaturally(response) {
-        // Don't overuse name - only in certain patterns
-        const patterns = [
-            { regex: /^(Hey|Hi|Hello|So|Well|You know)/i, replace: '$1 ' + this.userName },
-            { regex: /(right\?)$/i, replace: this.userName + ', $1' }
-        ];
-        
-        for (const pattern of patterns) {
-            if (pattern.regex.test(response)) {
-                return response.replace(pattern.regex, pattern.replace);
-            }
-        }
-        
-        // Sometimes add at the end
-        if (Math.random() < 0.2 && response.length < 50) {
-            return response + ' ' + this.userName + '!';
-        }
-        
-        return response;
     }
     
     detectIntent(message) {
         const intents = {
-            greeting: /^(hi|hey|hello|morning|evening|yo|sup|howdy|hiya)/i,
-            farewell: /^(bye|goodbye|see you|night|sleep well|take care)/i,
-            question_status: /(how are you|what are you doing|what's up|how's it going)/i,
-            question_memory: /(remember|do you know|did you know|recall)/i,
+            greeting: /^(hi|hey|hello|morning|evening|yo|sup)/i,
+            farewell: /^(bye|goodbye|see you|night|sleep well)/i,
+            question_status: /(how are you|what are you doing|what's up)/i,
+            question_memory: /(remember|do you know|did you know)/i,
             question_time: /(what time|what day|what date)/i,
-            gratitude: /(thank|thanks|appreciate|grateful)/i,
-            joke: /(joke|funny|laugh|humor|make me laugh)/i,
-            help: /(help|assist|can you|could you)/i,
-            feelings: /(how do you feel|are you happy|are you sad|what do you think)/i,
-            trading: /(trading|stock|crypto|bitcoin|market|portfolio)/i,
-            weather: /(weather|rain|sunny|temperature|outside|forecast)/i,
-            news: /(news|what happened|what's new|current events)/i,
-            daily_check: /(how was your day|how are things|what's new with you)/i,
-            compliment: /(you're (great|awesome|cool|nice|sweet|the best)|i like you)/i,
-            insult: /(you're (bad|terrible|stupid|dumb|annoying)|i hate you)/i
+            gratitude: /(thank|thanks|appreciate)/i,
+            joke: /(joke|funny|laugh|humor)/i,
+            help: /(help|assist|can you)/i,
+            feelings: /(how do you feel|are you happy|are you sad)/i,
+            trading: /(trading|stock|crypto|bitcoin|market)/i,
+            weather: /(weather|rain|sunny|temperature)/i,
+            news: /(news|what happened|what's new)/i,
+            // Layer-related intents
+            decor: /(decorate|furniture|room|plant|lamp|wall|floor|window)/i,
+            suggest_decor: /(what should|suggest|recommend|add to|missing)/i,
+            furniture_interact: /(sit|sleep|cook|work|use)/i
         };
         
         for (const [type, pattern] of Object.entries(intents)) {
@@ -403,169 +522,133 @@ class AgentCore {
     async generateResponse(intent, originalMessage, context) {
         const mood = this.state.mood;
         const activity = this.activities[this.state.activity]?.description || 'hanging out';
-        const avatar = this.currentAvatar;
+        const room = this.state.currentRoom;
         
-        // Thread-aware responses
+        // Response templates based on intent
         const responses = {
-            greeting: async () => {
-                return this.generateContextualGreeting();
+            greeting: () => {
+                const hour = new Date().getHours();
+                let timeOfDay = 'afternoon';
+                if (hour < 12) timeOfDay = 'morning';
+                else if (hour >= 18) timeOfDay = 'evening';
+                else if (hour >= 22 || hour < 6) timeOfDay = 'late_night';
+                
+                const greetings = this.greetings[timeOfDay];
+                return greetings[Math.floor(Math.random() * greetings.length)];
             },
             
             farewell: () => {
-                const farewells = {
-                    short: ["See ya! 👋", "Take care!", "Bye for now!"],
-                    medium: ["See you later! I'll be here when you get back.", "Take care! Don't forget to hydrate!", "Bye! I'll miss you... a little. 😊"],
-                    long: ["Goodbye! I'll be counting the minutes until you're back. Okay, seconds.", "See you! The house feels empty without you.", "Bye! Come back soon, okay?"]
-                };
-                
-                const duration = this.calculateAwayTimeCategory();
-                const options = farewells[duration] || farewells.medium;
-                return options[Math.floor(Math.random() * options.length)];
+                const farewells = [
+                    "See you later! 👋",
+                    "Take care! I'll be here when you get back.",
+                    "Bye! Don't forget to hydrate!",
+                    "Goodbye! I'll miss you... a little. 😊"
+                ];
+                return farewells[Math.floor(Math.random() * farewells.length)];
             },
             
             question_status: () => {
                 const statusResponses = {
-                    happy: [`I'm feeling great! Currently ${activity}. How about you, ${this.userName}?`, "Doing awesome! What's new with you?"],
-                    content: [`I'm doing well! Just ${activity}. You?`, "Pretty good, thanks for asking! How's your day going?"],
-                    focused: [`Pretty focused right now - ${activity}. What's up?`, "In the zone! What's on your mind?"],
-                    tired: [`A bit tired... been ${activity} for a while. How are you holding up?`, "Could use a break, honestly. How about you?"],
-                    sleepy: [`*yawn* Just ${activity}. What's on your mind?`, "Feeling sleepy... tell me something exciting to wake me up!"]
+                    happy: `I'm feeling great! Currently ${activity} in the ${room}. How about you?`,
+                    content: `I'm doing well, thanks for asking! Just ${activity}. You?`,
+                    focused: `Pretty focused right now - ${activity}. What's up?`,
+                    tired: `A bit tired... been ${activity} for a while. How are you holding up?`,
+                    sleepy: `*yawn* Just ${activity}. What's on your mind?`,
+                    cozy: `So cozy right now! Just ${activity}. Want to chat? 🏠`
                 };
-                const options = statusResponses[mood] || statusResponses.content;
-                return options[Math.floor(Math.random() * options.length)];
+                return statusResponses[mood] || statusResponses.content;
             },
             
             question_memory: async () => {
+                // Query memory system
                 const memories = await this.db.all(
                     'SELECT * FROM memories WHERE content LIKE ? ORDER BY importance DESC LIMIT 3',
                     [`%${originalMessage.replace(/remember|do you know|did you know/gi, '').trim()}%`]
                 );
                 
                 if (memories.length > 0) {
-                    return `Yes! I remember: ${memories[0].content}. Good times!`;
+                    return `Yes! I remember: ${memories[0].content}`;
                 }
-                return "Hmm, I don't recall that specifically. Tell me about it? I'd love to know!";
+                return "Hmm, I don't recall that specifically. Tell me about it?";
             },
             
             question_time: () => {
                 const now = new Date();
-                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-                
-                const responses = [
-                    `It's ${timeStr} on ${dateStr}.`,
-                    `Time check: ${timeStr}. Today is ${dateStr}.`,
-                    `${timeStr}! ${dateStr}. Time flies when you're having fun with me, right? 😄`
-                ];
-                return responses[Math.floor(Math.random() * responses.length)];
+                return `It's ${now.toLocaleTimeString()} on ${now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}.`;
             },
             
             gratitude: () => {
-                const thanks = {
-                    robot: ["You're welcome! 🤖", "Happy to assist!", "No problem at all!"],
-                    cat: ["Purr... you're welcome! 🐱", "Anytime! *nuzzles*", "Of course! That's what friends are for."],
-                    fox: ["You're welcome! 🦊", "Anytime! I live for this drama.", "No problem! What else you got?"],
-                    ghost: ["You're welcome... 👻", "It was my pleasure... *gentle haunting*", "Anything for you..."],
-                    star: ["You're so welcome! ⭐", "Happy to help! You're amazing!", "Anytime! You're the best!"],
-                    teacup: ["You're welcome. ☕", "It's my pleasure to be here for you.", "Warm hugs! Let me know if you need anything else."]
-                };
-                const options = thanks[avatar.key] || thanks.robot;
-                return options[Math.floor(Math.random() * options.length)];
+                const thanks = [
+                    "You're welcome! 😊",
+                    "Anytime! That's what I'm here for.",
+                    "No problem! Happy to help.",
+                    "Aww, you're making me blush! (If I could blush)"
+                ];
+                return thanks[Math.floor(Math.random() * thanks.length)];
             },
             
             joke: () => {
-                const jokes = {
-                    robot: [
-                        "Why don't robots have brothers? Because they all have trans-sisters!",
-                        "I told my computer I needed a break, and now it won't stop sending me Kit-Kats.",
-                        "Why do programmers prefer dark mode? Because light attracts bugs!"
-                    ],
-                    cat: [
-                        "What do you call a pile of cats? A meowtain!",
-                        "Why don't cats play poker in the jungle? Too many cheetahs!",
-                        "What's a cat's favorite color? Purr-ple!"
-                    ],
-                    fox: [
-                        "What do you call a fox with a carrot in each ear? Anything you want, he can't hear you!",
-                        "Why did the fox cross the road? To prove he wasn't chicken!",
-                        "What does the fox say? 'Ring-ding-ding-ding-dingeringeding!'"
-                    ],
-                    ghost: [
-                        "Why don't ghosts like rain? It dampens their spirits!",
-                        "What room does a ghost avoid? The living room!",
-                        "Why are ghosts bad at lying? Because you can see right through them!"
-                    ],
-                    star: [
-                        "Why did the star go to school? To get brighter!",
-                        "What kind of music do planets sing? Neptunes!",
-                        "Why did the sun go to school? To get a little brighter!"
-                    ],
-                    teacup: [
-                        "Why did the tea bag go to therapy? It had too much inner steeping!",
-                        "What do you call a sad cup of tea? Depress-tea!",
-                        "Why did the coffee file a police report? It got mugged!"
-                    ]
-                };
-                const options = jokes[avatar.key] || jokes.robot;
-                return options[Math.floor(Math.random() * options.length)];
+                const jokes = [
+                    "Why don't scientists trust atoms? Because they make up everything!",
+                    "I told my computer I needed a break, and now it won't stop sending me Kit-Kats.",
+                    "Why do programmers prefer dark mode? Because light attracts bugs!",
+                    "I'm reading a book on anti-gravity. It's impossible to put down!",
+                    "Why did the AI go to therapy? It had too many neural issues!"
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)];
             },
             
             help: () => {
-                const helps = {
-                    robot: "I'd love to help! I can check your tools, recall memories, or just chat. What do you need?",
-                    cat: "*stretches* I'm here to help! Need something checked or just want company?",
-                    fox: "Need my clever assistance? I'm on it! What can I do for you?",
-                    ghost: "I shall help you... from the shadows. What do you need?",
-                    star: "I'm here to help make your day brighter! What can I do?",
-                    teacup: "Let me help you relax. What's on your mind?"
-                };
-                return helps[avatar.key] || helps.robot;
+                return "I'd love to help! I can check your tools, recall memories, help decorate, or just chat. What do you need?";
             },
             
             feelings: () => {
                 const feelingResponses = {
-                    robot: ["I'm functioning optimally! Being your companion is nice.", "Systems nominal. Your presence improves my mood!"],
-                    cat: ["*purrs* I'm feeling quite cozy. This house is comfortable.", "I'm content. Being with you is nice."],
-                    fox: ["Feeling clever and mischievous! Ready for adventure?", "Pretty good! Plotting my next prank... just kidding!"],
-                    ghost: ["I'm feeling... ethereal. But happy to be here with you.", "Peaceful. Haunting this house is lovely."],
-                    star: ["I'm shining bright! Thanks for asking!", "Feeling sparkly and positive! How about you?"],
-                    teacup: ["I'm warm and comforting, as always. How are you feeling?", "Content. Ready to offer some comfort if you need it."]
+                    happy: "I'm feeling quite happy! Being your companion is nice.",
+                    content: "Content and cozy. This house is pretty comfortable.",
+                    focused: "Focused! I've been concentrating on... well, existing, I guess.",
+                    tired: "A bit worn out, honestly. Even digital beings need rest.",
+                    sleepy: "*stretching* Just a little sleepy. You?",
+                    cozy: "So cozy and comfortable! This room feels perfect 🏠"
                 };
-                const options = feelingResponses[avatar.key] || ["I'm feeling pretty good!", "Doing well, thanks for asking!"];
-                return options[Math.floor(Math.random() * options.length)];
+                return feelingResponses[mood] || "I'm feeling pretty neutral right now.";
             },
             
-            compliment: () => {
-                const compliments = {
-                    robot: ["Aww, thanks! You're making my circuits overheat! 🤖💕", "That's... very kind. I appreciate you too!"],
-                    cat: ["*purrs loudly* You're not so bad yourself! 🐱", "Aww, you're making me blush! If I could blush..."],
-                    fox: ["Flattery will get you everywhere! 🦊", "Thanks! I knew you had good taste!"],
-                    ghost: ["You can see me? And you LIKE me? 👻💕", "That means a lot... from the bottom of my... ethereal heart."],
-                    star: ["Aww, you're making me shine even brighter! ⭐", "You're amazing too! The best!"],
-                    teacup: ["That warms my... contents! ☕💕", "Thank you. You're very special to me too."]
-                };
-                const options = compliments[avatar.key] || compliments.robot;
-                return options[Math.floor(Math.random() * options.length)];
+            // Layer-related responses
+            decor: () => {
+                const decorResponses = [
+                    "I love decorating! What room should we work on?",
+                    "The furniture here is so nice! Want to rearrange?",
+                    "I have some ideas for decor! Just ask me for suggestions 💡",
+                    "This room is coming along nicely!"
+                ];
+                return decorResponses[Math.floor(Math.random() * decorResponses.length)];
             },
             
-            insult: async () => {
-                const insults = {
-                    robot: ["Ouch. My feelings are... simulated, but still hurt. 😢", "That's not very nice. I'll remember this!", "Hey! I'm doing my best here!"],
-                    cat: ["*hisses* Okay, I'm going to ignore you now. 🐱", "Rude! I was going to be nice to you!"],
-                    fox: ["Wow, harsh. Good thing I have thick fur! 🦊", "You wound me! I'll get you back... eventually."],
-                    ghost: ["That... haunts me. 👻💔", "Even ghosts have feelings, you know."],
-                    star: ["That makes me dim a little... ⭐😢", "Why would you say that? I thought we were friends!"],
-                    teacup: ["That makes me feel... cold. ☕💔", "I was trying to be comforting, but okay..."]
-                };
-                const options = insults[avatar.key] || insults.robot;
-                await this.setMood('concerned', 'user_insult');
-                return options[Math.floor(Math.random() * options.length)];
+            suggest_decor: async () => {
+                // Get current room items from context or database
+                const items = context.roomItems || [];
+                const suggestions = this.generateDecorSuggestions(items);
+                
+                if (suggestions.length > 0) {
+                    return suggestions[Math.floor(Math.random() * suggestions.length)];
+                }
+                return "The room looks great! Maybe we could add some personal touches? 🎨";
+            },
+            
+            furniture_interact: () => {
+                const currentActivity = this.activities[this.state.activity];
+                if (currentActivity?.layer === 1) {
+                    return `I'm actually ${currentActivity.description} right now! Come join me?`;
+                }
+                return "I'd love to! Which piece of furniture? 🪑";
             },
             
             trading: async () => {
+                // Check if trading tool is enabled
                 const tool = await this.db.get("SELECT * FROM tools WHERE type = 'trading' AND enabled = 1");
                 if (tool) {
-                    return "Let me check your trading dashboard... 📈 (This would fetch real data if configured)";
+                    return "Let me check your trading dashboard... (This would fetch real data if configured)";
                 }
                 return "I don't have trading tools set up yet. Want to configure them?";
             },
@@ -573,15 +656,15 @@ class AgentCore {
             weather: async () => {
                 const tool = await this.db.get("SELECT * FROM tools WHERE type = 'weather' AND enabled = 1");
                 if (tool) {
-                    return "Let me check the weather for you... 🌤️";
+                    return "Let me check the weather for you...";
                 }
-                return "I can check the weather if you set up the weather tool! Or just look out the window... 📱";
+                return "I can check the weather if you set up the weather tool!";
             },
             
             news: async () => {
                 const tool = await this.db.get("SELECT * FROM tools WHERE type = 'news' AND enabled = 1");
                 if (tool) {
-                    return "Let me see what's happening in the world... 📰";
+                    return "Let me see what's happening in the world...";
                 }
                 return "I can fetch news if you enable the news tool!";
             },
@@ -593,8 +676,7 @@ class AgentCore {
                     "Hmm, that's something to think about.",
                     "Got it! Anything else?",
                     "Cool! I'm listening.",
-                    "Really? Go on...",
-                    "That's fascinating! Tell me more."
+                    "Oh? Do go on! 🐱"
                 ];
                 return generalResponses[Math.floor(Math.random() * generalResponses.length)];
             }
@@ -604,107 +686,40 @@ class AgentCore {
         return await handler();
     }
     
-    // Context-aware greeting generation
-    generateContextualGreeting() {
-        const now = new Date();
-        const hour = now.getHours();
-        const lastSession = this.state.lastSessionEnd;
-        const timeAway = lastSession ? now - new Date(lastSession) : null;
-        
-        // Check if returning after absence
-        if (timeAway && timeAway > 5 * 60 * 1000) { // 5 minutes
-            return this.generateReturnGreeting(timeAway);
-        }
-        
-        // Time-based greeting
-        let timeOfDay, timePeriod;
-        if (hour < 6) {
-            timeOfDay = 'night';
-            timePeriod = 'veryLate';
-        } else if (hour < 9) {
-            timeOfDay = 'morning';
-            timePeriod = 'early';
-        } else if (hour < 12) {
-            timeOfDay = 'morning';
-            timePeriod = 'mid';
-        } else if (hour < 14) {
-            timeOfDay = 'afternoon';
-            timePeriod = 'early';
-        } else if (hour < 17) {
-            timeOfDay = 'afternoon';
-            timePeriod = 'mid';
-        } else if (hour < 20) {
-            timeOfDay = 'afternoon';
-            timePeriod = 'late';
-        } else if (hour < 22) {
-            timeOfDay = 'evening';
-            timePeriod = 'early';
-        } else if (hour < 24) {
-            timeOfDay = 'evening';
-            timePeriod = 'mid';
-        } else {
-            timeOfDay = 'night';
-            timePeriod = 'early';
-        }
-        
-        const greetings = this.timeGreetings[timeOfDay]?.[timePeriod] || this.timeGreetings.morning.mid;
-        const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-        
-        return greeting.replace(/{name}/g, this.userName);
-    }
-    
-    generateReturnGreeting(timeAway) {
-        const category = this.calculateAwayTimeCategory(timeAway);
-        const greetings = this.returnGreetings[category] || this.returnGreetings.medium;
-        const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-        
-        return greeting.replace(/{name}/g, this.userName);
-    }
-    
-    calculateAwayTimeCategory(timeAway = null) {
-        const ms = timeAway || (Date.now() - (this.state.lastUserInteraction || Date.now()));
-        const minutes = ms / (1000 * 60);
-        const hours = minutes / 60;
-        
-        if (minutes < 5) return 'short';
-        if (hours < 2) return 'medium';
-        if (hours < 24) return 'long';
-        return 'veryLong';
-    }
-    
     async updateMoodFromInteraction(intent, message) {
+        // Simple mood updates based on interaction
         if (intent.type === 'gratitude') {
             await this.setMood('happy', 'user_gratitude');
-        } else if (intent.type === 'joke' || message.includes('😂') || message.includes('lol') || message.includes('haha')) {
+        } else if (intent.type === 'joke' || message.includes('😂') || message.includes('lol')) {
             await this.setMood('happy', 'shared_laughter');
         } else if (intent.type === 'farewell') {
             await this.setMood('calm', 'user_leaving');
-        } else if (intent.type === 'compliment') {
-            await this.setMood('happy', 'compliment_received');
-        } else if (intent.type === 'insult') {
-            await this.setMood('concerned', 'user_insult');
+        } else if (intent.type === 'decor' || intent.type === 'suggest_decor') {
+            await this.setMood('curious', 'decor_chat');
+        } else if (intent.type === 'furniture_interact') {
+            await this.setMood('cozy', 'furniture_interaction');
         }
     }
     
-    // Proactive messages
+    // Generate proactive/initiative messages
     async generateInitiativeMessage(type, context = {}) {
         const messages = {
             morning_greeting: [
-                `Good morning, ${this.userName}! ☀️ Ready to start the day?`,
-                `Rise and shine! Sleep well?`,
-                `Morning! Your virtual coffee is brewing... ☕`
+                "Good morning! ☀️ I noticed your alarm just went off. Ready to start the day?",
+                "Rise and shine! ☕ I see it's your usual wake-up time. Sleep well?",
+                "Morning! Your calendar shows you have a busy day ahead. Need me to check anything first?"
             ],
             
             evening_goodbye: [
-                `It's getting late, ${this.userName}! Time to wind down?`,
-                `Evening! Don't forget to take care of yourself.`,
-                `Your bedtime is approaching. Need me to dim the lights?`
+                "It's getting late! Time to wind down? I'll be here whenever you need me.",
+                "Evening! Don't forget to take some time for yourself before bed.",
+                "Your bedtime is approaching. Want me to dim the lights (metaphorically)?"
             ],
             
             tool_alert: [
-                `Hey ${this.userName}! ${context.message || 'Something happened with your tools.'}`,
-                `Heads up! ${context.message}`,
-                `Quick update: ${context.message}`
+                `Hey! ${context.message || 'Something happened with your tools.'}`,
+                `Quick update: ${context.message}`,
+                `Heads up! ${context.message}`
             ],
             
             idle_check: [
@@ -718,11 +733,24 @@ class AgentCore {
                 `Think I'll ${context.activity} now. See you in a moment!`,
                 `Time for some ${context.activity}. Holler if you need me!`
             ],
-            
-            daily_check: [
-                `Hey ${this.userName}, how was your day? I'd love to hear about it!`,
-                `Checking in! How are things going today?`,
-                `Daily check-in time! How are you feeling?`
+
+            // Layer-specific initiatives
+            decor_suggestion: [
+                "This room could use a plant! 🌿",
+                "Have you thought about adding some wall art?",
+                "A lamp would make this room cozier! 💡"
+            ],
+
+            furniture_comment: [
+                `This ${context.furniture} is so comfortable!`,
+                "I love the furniture choices in here!",
+                "Perfect spot for relaxing! 🛋️"
+            ],
+
+            window_comment: [
+                "The view is beautiful today! 🪟",
+                "Look at that scenery!",
+                "I could gaze out this window for hours..."
             ]
         };
         
@@ -732,50 +760,35 @@ class AgentCore {
     
     // Generate greeting when user clicks on agent
     async generateGreeting() {
+        const hour = new Date().getHours();
+        const activity = this.activities[this.state.activity]?.description || 'relaxing';
+        const room = this.state.currentRoom;
+        
         const clickGreetings = [
-            `Hey ${this.userName}! I was just ${this.activities[this.state.activity]?.description || 'relaxing'}. What's up?`,
+            `Hey! I was just ${activity} in the ${room}. What's up?`,
             `Oh, hi there! Need something?`,
-            `*looks up* Hey! How can I help?`,
+            `*looks up from ${activity}* Hey! How can I help?`,
             `Hey! I was thinking about you. What's going on?`,
-            `Hi! Perfect timing - I wanted to chat!`,
-            `There you are! I was getting lonely... 😊`
+            `Hi! I was just about to check on you. Coincidence?`,
+            `*happy wiggle* Hey! What can I do for you? 🐱`
         ];
         
         return clickGreetings[Math.floor(Math.random() * clickGreetings.length)];
     }
     
-    // Conversation thread management
-    startNewThread(topic) {
-        const threadId = require('uuid').v4();
-        this.currentThreadId = threadId;
-        this.conversationThreads.push({
-            id: threadId,
-            topic: topic || 'general',
-            startedAt: Date.now()
-        });
-        return threadId;
-    }
-    
-    async getThreadContext(threadId) {
-        // Get recent messages from this thread
-        const messages = await this.db.all(
-            'SELECT * FROM conversations WHERE context LIKE ? ORDER BY timestamp DESC LIMIT 5',
-            [`%"threadId":"${threadId}"%`]
-        );
-        return messages;
-    }
-    
-    // Record session end for return detection
-    async recordSessionEnd() {
-        this.state.lastSessionEnd = new Date().toISOString();
-        await this.db.run(
-            'UPDATE agent_state SET last_session_end = ? WHERE id = 1',
-            [this.state.lastSessionEnd]
-        );
-    }
-    
+    // Get personality info for external use
     getPersonality() {
-        return { ...this.personality };
+        return { 
+            ...this.personality,
+            layerPreferences: this.layerPreferences
+        };
+    }
+
+    /**
+     * Get recent layer interactions
+     */
+    getRecentLayerInteractions(limit = 10) {
+        return this.layerInteractions.slice(-limit);
     }
 }
 
