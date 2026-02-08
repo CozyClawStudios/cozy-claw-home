@@ -1078,7 +1078,7 @@
                     <div class="thought-bubble" id="thoughtBubble"></div>
                     <div class="steam" id="steam">☁️</div>
                     <div class="agent-avatar" id="agentAvatar">🤖</div>
-                    <div class="agent-name" id="agentName">Claw</div>
+                    <div class="agent-name" id="agentName">Celest</div>
                     <div class="agent-status">
                         <span id="agentActivity">Relaxing</span>
                         <span class="activity-indicator" id="typingIndicator" style="display: none;">
@@ -1339,7 +1339,7 @@
         
         // UI Functions
         function updateAgentDisplay(state) {
-            document.getElementById('agentName').textContent = state.name || 'Claw';
+            document.getElementById('agentName').textContent = state.name || 'Celest';
             
             const activityInfo = state.activityInfo || { emoji: '😌', description: 'relaxing' };
             document.getElementById('agentActivity').textContent = activityInfo.description;
