@@ -38,21 +38,6 @@ function enterHouse() {
             startTutorialHighlight();
         }, 1500);
     }
-    
-    // Auto-dismiss welcome note after 5 seconds
-    setTimeout(() => {
-        closeWelcomeNote();
-    }, 5000);
-}
-
-function closeWelcomeNote() {
-    const note = document.getElementById('welcomeNote');
-    if (note && note.style.display !== 'none') {
-        note.classList.add('hiding');
-        setTimeout(() => {
-            note.style.display = 'none';
-        }, 500);
-    }
 }
 
 function showWelcomeMessage() {
@@ -510,84 +495,9 @@ const decorPanel = {
 
 // ==================== INITIALIZATION ====================
 
-let roomRenderer;
-let layerPanel;
-
-async function init() {
+function init() {
     loadSettings();
     updateMemoryCount();
-    
-    // Initialize layered room system
-    try {
-        // Create room renderer
-        roomRenderer = new RoomRenderer('room', {
-            gridWidth: 20,
-            gridHeight: 15
-        });
-        
-        // Load room state
-        await roomRenderer.loadRoomState('main');
-        
-        // Create layer panel
-        layerPanel = new LayerPanel({
-            position: 'right',
-            width: 350
-        });
-        layerPanel.setRoomRenderer(roomRenderer);
-        
-        // Replace old decor panel with new layer panel
-        window.decorPanel = {
-            open: () => layerPanel.open(),
-            close: () => layerPanel.close(),
-            toggle: () => layerPanel.toggle()
-        };
-        
-        // Set up room event listeners
-        document.addEventListener('room:itemMove', async (e) => {
-            try {
-                await fetch(`/api/room/item/${e.detail.id}/move`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ x: e.detail.x, y: e.detail.y })
-                });
-            } catch (err) {
-                console.error('Failed to move item:', err);
-            }
-        });
-        
-        document.addEventListener('room:itemRemove', async (e) => {
-            try {
-                await fetch(`/api/room/item/${e.detail.id}`, {
-                    method: 'DELETE'
-                });
-            } catch (err) {
-                console.error('Failed to remove item:', err);
-            }
-        });
-        
-        document.addEventListener('room:itemDrop', async (e) => {
-            const { x, y, itemId, layer } = e.detail;
-            try {
-                // Find item in catalog to get details
-                const catalogItem = layerPanel.catalog.find(i => i.id === itemId);
-                await roomRenderer.placeItem({
-                    itemType: catalogItem?.category || 'decor',
-                    itemKey: itemId,
-                    x,
-                    y,
-                    layer,
-                    icon: catalogItem?.icon || '📦',
-                    name: catalogItem?.name || 'Item'
-                });
-            } catch (err) {
-                console.error('Failed to place item:', err);
-            }
-        });
-        
-        console.log('🏠 Layered room system initialized');
-    } catch (err) {
-        console.error('Failed to initialize layered room system:', err);
-    }
     
     console.log('🏠 Cozy Claw Home initialized');
     console.log('First load:', app.isFirstLoad);
@@ -599,7 +509,6 @@ document.addEventListener('DOMContentLoaded', init);
 // ==================== EXPORTS ====================
 window.app = app;
 window.enterHouse = enterHouse;
-window.closeWelcomeNote = closeWelcomeNote;
 window.sendMessage = sendMessage;
 window.handleKeyPress = handleKeyPress;
 window.toggleVoice = toggleVoice;
@@ -612,5 +521,3 @@ window.closeModalDirect = closeModalDirect;
 window.toggleSetting = toggleSetting;
 window.updateEnergy = updateEnergy;
 window.decorPanel = decorPanel;
-window.roomRenderer = roomRenderer;
-window.layerPanel = layerPanel;

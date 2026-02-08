@@ -31,7 +31,6 @@ const ToolFramework = require('./agent/tools');
 // NEW: Bridge and Decor systems
 const ClawBotBridge = require('./bridge/clawbot-bridge');
 const DecorDatabase = require('./decor/decor-database');
-const LayeredRoomDatabase = require('./decor/layered-database');
 
 const app = express();
 const server = http.createServer(app);
@@ -685,177 +684,6 @@ app.get('/api/decor/stats', async (req, res) => {
     }
 });
 
-// ==================== LAYERED ROOM API ====================
-
-// Get full room state with all layers
-app.get('/api/room/layers', async (req, res) => {
-    try {
-        const roomId = req.query.roomId || 'main';
-        const state = await layeredRoomDB.getFullRoomState(roomId);
-        res.json(state);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Get specific layer
-app.get('/api/room/layer/:type', async (req, res) => {
-    try {
-        const roomId = req.query.roomId || 'main';
-        const layerType = req.params.type;
-        const layer = await layeredRoomDB.getLayer(roomId, layerType);
-        res.json(layer);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Update specific layer
-app.post('/api/room/layer/:type', async (req, res) => {
-    try {
-        const roomId = req.body.roomId || 'main';
-        const layerType = req.params.type;
-        const result = await layeredRoomDB.updateLayer(roomId, layerType, req.body);
-        
-        // Broadcast change to all clients
-        io.emit('room:layer:updated', { roomId, layer: layerType, data: req.body });
-        
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Get items in room (optionally filtered by layer)
-app.get('/api/room/items', async (req, res) => {
-    try {
-        const roomId = req.query.roomId || 'main';
-        const layer = req.query.layer ? parseInt(req.query.layer) : null;
-        const items = await layeredRoomDB.getItems(roomId, layer);
-        res.json(items);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Place item on a layer
-app.post('/api/room/item', async (req, res) => {
-    try {
-        const roomId = req.body.roomId || 'main';
-        const result = await layeredRoomDB.placeItem(roomId, req.body);
-        
-        io.emit('room:item:placed', { roomId, ...result });
-        
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Move/update item
-app.post('/api/room/item/:id/move', async (req, res) => {
-    try {
-        const itemId = req.params.id;
-        const result = await layeredRoomDB.moveItem(itemId, req.body);
-        
-        io.emit('room:item:moved', result);
-        
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Remove item
-app.delete('/api/room/item/:id', async (req, res) => {
-    try {
-        await layeredRoomDB.removeItem(req.params.id);
-        
-        io.emit('room:item:removed', { id: req.params.id });
-        
-        res.json({ success: true });
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Update item layer
-app.post('/api/room/item/:id/layer', async (req, res) => {
-    try {
-        const itemId = req.params.id;
-        const { layer } = req.body;
-        const result = await layeredRoomDB.updateItemLayer(itemId, layer);
-        
-        io.emit('room:item:layerChanged', { id: itemId, layer });
-        
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Set layer visibility
-app.post('/api/room/layer/:layer/visibility', async (req, res) => {
-    try {
-        const roomId = req.body.roomId || 'main';
-        const layer = parseInt(req.params.layer);
-        const { visible, opacity } = req.body;
-        
-        const result = await layeredRoomDB.setLayerVisibility(roomId, layer, visible, opacity);
-        
-        io.emit('room:layer:visibility', { roomId, layer, visible, opacity });
-        
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Create snapshot
-app.post('/api/room/snapshot', async (req, res) => {
-    try {
-        const roomId = req.body.roomId || 'main';
-        const result = await layeredRoomDB.createSnapshot(roomId);
-        res.json(result);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Restore snapshot
-app.post('/api/room/snapshot/:id/restore', async (req, res) => {
-    try {
-        const result = await layeredRoomDB.restoreSnapshot(req.params.id);
-        res.json(result);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
-});
-
-// Reset room to defaults
-app.post('/api/room/reset', async (req, res) => {
-    try {
-        const roomId = req.body.roomId || 'main';
-        
-        // Reset layers to defaults
-        await layeredRoomDB.updateLayer(roomId, 'floor', { type: 'wood', color: '#3d3d5c', texture: 'smooth' });
-        await layeredRoomDB.updateLayer(roomId, 'wall', { type: 'paint', color: '#3a3a55', pattern: 'solid' });
-        await layeredRoomDB.updateLayer(roomId, 'window', { view: 'city', time: 'day', frame: 'classic' });
-        
-        // Clear all items
-        const items = await layeredRoomDB.getItems(roomId);
-        for (const item of items) {
-            await layeredRoomDB.removeItem(item.id);
-        }
-        
-        io.emit('room:reset', { roomId });
-        
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 // Health check
 app.get('/health', (req, res) => {
     res.json({
@@ -888,10 +716,6 @@ async function start() {
         // Initialize decor database
         await decorDB.init();
         
-        // Initialize layered room database
-        const layeredRoomDB = new LayeredRoomDatabase(database);
-        await layeredRoomDB.init();
-        
         // Initialize agent components
         agentCore = new AgentCore(database);
         agentMemory = new AgentMemory(database);
@@ -904,7 +728,6 @@ async function start() {
         global.agentCore = agentCore;
         global.agentMemory = agentMemory;
         global.toolFramework = toolFramework;
-        global.layeredRoomDB = layeredRoomDB;
         
         // Initialize ClawBot Bridge
         clawbotBridge = new ClawBotBridge(io, database);
@@ -937,16 +760,6 @@ async function start() {
             console.log('  POST /api/decor/place          - Place an item');
             console.log('  POST /api/decor/move           - Move an item');
             console.log('  GET  /api/decor/themes         - Get room themes');
-            console.log('');
-            
-            console.log('');
-            console.log('🏗️  Layered Room Endpoints:');
-            console.log('  GET  /api/room/layers            - Get full room state');
-            console.log('  POST /api/room/layer/:type       - Update layer (floor/wall/window)');
-            console.log('  GET  /api/room/items             - Get items in room');
-            console.log('  POST /api/room/item              - Place item on layer');
-            console.log('  POST /api/room/item/:id/move     - Move item');
-            console.log('  DELETE /api/room/item/:id        - Remove item');
             console.log('');
             
             // Start agent presence loop
