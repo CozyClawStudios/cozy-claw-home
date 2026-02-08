@@ -432,7 +432,22 @@ const decorPanel = {
                     `).join('')}
                 </div>
                 <div style="margin-top: 20px; padding: 15px; background: rgba(255,154,158,0.1); border-radius: 12px; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
-                    💡 Click an item to place it in your room!
+                    💡 <strong>Controls:</strong><br>
+                    • Click item to place<br>
+                    • Drag to move<br>
+                    • Scroll wheel to resize<br>
+                    • Right-click to cycle sizes<br>
+                    • Double-click to remove
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3 style="color: #ff9a9e; font-size: 1rem; margin-bottom: 12px;">🏠 Switch Room</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                        <button onclick="switchRoom('living')" style="background: rgba(255,255,255,0.1); border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🛋️ Living</button>
+                        <button onclick="switchRoom('bedroom')" style="background: rgba(255,255,255,0.1); border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🛏️ Bedroom</button>
+                        <button onclick="switchRoom('kitchen')" style="background: rgba(255,255,255,0.1); border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">🍳 Kitchen</button>
+                        <button onclick="switchRoom('office')" style="background: rgba(255,255,255,0.1); border: 2px solid transparent; padding: 12px; border-radius: 10px; color: white; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#ff9a9e'" onmouseout="this.style.borderColor='transparent'">💼 Office</button>
+                    </div>
                 </div>
                 
                 <div style="margin-top: 20px;">
@@ -518,6 +533,26 @@ const decorPanel = {
             item.style.cursor = 'move';
         });
         
+        // Scroll wheel to resize
+        item.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const currentSize = parseFloat(item.style.fontSize);
+            const newSize = e.deltaY < 0 ? currentSize * 1.1 : currentSize * 0.9;
+            // Clamp between 0.5rem and 8rem
+            const clampedSize = Math.max(0.5, Math.min(8, newSize));
+            item.style.fontSize = `${clampedSize}rem`;
+        });
+        
+        // Right-click to cycle size presets
+        item.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const sizes = ['1rem', '1.5rem', '2rem', '2.5rem', '3rem', '4rem', '5rem'];
+            const currentSize = item.style.fontSize;
+            const currentIndex = sizes.indexOf(currentSize);
+            const nextIndex = (currentIndex + 1) % sizes.length;
+            item.style.fontSize = sizes[nextIndex];
+        });
+        
         // Double click to remove
         item.addEventListener('dblclick', () => {
             item.remove();
@@ -577,15 +612,90 @@ function loadRoomTheme() {
     }
 }
 
+// ==================== ROOM SWITCHING ====================
+
+const rooms = {
+    living: { name: 'Living Room', icon: '🛋️', wall: '#3a3a55', floor: '#3d3d5c' },
+    bedroom: { name: 'Bedroom', icon: '🛏️', wall: '#4a3a55', floor: '#4d3d5c' },
+    kitchen: { name: 'Kitchen', icon: '🍳', wall: '#3a4a55', floor: '#3d4d5c' },
+    office: { name: 'Office', icon: '💼', wall: '#2a3a4a', floor: '#2d3d4d' }
+};
+
+function switchRoom(roomId) {
+    const roomData = rooms[roomId];
+    if (!roomData) return;
+    
+    // Update room label
+    const roomLabel = document.getElementById('roomLabel');
+    if (roomLabel) {
+        roomLabel.textContent = `${roomData.icon} ${roomData.name}`;
+    }
+    
+    // Update CSS variables for room colors
+    const room = document.querySelector('.room');
+    if (room) {
+        room.style.setProperty('--wall-color', roomData.wall);
+        room.style.setProperty('--floor-color', roomData.floor);
+    }
+    
+    // Save preference
+    localStorage.setItem('currentRoom', roomId);
+    
+    // Clear current items (optional - or we could save/load per room)
+    document.querySelectorAll('.placement-item').forEach(el => el.remove());
+    
+    // Celest reacts
+    addMessage('Celest', `Welcome to the ${roomData.name}! ${roomData.icon}✨`, true);
+}
+
+function loadSavedRoom() {
+    const savedRoom = localStorage.getItem('currentRoom');
+    if (savedRoom && rooms[savedRoom]) {
+        switchRoom(savedRoom);
+    }
+}
+
+// ==================== AI ITEM RESIZE ====================
+
+// Function for AI to resize any item
+function resizeItem(itemEmoji, newSizeRem) {
+    const items = document.querySelectorAll('.room > div');
+    for (const item of items) {
+        if (item.textContent === itemEmoji) {
+            item.style.fontSize = `${newSizeRem}rem`;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Function for AI to resize all items of a type
+function resizeAllItems(itemEmoji, newSizeRem) {
+    let count = 0;
+    const items = document.querySelectorAll('.room > div');
+    for (const item of items) {
+        if (item.textContent === itemEmoji) {
+            item.style.fontSize = `${newSizeRem}rem`;
+            count++;
+        }
+    }
+    return count;
+}
+
+// Make functions available globally for AI
+window.resizeItem = resizeItem;
+window.resizeAllItems = resizeAllItems;
+window.switchRoom = switchRoom;
+
 // ==================== INITIALIZATION ====================
 
 function init() {
     loadSettings();
     loadRoomTheme();
+    loadSavedRoom();
     updateMemoryCount();
     
     console.log('🏠 Cozy Claw Home initialized');
-    console.log('First load:', app.isFirstLoad);
 }
 
 // Start when DOM is ready
