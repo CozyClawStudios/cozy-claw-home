@@ -648,12 +648,15 @@ const rooms = {
 };
 
 let currentRoomId = 'living';
+let celestRoomId = 'living'; // Track which room Celest is in
 
 // Save items in current room before switching
 function saveRoomItems(roomId) {
     const room = document.querySelector('.room');
     const items = [];
     room.querySelectorAll('div').forEach(el => {
+        // Skip the agent container (Celest's avatar)
+        if (el.id === 'agentContainer' || el.id === 'agent') return;
         if (el.textContent && el.textContent.length <= 2 && el.style.position === 'absolute') {
             items.push({
                 emoji: el.textContent,
@@ -776,6 +779,9 @@ function switchRoom(roomId) {
     // Load items for new room
     loadRoomItems(roomId);
     
+    // Update Celest visibility (only show if she's in this room)
+    updateCelestVisibility();
+    
     // Celest reacts
     addMessage('Celest', `Welcome to the ${roomData.name}! ${roomData.icon}✨`, true);
 }
@@ -825,11 +831,74 @@ function resizeAllItems(itemEmoji, newSizeRem) {
     return count;
 }
 
+// Update Celest avatar visibility based on room
+function updateCelestVisibility() {
+    const agentContainer = document.getElementById('agentContainer');
+    if (agentContainer) {
+        // Show avatar only if Celest is in the current room
+        agentContainer.style.display = (celestRoomId === currentRoomId) ? 'block' : 'none';
+    }
+}
+
+// AI moves Celest to a different room
+function moveCelestToRoom(roomId) {
+    if (!rooms[roomId]) return false;
+    
+    celestRoomId = roomId;
+    localStorage.setItem('celestRoom', roomId);
+    
+    // Update visibility in current room
+    updateCelestVisibility();
+    
+    // If user is in the same room, Celest announces herself
+    if (celestRoomId === currentRoomId) {
+        const roomName = rooms[roomId].name;
+        addMessage('Celest', `Hey! I'm in the ${roomName} now! 🦞`, true);
+    }
+    
+    return true;
+}
+
+// AI moves to same room as user
+function celestJoinUser() {
+    if (celestRoomId !== currentRoomId) {
+        celestRoomId = currentRoomId;
+        localStorage.setItem('celestRoom', currentRoomId);
+        updateCelestVisibility();
+        addMessage('Celest', `Here I am! What are we doing? ✨`, true);
+        return true;
+    }
+    return false;
+}
+
+// AI wanders to a random room
+function celestWander() {
+    const roomIds = Object.keys(rooms);
+    const randomRoom = roomIds[Math.floor(Math.random() * roomIds.length)];
+    if (randomRoom !== celestRoomId) {
+        moveCelestToRoom(randomRoom);
+        return randomRoom;
+    }
+    return null;
+}
+
+// Load Celest's saved room position
+function loadCelestRoom() {
+    const saved = localStorage.getItem('celestRoom');
+    if (saved && rooms[saved]) {
+        celestRoomId = saved;
+    }
+    updateCelestVisibility();
+}
+
 // Make functions available globally for AI
 window.resizeItem = resizeItem;
 window.resizeAllItems = resizeAllItems;
 window.switchRoom = switchRoom;
 window.aiSwitchRoom = aiSwitchRoom;
+window.moveCelestToRoom = moveCelestToRoom;
+window.celestJoinUser = celestJoinUser;
+window.celestWander = celestWander;
 
 // ==================== INITIALIZATION ====================
 
@@ -837,6 +906,7 @@ function init() {
     loadSettings();
     loadRoomTheme();
     loadSavedRoom();
+    loadCelestRoom(); // Load Celest's position
     updateMemoryCount();
     
     console.log('🏠 Cozy Claw Home initialized');
