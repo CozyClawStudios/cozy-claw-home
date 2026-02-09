@@ -244,16 +244,28 @@ if (require.main === module) {
         console.log('\n📝 User message:', msg.content);
         console.log('   Session:', msg.sessionId);
         
-        // Echo response (replace with actual agent logic)
-        const response = {
-            text: `I received: "${msg.content}"`,
-            mood: 'content'
+        // Forward to OpenClaw inbox for Celest to process
+        const inboxEntry = {
+            type: 'companion_message',
+            id: msg.id,
+            content: msg.content,
+            sessionId: msg.sessionId,
+            timestamp: new Date().toISOString(),
+            source: 'cozy-claw-home'
         };
         
-        await adapter.sendResponse(msg.sessionId, response);
-        await adapter.markProcessed(msg);
+        // Write to inbox file for OpenClaw to pick up
+        const inboxPath = path.join(__dirname, '..', 'inbox.jsonl');
+        fs.appendFileSync(inboxPath, JSON.stringify(inboxEntry) + '\n');
+        console.log('📨 Forwarded to OpenClaw inbox');
         
-        console.log('✅ Response sent\n');
+        // Send immediate acknowledgment to user
+        await adapter.sendResponse(msg.sessionId, {
+            text: "Let me check that for you, sir...",
+            mood: 'thinking'
+        });
+        
+        await adapter.markProcessed(msg);
     });
     
     adapter.connect().catch(err => {

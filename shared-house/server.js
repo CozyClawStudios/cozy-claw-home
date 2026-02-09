@@ -27,7 +27,7 @@ const EventEmitter = require('events');
 const AgentCore = require('./agent/core');
 const AgentMemory = require('./agent/memory');
 const ToolFramework = require('./agent/tools');
-// const VoiceSystem = require('./agent/voice'); // FUTURE: Voice system not ready yet
+const VoiceSystem = require('./agent/voice');
 
 // NEW: Bridge and Decor systems
 const ClawBotBridge = require('./bridge/clawbot-bridge');
@@ -256,8 +256,8 @@ class AgentSystem extends EventEmitter {
         super();
         this.db = db;
         this.tools = tools;
-        // this.voice = new VoiceSystem(); // FUTURE: Voice system
-        this.core = new AgentCore(db); // { voice: this.voice }
+        this.voice = new VoiceSystem();
+        this.core = new AgentCore(db, { voice: this.voice });
         this.memory = new AgentMemory(db);
         this.loopInterval = null;
         this.isRunning = false;
@@ -267,6 +267,14 @@ class AgentSystem extends EventEmitter {
         await this.core.init(io);
         await this.memory.init();
         await this.tools.init();
+        
+        // Connect voice to Socket.IO
+        if (this.voice) {
+            this.voice.on('fallback_speak', (data) => {
+                io.emit('voice:speak', data);
+            });
+            console.log('🔊 Voice System connected to Socket.IO');
+        }
         
         console.log('🤖 Agent system initialized');
     }
@@ -792,8 +800,7 @@ app.post('/api/openclaw/chat', async (req, res) => {
     }
 });
 
-// ==================== FUTURE: VOICE API (Not Ready) ====================
-/*
+// ==================== VOICE API ====================
 // Get voice system status
 app.get('/api/voice/status', (req, res) => {
     try {
@@ -889,7 +896,6 @@ app.post('/api/voice/alert', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-*/
 
 // Health check
 app.get('/health', (req, res) => {

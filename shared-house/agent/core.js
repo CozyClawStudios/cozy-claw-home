@@ -9,8 +9,9 @@
  */
 
 class AgentCore {
-    constructor(database) {
+    constructor(database, options = {}) {
         this.db = database;
+        this.voice = options.voice || null;
         this.state = {
             mood: 'content',
             activity: 'relaxing',
@@ -403,6 +404,45 @@ class AgentCore {
     // Get personality info for external use
     getPersonality() {
         return { ...this.personality };
+    }
+    
+    // Voice system methods
+    getVoiceStatus() {
+        return this.voice ? this.voice.getStatus() : { initialized: false };
+    }
+    
+    async setVoiceVolume(volume) {
+        if (this.voice) {
+            this.voice.setVolume(volume);
+            return this.voice.volume;
+        }
+        return 0.8;
+    }
+    
+    async toggleVoice() {
+        if (this.voice) {
+            const muted = this.voice.toggleMute();
+            return { muted, enabled: !muted };
+        }
+        return { muted: false, enabled: false };
+    }
+    
+    async stopVoice(clearQueue = true) {
+        if (this.voice) {
+            this.voice.stop();
+        }
+    }
+    
+    async narrateActivity(activity) {
+        if (this.voice) {
+            await this.voice.trigger('activity_narration');
+        }
+    }
+    
+    async announceTradingAlert(type, context = {}) {
+        if (this.voice) {
+            await this.voice.trigger('trading_alerts');
+        }
     }
 }
 
