@@ -24,29 +24,34 @@ window.openclawConnected = false;
 
 function connectToOpenClaw() {
     // Skip if disabled
-    if (!CONFIG.OPENCLAW_ENABLED || !CONFIG.OPENCLAW_WS_URL) {
+    if (!CONFIG.OPENCLAW_ENABLED) {
         console.log('ℹ️ OpenClaw connection disabled, using local mode');
         window.openclawConnected = false;
         return;
     }
     
-    // Test HTTP connection to OpenClaw
-    const testUrl = CONFIG.OPENCLAW_WS_URL.replace('ws://', 'http://').replace('/clawbot', '');
-    fetch(`${testUrl}/api/status`, { method: 'GET' })
-        .then(() => {
-            console.log('✅ OpenClaw HTTP reachable');
-            window.openclawConnected = true;
+    // Test connection via proxy (no CORS issues)
+    fetch('/api/openclaw/status')
+        .then(res => res.json())
+        .then(data => {
+            if (data.connected) {
+                console.log('✅ OpenClaw connected via proxy');
+                window.openclawConnected = true;
+            } else {
+                console.log('⚠️ OpenClaw not available, using local mode');
+                window.openclawConnected = false;
+            }
         })
         .catch(() => {
-            console.log('⚠️ OpenClaw not reachable, using local mode');
+            console.log('⚠️ OpenClaw proxy error, using local mode');
             window.openclawConnected = false;
         });
 }
 
 window.sendToOpenClaw = async function(text) {
     try {
-        const baseUrl = CONFIG.OPENCLAW_WS_URL.replace('ws://', 'http://').replace('wss://', 'https://').replace('/clawbot', '');
-        const response = await fetch(`${baseUrl}/api/v1/chat`, {
+        // Use proxy to avoid CORS
+        const response = await fetch('/api/openclaw/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -83,7 +88,7 @@ window.sendToOpenClaw = async function(text) {
             useLocalResponse();
         }
     } catch (e) {
-        console.log('⚠️ OpenClaw HTTP error:', e.message);
+        console.log('⚠️ OpenClaw proxy error:', e.message);
         window.openclawConnected = false;
         useLocalResponse();
     }

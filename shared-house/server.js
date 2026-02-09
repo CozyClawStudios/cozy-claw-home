@@ -727,6 +727,55 @@ app.get('/api/economy/stats', async (req, res) => {
 });
 */
 
+// ==================== OPENCLAW PROXY (Bypass CORS) ====================
+
+// Proxy status check
+app.get('/api/openclaw/status', async (req, res) => {
+    try {
+        const response = await fetch('http://127.0.0.1:18789/api/status');
+        const data = await response.json();
+        res.json({ connected: true, data });
+    } catch (err) {
+        res.json({ connected: false, error: err.message });
+    }
+});
+
+// Proxy chat messages to OpenClaw
+app.post('/api/openclaw/chat', async (req, res) => {
+    try {
+        const { message, session, context } = req.body;
+        
+        // Forward to OpenClaw
+        const response = await fetch('http://127.0.0.1:18789/api/v1/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message, session, context })
+        });
+        
+        if (!response.ok) {
+            // Try alternative endpoint
+            const altResponse = await fetch('http://127.0.0.1:18789/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message, session, context })
+            });
+            
+            if (!altResponse.ok) {
+                return res.status(502).json({ error: 'OpenClaw not responding' });
+            }
+            
+            const altData = await altResponse.json();
+            return res.json(altData);
+        }
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error('OpenClaw proxy error:', err);
+        res.status(502).json({ error: err.message });
+    }
+});
+
 // ==================== FUTURE: VOICE API (Not Ready) ====================
 /*
 // Get voice system status
