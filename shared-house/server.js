@@ -747,18 +747,22 @@ function connectToOpenClaw() {
         openclawWs.on('message', (data) => {
             try {
                 const msg = JSON.parse(data);
-                console.log('📨 OpenClaw message:', msg.type, msg.event || '');
+                console.log('📨 OpenClaw message:', JSON.stringify(msg, null, 2));
                 
                 // Handle connection challenge
                 if (msg.type === 'event' && msg.event === 'connect.challenge') {
                     console.log('🔐 Responding to OpenClaw challenge...');
-                    openclawWs.send(JSON.stringify({
+                    const response = {
                         type: 'connect.challenge_response',
+                        id: msg.id || uuidv4(),
+                        timestamp: Date.now(),
                         payload: {
-                            nonce: msg.payload.nonce,
+                            nonce: msg.payload?.nonce,
                             accepted: true
                         }
-                    }));
+                    };
+                    console.log('📤 Sending challenge response:', JSON.stringify(response));
+                    openclawWs.send(JSON.stringify(response));
                     return;
                 }
                 
@@ -766,6 +770,12 @@ function connectToOpenClaw() {
                 if (msg.type === 'event' && msg.event === 'connect.ready') {
                     console.log('✅ OpenClaw connection established!');
                     openclawConnected = true;
+                    return;
+                }
+                
+                // Handle connection error
+                if (msg.type === 'event' && msg.event === 'connect.error') {
+                    console.error('❌ OpenClaw connection error:', msg.payload);
                     return;
                 }
                 
