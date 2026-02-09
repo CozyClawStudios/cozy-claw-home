@@ -29,3 +29,4 @@
 {"type":"companion_message","id":"4520df3f-9012-4061-9b53-60afb39ab463","content":"path test","sessionId":"api:default","timestamp":"2026-02-09T08:04:44.657Z","source":"cozy-claw-home"}
 {"type":"companion_message","id":"3ca1891b-319b-4fc9-959f-8fd487f93e83","content":"telegram webhook test","sessionId":"api:default","timestamp":"2026-02-09T08:11:42.104Z","source":"cozy-claw-home"}
 {"type":"companion_message","id":"96f143aa-1fb2-4da6-81d8-39db44ea5f17","content":"api test","sessionId":"api:default","timestamp":"2026-02-09T08:17:10.097Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"2f70a887-e221-40c3-b207-c71c8b21ff52","content":"webhook test from api","sessionId":"api:default","timestamp":"2026-02-09T08:44:48.746Z","source":"cozy-claw-home"}

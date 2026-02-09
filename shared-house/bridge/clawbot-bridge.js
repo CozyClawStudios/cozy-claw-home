@@ -146,14 +146,53 @@ class ClawBotBridge extends EventEmitter {
         }
     }
     
-    // Forward message to Celest via file queue (webhooks require gateway restart)
+    // Forward message to Celest via OpenClaw webhook
     forwardToOpenClaw(message) {
+        const http = require('http');
+        
+        const postData = JSON.stringify({
+            text: `[Companion House] ${message.content}`,
+            mode: 'now'
+        });
+        
+        const options = {
+            hostname: 'localhost',
+            port: 18789,
+            path: '/hooks/wake',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer companion-house-secret',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        };
+        
+        const req = http.request(options, (res) => {
+            if (res.statusCode === 200) {
+                console.log('✅ Delivered to Celest:', message.content.substring(0, 40));
+            } else {
+                console.error('❌ Webhook returned:', res.statusCode);
+                // Fallback to file queue
+                this.fallbackToFile(message);
+            }
+        });
+        
+        req.on('error', (err) => {
+            console.error('❌ Webhook error:', err.message);
+            // Fallback to file queue
+            this.fallbackToFile(message);
+        });
+        
+        req.write(postData);
+        req.end();
+    }
+    
+    // Fallback to file queue if webhook fails
+    fallbackToFile(message) {
         const fs = require('fs');
         const path = require('path');
         
-        // Write to a queue file that Celest polls
         const queueFile = path.join(__dirname, '..', '.clawbot-queue.jsonl');
-        
         const entry = {
             type: 'companion_message',
             id: message.id,
@@ -165,7 +204,7 @@ class ClawBotBridge extends EventEmitter {
         
         try {
             fs.appendFileSync(queueFile, JSON.stringify(entry) + '\n');
-            console.log('✅ Queued for Celest (tell her "check game"):', message.content.substring(0, 40));
+            console.log('📁 Fallback to file queue:', message.content.substring(0, 40));
         } catch (err) {
             console.error('❌ Failed to queue:', err.message);
         }
