@@ -3,6 +3,103 @@
  * A cozy personal space with your AI companion
  */
 
+// ==================== OPENCLAW CONNECTION ====================
+
+let openclawSocket = null;
+window.openclawConnected = false;
+
+function connectToOpenClaw() {
+    try {
+        // Try to connect to OpenClaw bridge
+        openclawSocket = new WebSocket('ws://localhost:8080/clawbot');
+        
+        openclawSocket.onopen = () => {
+            console.log('✅ Connected to OpenClaw');
+            window.openclawConnected = true;
+            openclawSocket.send(JSON.stringify({
+                type: 'auth',
+                apiKey: 'cozy-claw-home-secret'
+            }));
+        };
+        
+        openclawSocket.onmessage = (event) => {
+            try {
+                const response = JSON.parse(event.data);
+                if (response.type === 'response' && response.data) {
+                    addMessage('Celest', response.data.text, true);
+                    
+                    // Show in thought bubble
+                    const thoughtBubble = document.getElementById('thoughtBubble');
+                    thoughtBubble.textContent = response.data.text;
+                    thoughtBubble.classList.add('visible');
+                    
+                    setTimeout(() => {
+                        thoughtBubble.classList.remove('visible');
+                    }, 3000);
+                }
+            } catch (e) {
+                console.error('Error parsing OpenClaw response:', e);
+            }
+        };
+        
+        openclawSocket.onclose = () => {
+            console.log('🔌 OpenClaw disconnected');
+            window.openclawConnected = false;
+            // Try to reconnect after 5 seconds
+            setTimeout(connectToOpenClaw, 5000);
+        };
+        
+        openclawSocket.onerror = (err) => {
+            console.log('⚠️ OpenClaw connection error, using local loop');
+            window.openclawConnected = false;
+        };
+    } catch (e) {
+        console.log('⚠️ OpenClaw not available, using local loop');
+        window.openclawConnected = false;
+    }
+}
+
+window.sendToOpenClaw = function(text) {
+    if (openclawSocket && openclawSocket.readyState === WebSocket.OPEN) {
+        openclawSocket.send(JSON.stringify({
+            type: 'query',
+            text: text,
+            context: {
+                room: currentRoomId,
+                decorations: 'cozy home'
+            }
+        }));
+    } else {
+        // Fallback to local loop if socket not ready
+        window.openclawConnected = false;
+        useLocalResponse();
+    }
+};
+
+function useLocalResponse() {
+    setTimeout(() => {
+        const responses = [
+            "That's interesting! Tell me more.",
+            "I love chatting with you! 💕",
+            "Hmm, let me think about that...",
+            "You're so creative! ✨",
+            "Want to decorate the room together?",
+            "This is so cozy! 🏠"
+        ];
+        const response = responses[Math.floor(Math.random() * responses.length)];
+        addMessage('Celest', response, true);
+        
+        // Show in thought bubble too
+        const thoughtBubble = document.getElementById('thoughtBubble');
+        thoughtBubble.textContent = response;
+        thoughtBubble.classList.add('visible');
+        
+        setTimeout(() => {
+            thoughtBubble.classList.remove('visible');
+        }, 3000);
+    }, 1000);
+}
+
 // ==================== APP STATE ====================
 const app = {
     memories: [],
@@ -117,28 +214,34 @@ function sendMessage() {
     addMessage('You', text, false);
     input.value = '';
     
-    // Simulate Celest's response
-    setTimeout(() => {
-        const responses = [
-            "That's interesting! Tell me more.",
-            "I love chatting with you! 💕",
-            "Hmm, let me think about that...",
-            "You're so creative! ✨",
-            "Want to decorate the room together?",
-            "This is so cozy! 🏠"
-        ];
-        const response = responses[Math.floor(Math.random() * responses.length)];
-        addMessage('Celest', response, true);
-        
-        // Show in thought bubble too
-        const thoughtBubble = document.getElementById('thoughtBubble');
-        thoughtBubble.textContent = response;
-        thoughtBubble.classList.add('visible');
-        
+    // Check if OpenClaw is connected
+    if (window.openclawConnected && window.sendToOpenClaw) {
+        // Send to OpenClaw for real AI response
+        window.sendToOpenClaw(text);
+    } else {
+        // Use local fallback loop
         setTimeout(() => {
-            thoughtBubble.classList.remove('visible');
-        }, 3000);
-    }, 1000);
+            const responses = [
+                "That's interesting! Tell me more.",
+                "I love chatting with you! 💕",
+                "Hmm, let me think about that...",
+                "You're so creative! ✨",
+                "Want to decorate the room together?",
+                "This is so cozy! 🏠"
+            ];
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            addMessage('Celest', response, true);
+            
+            // Show in thought bubble too
+            const thoughtBubble = document.getElementById('thoughtBubble');
+            thoughtBubble.textContent = response;
+            thoughtBubble.classList.add('visible');
+            
+            setTimeout(() => {
+                thoughtBubble.classList.remove('visible');
+            }, 3000);
+        }, 1000);
+    }
 }
 
 function handleKeyPress(event) {
@@ -1093,6 +1196,9 @@ function init() {
     loadSavedWindowView();
     loadCustomBackground();
     updateMemoryCount();
+    
+    // Connect to OpenClaw if available
+    connectToOpenClaw();
     
     // Start AI connection
     onAIConnect();
