@@ -453,24 +453,11 @@ class ClawBotBridge extends EventEmitter {
     }
     
     // Send recent responses to new connection (helps with session recovery)
+    // DISABLED: Causing duplicate messages since Socket.IO is working well
     sendRecentResponses(socket) {
-        const cutoff = Date.now() - 2 * 60 * 1000; // Last 2 minutes
-        // Only send actual agent responses, not user message echoes
-        const recent = this.recentResponses.filter(r => r.storedAt > cutoff && r.isAgentResponse);
-        
-        if (recent.length > 0) {
-            console.log(`📚 Sending ${recent.length} recent responses to new connection:`, socket.id);
-            
-            for (const resp of recent) {
-                socket.emit('agent:message', {
-                    text: resp.text,
-                    mood: resp.mood || 'content',
-                    timestamp: resp.timestamp || new Date().toISOString(),
-                    fromRecentBuffer: true
-                });
-                this.stats.responsesDelivered++;
-            }
-        }
+        // Skip - real-time Socket.IO delivery is sufficient
+        // Keeping function for compatibility but not sending duplicates
+        return;
     }
     
     // Send pending responses for a specific client (after they reconnect with same clientId)
