@@ -3,15 +3,36 @@
  * A cozy personal space with your AI companion
  */
 
+// ==================== CONFIGURATION ====================
+const CONFIG = {
+    // OpenClaw Bridge Connection
+    // Set to null to disable OpenClaw connection (use local responses only)
+    // Or set to your OpenClaw WebSocket URL: 'ws://localhost:8080/clawbot'
+    OPENCLAW_WS_URL: localStorage.getItem('openclawUrl') || 'ws://localhost:8080/clawbot',
+    
+    // Enable/disable OpenClaw connection
+    OPENCLAW_ENABLED: localStorage.getItem('openclawEnabled') !== 'false',
+    
+    // Local response fallback when OpenClaw is disabled
+    USE_LOCAL_RESPONSES: true
+};
+
 // ==================== OPENCLAW CONNECTION ====================
 
 let openclawSocket = null;
 window.openclawConnected = false;
 
 function connectToOpenClaw() {
+    // Skip if disabled
+    if (!CONFIG.OPENCLAW_ENABLED || !CONFIG.OPENCLAW_WS_URL) {
+        console.log('ℹ️ OpenClaw connection disabled, using local mode');
+        window.openclawConnected = false;
+        return;
+    }
+    
     try {
         // Try to connect to OpenClaw bridge
-        openclawSocket = new WebSocket('ws://localhost:8080/clawbot');
+        openclawSocket = new WebSocket(CONFIG.OPENCLAW_WS_URL);
         
         openclawSocket.onopen = () => {
             console.log('✅ Connected to OpenClaw');
@@ -453,6 +474,77 @@ function loadSettings() {
         } catch (e) {
             console.warn('Failed to load settings');
         }
+    }
+    
+    // Load OpenClaw settings
+    loadOpenClawSettings();
+}
+
+// ==================== OPENCLAW SETTINGS ====================
+
+function toggleOpenClaw() {
+    const enabled = localStorage.getItem('openclawEnabled') !== 'false';
+    const newEnabled = !enabled;
+    localStorage.setItem('openclawEnabled', newEnabled);
+    
+    const toggle = document.getElementById('openclawToggle');
+    if (toggle) {
+        toggle.classList.toggle('active', newEnabled);
+    }
+    
+    // Update CONFIG
+    CONFIG.OPENCLAW_ENABLED = newEnabled;
+    
+    if (newEnabled) {
+        connectToOpenClaw();
+        addMessage('Celest', 'Connecting to OpenClaw... 🔗', true);
+    } else {
+        if (openclawSocket) {
+            openclawSocket.close();
+        }
+        window.openclawConnected = false;
+        addMessage('Celest', 'Switched to local mode 📴', true);
+    }
+}
+
+function saveOpenClawUrl(url) {
+    localStorage.setItem('openclawUrl', url);
+    CONFIG.OPENCLAW_WS_URL = url || null;
+}
+
+function loadOpenClawSettings() {
+    const enabled = localStorage.getItem('openclawEnabled') !== 'false';
+    const url = localStorage.getItem('openclawUrl') || 'ws://localhost:8080/clawbot';
+    
+    const toggle = document.getElementById('openclawToggle');
+    const urlInput = document.getElementById('openclawUrl');
+    
+    if (toggle) {
+        toggle.classList.toggle('active', enabled);
+    }
+    if (urlInput) {
+        urlInput.value = url;
+    }
+}
+
+function reconnectOpenClaw() {
+    if (openclawSocket) {
+        openclawSocket.close();
+    }
+    window.openclawConnected = false;
+    
+    // Reload settings
+    const url = document.getElementById('openclawUrl')?.value || localStorage.getItem('openclawUrl');
+    const enabled = localStorage.getItem('openclawEnabled') !== 'false';
+    
+    CONFIG.OPENCLAW_WS_URL = url || null;
+    CONFIG.OPENCLAW_ENABLED = enabled;
+    
+    if (enabled && url) {
+        connectToOpenClaw();
+        addMessage('Celest', 'Reconnecting to OpenClaw... 🔄', true);
+    } else {
+        addMessage('Celest', 'Using local responses 📴', true);
     }
 }
 
@@ -1340,6 +1432,9 @@ window.closeModal = closeModal;
 window.closeModalDirect = closeModalDirect;
 window.toggleSetting = toggleSetting;
 window.updateEnergy = updateEnergy;
+window.toggleOpenClaw = toggleOpenClaw;
+window.saveOpenClawUrl = saveOpenClawUrl;
+window.reconnectOpenClaw = reconnectOpenClaw;
 window.decorPanel = decorPanel;
 window.uploadBackground = uploadBackground;
 window.resetBackground = resetBackground;

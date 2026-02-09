@@ -1421,6 +1421,39 @@
             </div>
             
             <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
+                <h3 style="color: #ff9a9e; margin: 0 0 15px 0; font-size: 1rem;">🔗 OpenClaw Connection</h3>
+                
+                <div class="setting-item" style="padding: 0;">
+                    <div class="toggle" style="margin-bottom: 10px;">
+                        <span>Enable OpenClaw Bridge</span>
+                        <div class="toggle-switch" id="openclawToggle" onclick="toggleOpenClaw()" style="cursor: pointer;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px;">WebSocket URL</label>
+                    <input type="text" id="openclawUrl" placeholder="ws://localhost:8080/clawbot" 
+                           style="width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; color: white; font-size: 0.85rem;"
+                           onchange="saveOpenClawUrl(this.value)">
+                    <div style="font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px;">
+                        Leave empty to use local responses only
+                    </div>
+                </div>
+                
+                <button onclick="reconnectOpenClaw()" style="
+                    width: 100%;
+                    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+                    border: none;
+                    padding: 10px 16px;
+                    border-radius: 8px;
+                    color: #1a1a2e;
+                    cursor: pointer;
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                ">🔄 Reconnect</button>
+            </div>
+            
+            <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
                 <div class="setting-label" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                     <span>🖼️ Room Background</span>
                     <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">1920x1080 recommended</span>
