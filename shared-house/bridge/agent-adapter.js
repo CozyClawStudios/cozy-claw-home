@@ -1,18 +1,7 @@
 /**
- * Agent Adapter - For Main Agent to Connect to Bridge
+ * Agent Adapter - Connects Companion House to Celest (Main Agent)
  * 
- * This module allows the main agent (Celest) to:
- * 1. Connect to the bridge via WebSocket or file polling
- * 2. Receive messages from the UI
- * 3. Send responses back to the UI
- * 
- * Usage in main agent:
- *   const adapter = new AgentAdapter();
- *   await adapter.connect();
- *   adapter.on('message', async (msg) => {
- *     const response = await generateResponse(msg.content);
- *     await adapter.sendResponse(msg.sessionId, response);
- *   });
+ * Flow: Game UI → Bridge → inbox.jsonl → (Celest reads) → outbox.jsonl → Bridge → Game UI
  */
 
 const io = require('socket.io-client');
@@ -27,8 +16,8 @@ class AgentAdapter extends EventEmitter {
         
         this.options = {
             bridgeUrl: options.bridgeUrl || 'http://localhost:3000',
-            useSocket: options.useSocket !== false, // Default true
-            useFilePolling: options.useFilePolling !== false, // Default true
+            useSocket: options.useSocket !== false,
+            useFilePolling: options.useFilePolling !== false,
             pollInterval: options.pollInterval || 1000,
             ...options
         };
@@ -38,20 +27,25 @@ class AgentAdapter extends EventEmitter {
         this.connected = false;
         this.pollTimer = null;
         this.processingMessages = new Set();
+        this.pendingResponses = new Map(); // Track pending responses
+        
+        this.inboxPath = path.join(__dirname, '..', 'inbox.jsonl');
+        this.outboxPath = path.join(__dirname, '..', 'outbox.jsonl');
     }
     
     async connect() {
         console.log('🔌 AgentAdapter: Connecting to bridge...');
         
-        // Try WebSocket first
         if (this.options.useSocket) {
             await this.connectSocket();
         }
         
-        // Also set up file polling as backup/fallback
         if (this.options.useFilePolling) {
             await this.connectFilePolling();
         }
+        
+        // Start polling for Celest's responses
+        this.startResponsePolling();
         
         this.connected = true;
         this.emit('connected');
@@ -60,7 +54,7 @@ class AgentAdapter extends EventEmitter {
     }
     
     async connectSocket() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.socket = io(this.options.bridgeUrl, {
                 reconnection: true,
                 reconnectionDelay: 1000,
@@ -69,14 +63,11 @@ class AgentAdapter extends EventEmitter {
             
             this.socket.on('connect', () => {
                 console.log('📡 AgentAdapter: Socket connected');
-                
-                // Register as main agent
                 this.socket.emit('agent:register', {
                     name: 'Celest',
                     version: '1.0.0',
                     capabilities: ['chat', 'memory', 'tools']
                 });
-                
                 resolve();
             });
             
@@ -90,21 +81,20 @@ class AgentAdapter extends EventEmitter {
             });
             
             this.socket.on('connect_error', (err) => {
-                console.log('📡 AgentAdapter: Socket connection failed:', err.message);
-                // Don't reject - we'll fall back to file polling
+                console.log('📡 AgentAdapter: Socket error:', err.message);
                 resolve();
             });
             
-            // Timeout after 5 seconds
             setTimeout(() => resolve(), 5000);
         });
     }
     
     async connectFilePolling() {
-        this.queue = new MessageQueue();
+        // Use the same queue directory as the server
+        const queueDir = '/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/memory/message-queue';
+        this.queue = new MessageQueue(queueDir);
         await this.queue.init();
         
-        // Watch for new messages
         this.queue.watch((message) => {
             this.handleMessage(message);
         });
@@ -113,13 +103,11 @@ class AgentAdapter extends EventEmitter {
     }
     
     handleMessage(message) {
-        // Prevent duplicate processing
         if (this.processingMessages.has(message.id)) {
             return;
         }
         this.processingMessages.add(message.id);
         
-        // Clean up after 5 minutes
         setTimeout(() => {
             this.processingMessages.delete(message.id);
         }, 5 * 60 * 1000);
@@ -128,7 +116,6 @@ class AgentAdapter extends EventEmitter {
         this.emit('message', message);
     }
     
-    // Send response back to user
     async sendResponse(sessionId, response) {
         const responseData = {
             text: typeof response === 'string' ? response : response.text,
@@ -137,66 +124,86 @@ class AgentAdapter extends EventEmitter {
             timestamp: new Date().toISOString()
         };
         
-        // Try WebSocket first
-        if (this.socket?.connected) {
-            this.socket.emit('agent:response', {
-                sessionId,
-                response: responseData
-            });
-            console.log('📤 AgentAdapter: Sent via socket');
-        }
-        
-        // Also store in queue for persistence
         if (this.queue) {
             await this.queue.storeResponse(sessionId, {
                 type: 'agent_response',
                 content: responseData.text,
                 metadata: responseData
             });
+            console.log('📤 AgentAdapter: Stored response in queue');
         }
         
         this.emit('response:sent', { sessionId, response: responseData });
     }
     
-    // Mark message as processed (removes from queue)
     async markProcessed(message) {
         if (this.queue && message._filepath) {
             await this.queue.markProcessed(message._filepath);
         }
     }
     
-    // Get queue stats
-    async getStats() {
+    // NEW: Poll for responses from Celest (outbox.jsonl)
+    startResponsePolling() {
+        setInterval(async () => {
+            try {
+                if (!fs.existsSync(this.outboxPath)) {
+                    return;
+                }
+                
+                const lines = fs.readFileSync(this.outboxPath, 'utf8')
+                    .split('\n')
+                    .filter(line => line.trim());
+                
+                if (lines.length === 0) return;
+                
+                // Clear outbox after reading
+                fs.writeFileSync(this.outboxPath, '');
+                
+                for (const line of lines) {
+                    try {
+                        const response = JSON.parse(line);
+                        if (response.sessionId && response.text) {
+                            console.log('📥 Celest response:', response.text.substring(0, 50));
+                            await this.sendResponse(response.sessionId, {
+                                text: response.text,
+                                mood: response.mood || 'content'
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse response:', err.message);
+                    }
+                }
+            } catch (err) {
+                // Silent fail - will retry
+            }
+        }, 1000); // Poll every second
+    }
+    
+    getStats() {
         if (this.queue) {
-            return await this.queue.getStats();
+            return this.queue.getStats();
         }
         return { pending: 0 };
     }
     
-    // Disconnect
     disconnect() {
         this.connected = false;
-        
         if (this.socket) {
             this.socket.disconnect();
             this.socket = null;
         }
-        
         if (this.pollTimer) {
             clearInterval(this.pollTimer);
             this.pollTimer = null;
         }
-        
         if (this.queue) {
             this.queue.close();
             this.queue = null;
         }
-        
         this.emit('disconnected');
     }
 }
 
-// Simple file-based adapter for minimal setups
 class FileAdapter extends EventEmitter {
     constructor(queueDir) {
         super();
@@ -207,12 +214,9 @@ class FileAdapter extends EventEmitter {
     
     async connect() {
         await this.queue.init();
-        
-        // Watch for messages
         this.queue.watch((message) => {
             this.emit('message', message);
         });
-        
         console.log('📁 FileAdapter: Watching for messages...');
     }
     
@@ -244,7 +248,7 @@ if (require.main === module) {
         console.log('\n📝 User message:', msg.content);
         console.log('   Session:', msg.sessionId);
         
-        // Forward to OpenClaw inbox for Celest to process
+        // Write to inbox for Celest to pick up
         const inboxEntry = {
             type: 'companion_message',
             id: msg.id,
@@ -254,17 +258,10 @@ if (require.main === module) {
             source: 'cozy-claw-home'
         };
         
-        // Write to inbox file for OpenClaw to pick up
-        const inboxPath = path.join(__dirname, '..', 'inbox.jsonl');
-        fs.appendFileSync(inboxPath, JSON.stringify(inboxEntry) + '\n');
-        console.log('📨 Forwarded to OpenClaw inbox');
+        fs.appendFileSync(adapter.inboxPath, JSON.stringify(inboxEntry) + '\n');
+        console.log('📨 Forwarded to inbox (waiting for Celest response)');
         
-        // Send immediate acknowledgment to user
-        await adapter.sendResponse(msg.sessionId, {
-            text: "Let me check that for you, sir...",
-            mood: 'thinking'
-        });
-        
+        // Don't send immediate response - wait for Celest
         await adapter.markProcessed(msg);
     });
     
@@ -273,7 +270,6 @@ if (require.main === module) {
         process.exit(1);
     });
     
-    // Graceful shutdown
     process.on('SIGINT', () => {
         console.log('\n👋 Disconnecting...');
         adapter.disconnect();

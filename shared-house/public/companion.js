@@ -362,6 +362,14 @@ function toggleVoice() {
 }
 
 function handleVoiceResult(event) {
+    // Don't process if TTS is speaking (prevent echo)
+    if (ttsSpeaking) {
+        console.log('Ignoring voice input - TTS is speaking');
+        state.voiceRecording = false;
+        document.getElementById('voiceBtn').classList.remove('recording');
+        return;
+    }
+    
     const transcript = event.results[0][0].transcript;
     document.getElementById('chatInput').value = transcript;
     sendMessage();
@@ -377,14 +385,22 @@ function handleVoiceError(event) {
     showThought('Sorry, I didn\'t catch that');
 }
 
+let ttsSpeaking = false;
+
 function speak(text) {
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
+    
+    ttsSpeaking = true;
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
     utterance.pitch = 1;
     utterance.volume = 1;
+    
+    utterance.onend = () => {
+        ttsSpeaking = false;
+    };
     
     // Try to find a pleasant voice
     const voices = window.speechSynthesis.getVoices();
