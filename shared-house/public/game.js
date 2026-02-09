@@ -532,7 +532,24 @@ const decorPanel = {
                 { emoji: '🌙', name: 'Moon', size: 'small', category: 'small' },
                 { emoji: '⭐', name: 'Star', size: 'small', category: 'small' },
                 { emoji: '🔥', name: 'Fire', size: 'small', category: 'small' },
-                { emoji: '💰', name: 'Money', size: 'small', category: 'small' }
+                { emoji: '💰', name: 'Money', size: 'small', category: 'small' },
+                
+                // Kitchen Items (NEW)
+                { emoji: '🧊', name: 'Fridge', size: 'large', category: 'furniture' },
+                { emoji: '🍳', name: 'Stove', size: 'medium', category: 'furniture' },
+                { emoji: '🚰', name: 'Sink', size: 'medium', category: 'furniture' },
+                { emoji: '🥘', name: 'Pan', size: 'small', category: 'small' },
+                { emoji: '🍽️', name: 'Plate', size: 'small', category: 'small' },
+                { emoji: '🥄', name: 'Spoon', size: 'small', category: 'small' },
+                { emoji: '🔪', name: 'Knife', size: 'small', category: 'small' },
+                { emoji: '🧂', name: 'Salt', size: 'small', category: 'small' },
+                { emoji: '🍞', name: 'Bread', size: 'small', category: 'small' },
+                { emoji: '🧈', name: 'Butter', size: 'small', category: 'small' },
+                { emoji: '🥚', name: 'Eggs', size: 'small', category: 'small' },
+                { emoji: '🥛', name: 'Milk', size: 'small', category: 'small' },
+                { emoji: '🧀', name: 'Cheese', size: 'small', category: 'small' },
+                { emoji: '🍎', name: 'Apple', size: 'small', category: 'small' },
+                { emoji: '🍌', name: 'Banana', size: 'small', category: 'small' }
             ];
             
             // Group items by category
