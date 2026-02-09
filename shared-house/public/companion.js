@@ -153,18 +153,19 @@ async function fetchBridgeStatus() {
 
 // NEW: Poll for bridge responses
 async function pollBridgeResponses() {
-    if (!state.bridge.pendingResponses) return;
-    
+    // Always poll, not just when pending flag is set
     try {
-        // This would need a session identifier - using socket.id as proxy
         const sessionId = state.socket?.id ? `web:${state.socket.id}` : 'web:default';
         
+        console.log('📡 Polling for responses...', sessionId);
         const response = await fetch(`/api/clawbot/responses?sessionId=${sessionId}`);
         const data = await response.json();
         
         if (data.responses?.length > 0) {
+            console.log('📥 Received', data.responses.length, 'responses from bridge');
             for (const resp of data.responses) {
                 if (resp.type === 'agent_response') {
+                    console.log('📝 Displaying response:', resp.content.substring(0, 50));
                     receiveAgentMessage({
                         text: resp.content,
                         mood: resp.metadata?.mood || 'content',
@@ -173,10 +174,9 @@ async function pollBridgeResponses() {
                     });
                 }
             }
-            state.bridge.pendingResponses = false;
         }
     } catch (err) {
-        // Silent fail - will retry
+        console.error('❌ Poll error:', err.message);
     }
 }
 
@@ -267,6 +267,14 @@ async function sendMessage() {
     const text = input.value.trim();
     
     if (!text) return;
+    
+    // Prevent duplicate messages within 1 second
+    const hash = getMessageHash(text, Date.now());
+    if (hash === lastMessageHash) {
+        console.log('Duplicate message prevented');
+        return;
+    }
+    lastMessageHash = hash;
     
     // Add user message to UI
     addMessage({
@@ -386,6 +394,11 @@ function handleVoiceError(event) {
 }
 
 let ttsSpeaking = false;
+let lastMessageHash = ''; // Prevent duplicates
+
+function getMessageHash(text, timestamp) {
+    return text + '|' + Math.floor(timestamp / 1000); // Same second = duplicate
+}
 
 function speak(text) {
     // Cancel any ongoing speech
@@ -579,5 +592,4 @@ if ('speechSynthesis' in window) {
     window.speechSynthesis.getVoices();
 }
 
-// Make decor panel globally available
-let decorPanel;
+// decorPanel is defined in game.js
