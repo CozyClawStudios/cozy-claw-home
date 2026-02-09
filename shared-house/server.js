@@ -770,10 +770,10 @@ function connectToOpenClaw() {
                             nonce: msg.payload?.nonce,
                             ts: msg.payload?.ts,
                             accepted: true,
-                            token: openclawToken
+                            token: 'cozyclaw'
                         }
                     };
-                    console.log('📤 Sending challenge response with token');
+                    console.log('📤 Sending challenge response with cozyclaw token');
                     openclawWs.send(JSON.stringify(response));
                     return;
                 }
