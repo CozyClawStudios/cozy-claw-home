@@ -240,13 +240,8 @@ function startTutorialHighlight() {
 const recentMessages = new Set();
 const MAX_RECENT_MESSAGES = 20;
 
-// Game-specific addMessage - delegates to companion.js version if it exists
+// Game-specific addMessage - handles both object and string formats
 function gameAddMessage(sender, text, isAgent = false) {
-    // If companion.js addMessage exists, use it for object format
-    if (typeof window.companionAddMessage === 'function' && typeof sender === 'object') {
-        return window.companionAddMessage(sender);
-    }
-    
     // Handle object format (from companion.js style calls)
     if (typeof sender === 'object' && sender !== null) {
         const msg = sender;

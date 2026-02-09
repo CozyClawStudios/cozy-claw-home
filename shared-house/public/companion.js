@@ -412,12 +412,7 @@ function receiveAgentMessage(message) {
 function addMessage(msg) {
     state.messages.push(msg);
     
-    // Also call game.js version if it exists (for proper UI display)
-    if (typeof gameAddMessage === 'function') {
-        gameAddMessage(msg);
-        return;
-    }
-    
+    // Direct DOM manipulation - don't call gameAddMessage to avoid recursion
     const historyEl = document.getElementById('messageHistory');
     if (!historyEl) return;
     
@@ -439,9 +434,6 @@ function addMessage(msg) {
         historyEl.removeChild(historyEl.firstChild);
     }
 }
-
-// Expose for game.js to use
-window.companionAddMessage = addMessage;
 
 function escapeHtml(text) {
     const div = document.createElement('div');
