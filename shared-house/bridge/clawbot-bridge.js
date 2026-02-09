@@ -126,13 +126,16 @@ class ClawBotBridge extends EventEmitter {
             // Method 2: Queue for agent to pick up
             await this.queue.enqueue(message);
             
+            // Method 3: Direct HTTP webhook to OpenClaw gateway
+            this.forwardToOpenClaw(message);
+            
             // Notify UI that message is queued
             socket.emit('message:queued', {
                 messageId: message.id,
                 status: 'pending'
             });
             
-            console.log('📤 Message queued:', message.id);
+            console.log('📤 Message queued and forwarded to OpenClaw:', message.id);
             
         } catch (err) {
             console.error('Failed to handle message:', err);
@@ -142,6 +145,24 @@ class ClawBotBridge extends EventEmitter {
                 messageId: message.id
             });
         }
+    }
+    
+    // Forward message to OpenClaw via HTTP webhook
+    forwardToOpenClaw(message) {
+        const http = require('http');
+        const { exec } = require('child_process');
+        
+        // Use openclaw CLI to send to main session
+        const escapedMessage = message.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        const cmd = `openclaw sessions send --session-key "agent:main:main" --message "[Companion House] ${escapedMessage}"`;
+        
+        exec(cmd, { timeout: 10000 }, (err, stdout, stderr) => {
+            if (err) {
+                console.error('❌ Failed to forward to OpenClaw:', err.message);
+            } else {
+                console.log('✅ Forwarded to OpenClaw:', message.content.substring(0, 40));
+            }
+        });
     }
     
     handleAgentRegistration(socket, data) {
