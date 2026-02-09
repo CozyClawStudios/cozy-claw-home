@@ -741,27 +741,48 @@ function connectToOpenClaw() {
         
         openclawWs.on('open', () => {
             console.log('✅ Connected to OpenClaw WebSocket');
-            openclawConnected = true;
-            
-            // Send authentication if needed
-            openclawWs.send(JSON.stringify({
-                type: 'auth',
-                source: 'cozy-claw-home'
-            }));
+            // Wait for challenge before marking as connected
         });
         
         openclawWs.on('message', (data) => {
             try {
-                const response = JSON.parse(data);
-                console.log('📨 OpenClaw response:', response);
+                const msg = JSON.parse(data);
+                console.log('📨 OpenClaw message:', msg.type, msg.event || '');
                 
-                // Handle response
-                if (response.type === 'response' && response.id) {
-                    const pending = pendingRequests.get(response.id);
+                // Handle connection challenge
+                if (msg.type === 'event' && msg.event === 'connect.challenge') {
+                    console.log('🔐 Responding to OpenClaw challenge...');
+                    openclawWs.send(JSON.stringify({
+                        type: 'connect.challenge_response',
+                        payload: {
+                            nonce: msg.payload.nonce,
+                            accepted: true
+                        }
+                    }));
+                    return;
+                }
+                
+                // Handle successful connection
+                if (msg.type === 'event' && msg.event === 'connect.ready') {
+                    console.log('✅ OpenClaw connection established!');
+                    openclawConnected = true;
+                    return;
+                }
+                
+                // Handle response to chat messages
+                if (msg.type === 'response' && msg.id) {
+                    const pending = pendingRequests.get(msg.id);
                     if (pending) {
-                        pending.resolve(response);
-                        pendingRequests.delete(response.id);
+                        pending.resolve(msg);
+                        pendingRequests.delete(msg.id);
                     }
+                }
+                
+                // Handle agent messages (from Celest)
+                if (msg.type === 'agent:message') {
+                    console.log('💬 Agent message:', msg.data);
+                    // Broadcast to all connected browser clients via Socket.IO
+                    io.emit('agent:message', msg.data);
                 }
             } catch (e) {
                 console.error('Error parsing OpenClaw message:', e);
@@ -771,7 +792,6 @@ function connectToOpenClaw() {
         openclawWs.on('close', () => {
             console.log('🔌 OpenClaw WebSocket disconnected');
             openclawConnected = false;
-            // Reconnect after 5 seconds
             setTimeout(connectToOpenClaw, 5000);
         });
         
@@ -793,6 +813,11 @@ function sendToOpenClaw(message, context = {}) {
             return;
         }
         
+        if (!openclawConnected) {
+            reject(new Error('OpenClaw handshake not complete'));
+            return;
+        }
+        
         const id = uuidv4();
         const timeout = setTimeout(() => {
             pendingRequests.delete(id);
@@ -810,13 +835,18 @@ function sendToOpenClaw(message, context = {}) {
             }
         });
         
+        // Send message in OpenClaw format
         openclawWs.send(JSON.stringify({
-            type: 'message',
+            type: 'user:message',
             id: id,
-            text: message,
-            context: context,
+            data: {
+                text: message,
+                context: context
+            },
             timestamp: new Date().toISOString()
         }));
+        
+        console.log('📤 Sent to OpenClaw:', message);
     });
 }
 

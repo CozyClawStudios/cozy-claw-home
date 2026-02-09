@@ -118,6 +118,42 @@ function useLocalResponse() {
     }, 1000);
 }
 
+// ==================== SOCKET.IO CONNECTION ====================
+
+let socket = null;
+
+function initSocketIO() {
+    try {
+        socket = io();
+        
+        socket.on('connect', () => {
+            console.log('✅ Socket.IO connected');
+        });
+        
+        socket.on('agent:message', (data) => {
+            console.log('💬 Received from agent:', data);
+            if (data && data.text) {
+                addMessage('Celest', data.text, true);
+                
+                // Show in thought bubble
+                const thoughtBubble = document.getElementById('thoughtBubble');
+                thoughtBubble.textContent = data.text;
+                thoughtBubble.classList.add('visible');
+                
+                setTimeout(() => {
+                    thoughtBubble.classList.remove('visible');
+                }, 3000);
+            }
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('🔌 Socket.IO disconnected');
+        });
+    } catch (e) {
+        console.error('Socket.IO init error:', e);
+    }
+}
+
 // ==================== APP STATE ====================
 const app = {
     memories: [],
@@ -1302,6 +1338,9 @@ function init() {
     loadSavedWindowView();
     loadCustomBackground();
     updateMemoryCount();
+    
+    // Initialize Socket.IO for real-time messages
+    initSocketIO();
     
     // Connect to OpenClaw if available
     connectToOpenClaw();
