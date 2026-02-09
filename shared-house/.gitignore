@@ -45,3 +45,9 @@ Thumbs.db
 # Build
 dist/
 build/
+
+# Companion House runtime files
+.clawbot*
+.seen*
+*.jsonl
+memory/message-queue/

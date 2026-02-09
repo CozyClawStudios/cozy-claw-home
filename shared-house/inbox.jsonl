@@ -9,3 +9,23 @@
 {"type":"companion_message","id":"37bf1396-9cee-4cf4-a9b9-affc7102c95c","content":"hello","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:05:49.800Z","source":"cozy-claw-home"}
 {"type":"companion_message","id":"b8fb8de9-d4c0-4125-ab00-db79ce2139c7","content":"yes!","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:06:02.222Z","source":"cozy-claw-home"}
 {"type":"companion_message","id":"43174c30-edaf-4026-9451-e62ff5360fca","content":"HI Celest","sessionId":"web:b9NRy-1x4rhB9VM6AAAb","timestamp":"2026-02-09T07:06:37.997Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"0186d136-5c0c-471c-b692-78db9ea2c663","content":"hello","sessionId":"web:_zg3IWmvm4Ifhw3HAAAL","timestamp":"2026-02-09T07:09:25.136Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"12d856af-f456-45df-8699-b156b8134ca5","content":"Hi","sessionId":"web:N-XdfPETIVIieZpiAAAF","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"2afa99a8-b6b5-4507-b2dc-bb673706e519","content":"hello","sessionId":"web:VKWrMU5JTydPkqbaAAAX","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"32bd7853-3d79-43c2-ad80-b409880e422f","content":"testing","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"37bf1396-9cee-4cf4-a9b9-affc7102c95c","content":"hello","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:09:25.138Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"43174c30-edaf-4026-9451-e62ff5360fca","content":"HI Celest","sessionId":"web:b9NRy-1x4rhB9VM6AAAb","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"6ec976ed-ebdb-459c-b9bd-ce4289005096","content":"hello","sessionId":"web:awv-lqJzMvSkgGs0AAAN","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"7d6a82df-3e63-461b-9ace-8f26df1c1255","content":"hello","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"81b55de7-3e1e-4a0e-ba07-2e6bd05e4983","content":"asdasd","sessionId":"web:8XFPgfKjBug9SkFWAAAV","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"b8fb8de9-d4c0-4125-ab00-db79ce2139c7","content":"yes!","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:09:25.140Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"18328fe2-1916-4884-adb0-ed792066b48b","content":"hi celest","sessionId":"web:GUe7BlYO8Uey6yjKAAAH","timestamp":"2026-02-09T07:09:44.420Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"18328fe2-1916-4884-adb0-ed792066b48b","content":"hi celest","sessionId":"web:GUe7BlYO8Uey6yjKAAAH","timestamp":"2026-02-09T07:21:01.128Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"75dfa84e-6e7e-4409-8a22-e97e58dab583","content":"direct test","sessionId":"api:default","timestamp":"2026-02-09T07:55:13.970Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"9f94cd1a-65bb-4f81-86a4-8e804906f333","content":"test after restart","sessionId":"api:default","timestamp":"2026-02-09T07:56:16.518Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"950507bd-3caf-44be-9d43-3d6b61719a07","content":"test forwarding","sessionId":"api:default","timestamp":"2026-02-09T07:57:19.112Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"6fdbf53c-1532-4dde-9225-e31203af191e","content":"auth test","sessionId":"api:default","timestamp":"2026-02-09T07:58:56.830Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"38fc0044-60d8-4773-b6d7-31685343e5d0","content":"spawn test","sessionId":"api:default","timestamp":"2026-02-09T08:02:14.170Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"4520df3f-9012-4061-9b53-60afb39ab463","content":"path test","sessionId":"api:default","timestamp":"2026-02-09T08:04:44.657Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"3ca1891b-319b-4fc9-959f-8fd487f93e83","content":"telegram webhook test","sessionId":"api:default","timestamp":"2026-02-09T08:11:42.104Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"96f143aa-1fb2-4da6-81d8-39db44ea5f17","content":"api test","sessionId":"api:default","timestamp":"2026-02-09T08:17:10.097Z","source":"cozy-claw-home"}

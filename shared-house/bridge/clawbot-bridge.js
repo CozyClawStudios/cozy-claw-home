@@ -110,6 +110,9 @@ class ClawBotBridge extends EventEmitter {
         };
         
         try {
+            // Always forward to file queue for Celest to pick up
+            this.forwardToOpenClaw(message);
+            
             // Method 1: Direct forward to main agent session (if connected)
             if (this.mainAgentSession) {
                 const agentSocket = this.io.sockets.sockets.get(this.mainAgentSession);
@@ -119,15 +122,11 @@ class ClawBotBridge extends EventEmitter {
                     
                     // Also store in queue for persistence
                     await this.queue.enqueue(message);
-                    return;
                 }
+            } else {
+                // Method 2: Queue for agent to pick up
+                await this.queue.enqueue(message);
             }
-            
-            // Method 2: Queue for agent to pick up
-            await this.queue.enqueue(message);
-            
-            // Method 3: Direct HTTP webhook to OpenClaw gateway
-            this.forwardToOpenClaw(message);
             
             // Notify UI that message is queued
             socket.emit('message:queued', {
@@ -147,29 +146,29 @@ class ClawBotBridge extends EventEmitter {
         }
     }
     
-    // Forward message to OpenClaw via CLI
+    // Forward message to Celest via file queue
     forwardToOpenClaw(message) {
-        const { exec } = require('child_process');
+        const fs = require('fs');
+        const path = require('path');
         
-        // Escape the message for shell
-        const escapedMessage = message.content
-            .replace(/\\/g, '\\\\')
-            .replace(/"/g, '\\"')
-            .replace(/\n/g, ' ');
+        // Write to a queue file that Celest polls
+        const queueFile = path.join(__dirname, '..', '.clawbot-queue.jsonl');
         
-        // Use openclaw to send to main agent session
-        const cmd = `cd /home/zak/.openclaw/workspace && echo "${escapedMessage}" > .clawbot-msg && openclaw sessions send --session-key "agent:main:main" --message "[Companion House] ${escapedMessage}"`;
+        const entry = {
+            type: 'companion_message',
+            id: message.id,
+            content: message.content,
+            sessionId: message.sessionId,
+            timestamp: new Date().toISOString(),
+            source: 'cozy-claw-home'
+        };
         
-        exec(cmd, { 
-            timeout: 15000,
-            env: { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin:/home/zak/.nvm/versions/node/v25.5.0/bin' }
-        }, (err, stdout, stderr) => {
-            if (err) {
-                console.error('❌ Failed to forward:', err.message);
-                return;
-            }
-            console.log('✅ Forwarded to Celest:', message.content.substring(0, 40));
-        });
+        try {
+            fs.appendFileSync(queueFile, JSON.stringify(entry) + '\n');
+            console.log('✅ Queued for Celest:', message.content.substring(0, 40));
+        } catch (err) {
+            console.error('❌ Failed to queue:', err.message);
+        }
     }
     
     handleAgentRegistration(socket, data) {
