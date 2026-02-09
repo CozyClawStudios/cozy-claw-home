@@ -98,7 +98,12 @@ function connectSocket() {
     });
     
     socket.on('agent:message', (message) => {
-        receiveAgentMessage(message);
+        // Track this message ID to prevent HTTP polling from duplicating it
+        const responseId = (message.timestamp || Date.now()) + '|' + (message.text || '').substring(0, 50);
+        if (!displayedResponseIds.has(responseId)) {
+            displayedResponseIds.add(responseId);
+            receiveAgentMessage(message);
+        }
     });
     
     socket.on('agent:activity', (activity) => {
@@ -166,12 +171,17 @@ async function pollBridgeResponses() {
     try {
         const sessionId = state.socket?.id ? `web:${state.socket.id}` : 'web:default';
         
-        console.log('📡 Polling for responses...', sessionId, 'since', lastResponseTimestamp);
+        // Skip polling if socket is connected (responses come via Socket.IO)
+        if (state.socket?.connected) {
+            // Socket.IO handles responses directly, HTTP polling is backup only
+            return;
+        }
+        
         const response = await fetch(`/api/clawbot/responses?sessionId=${sessionId}&since=${encodeURIComponent(lastResponseTimestamp)}`);
         const data = await response.json();
         
         if (data.responses?.length > 0) {
-            console.log('📥 Received', data.responses.length, 'responses from bridge');
+            console.log('📥 Received', data.responses.length, 'responses from bridge (HTTP fallback)');
             let foundNew = false;
             let newestTimestamp = lastResponseTimestamp;
             
@@ -187,7 +197,7 @@ async function pollBridgeResponses() {
                 
                 // Only show responses newer than our last seen
                 if (resp.timestamp > lastResponseTimestamp) {
-                    console.log('📝 Displaying NEW response:', resp.content.substring(0, 50));
+                    console.log('📝 Displaying NEW response (HTTP):', resp.content.substring(0, 50));
                     receiveAgentMessage({
                         text: resp.content,
                         mood: resp.metadata?.mood || 'content',
