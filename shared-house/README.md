@@ -32,6 +32,26 @@ npm start
 open http://localhost:3000
 ```
 
+## OpenClaw Bridge (Optional)
+
+To enable real-time chat with your OpenClaw agent:
+
+```bash
+# In a separate terminal, run the bridge
+node celest-bridge.js
+
+# The game will auto-connect on load
+# If bridge is not running, game uses local AI responses
+```
+
+**Bridge features:**
+- WebSocket connection at `ws://localhost:8080/clawbot`
+- Forwards chat messages to your actual agent
+- Receives responses back into the game chat
+- Auto-reconnects if connection drops
+
+See `celest-bridge.js` for configuration options.
+
 ## Architecture
 
 ```

@@ -260,6 +260,23 @@ class DecorationPanel {
             { id: 'window_city', name: 'City View', category: 'views', style: 'modern', width: 3, height: 2, layer: 3, icon: '🌃' },
             { id: 'window_forest', name: 'Forest View', category: 'views', style: 'nature', width: 3, height: 2, layer: 3, icon: '🌲' },
             { id: 'window_beach', name: 'Beach View', category: 'views', style: 'nature', width: 3, height: 2, layer: 3, icon: '🏖️' },
+            
+            // Kitchen Items
+            { id: 'fridge', name: 'Refrigerator', category: 'storage', style: 'modern', width: 1, height: 2, layer: 1, icon: '🧊' },
+            { id: 'oven', name: 'Oven', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 1, icon: '🔥' },
+            { id: 'stove', name: 'Gas Stove', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 1, icon: '🍳' },
+            { id: 'sink', name: 'Kitchen Sink', category: 'decor', style: 'modern', width: 2, height: 1, layer: 1, icon: '🚰' },
+            { id: 'microwave', name: 'Microwave', category: 'decor', style: 'modern', width: 1, height: 1, layer: 2, icon: '🔲' },
+            { id: 'toaster', name: 'Toaster', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🍞' },
+            { id: 'blender', name: 'Blender', category: 'decor', style: 'modern', width: 1, height: 1, layer: 2, icon: '🥤' },
+            { id: 'coffee_maker', name: 'Coffee Maker', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '☕' },
+            { id: 'kettle', name: 'Electric Kettle', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🫖' },
+            { id: 'cutting_board', name: 'Cutting Board', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🪵' },
+            { id: 'knife_set', name: 'Knife Block', category: 'decor', style: 'modern', width: 1, height: 1, layer: 2, icon: '🔪' },
+            { id: 'spice_rack', name: 'Spice Rack', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🧂' },
+            { id: 'fruit_bowl', name: 'Fruit Bowl', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🥗' },
+            { id: 'bread_box', name: 'Bread Box', category: 'storage', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🍞' },
+            { id: 'dish_rack', name: 'Dish Rack', category: 'decor', style: 'cozy', width: 1, height: 1, layer: 2, icon: '🍽️' },
         ];
     }
     
