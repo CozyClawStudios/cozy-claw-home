@@ -30,68 +30,60 @@ function connectToOpenClaw() {
         return;
     }
     
-    try {
-        // Try to connect to OpenClaw bridge
-        openclawSocket = new WebSocket(CONFIG.OPENCLAW_WS_URL);
-        
-        openclawSocket.onopen = () => {
-            console.log('✅ Connected to OpenClaw');
+    // Test HTTP connection to OpenClaw
+    const testUrl = CONFIG.OPENCLAW_WS_URL.replace('ws://', 'http://').replace('/clawbot', '');
+    fetch(`${testUrl}/api/status`, { method: 'GET' })
+        .then(() => {
+            console.log('✅ OpenClaw HTTP reachable');
             window.openclawConnected = true;
-            openclawSocket.send(JSON.stringify({
-                type: 'auth',
-                apiKey: 'cozy-claw-home-secret'
-            }));
-        };
-        
-        openclawSocket.onmessage = (event) => {
-            try {
-                const response = JSON.parse(event.data);
-                if (response.type === 'response' && response.data) {
-                    addMessage('Celest', response.data.text, true);
-                    
-                    // Show in thought bubble
-                    const thoughtBubble = document.getElementById('thoughtBubble');
-                    thoughtBubble.textContent = response.data.text;
-                    thoughtBubble.classList.add('visible');
-                    
-                    setTimeout(() => {
-                        thoughtBubble.classList.remove('visible');
-                    }, 3000);
-                }
-            } catch (e) {
-                console.error('Error parsing OpenClaw response:', e);
-            }
-        };
-        
-        openclawSocket.onclose = () => {
-            console.log('🔌 OpenClaw disconnected');
+        })
+        .catch(() => {
+            console.log('⚠️ OpenClaw not reachable, using local mode');
             window.openclawConnected = false;
-            // Try to reconnect after 5 seconds
-            setTimeout(connectToOpenClaw, 5000);
-        };
-        
-        openclawSocket.onerror = (err) => {
-            console.log('⚠️ OpenClaw connection error, using local loop');
-            window.openclawConnected = false;
-        };
-    } catch (e) {
-        console.log('⚠️ OpenClaw not available, using local loop');
-        window.openclawConnected = false;
-    }
+        });
 }
 
-window.sendToOpenClaw = function(text) {
-    if (openclawSocket && openclawSocket.readyState === WebSocket.OPEN) {
-        openclawSocket.send(JSON.stringify({
-            type: 'query',
-            text: text,
-            context: {
-                room: currentRoomId,
-                decorations: 'cozy home'
-            }
-        }));
-    } else {
-        // Fallback to local loop if socket not ready
+window.sendToOpenClaw = async function(text) {
+    try {
+        const baseUrl = CONFIG.OPENCLAW_WS_URL.replace('ws://', 'http://').replace('wss://', 'https://').replace('/clawbot', '');
+        const response = await fetch(`${baseUrl}/api/v1/chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: text,
+                session: 'cozy-claw-home',
+                context: {
+                    room: currentRoomId,
+                    source: 'cozy-claw-home'
+                }
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data && (data.response || data.text || data.message)) {
+            const reply = data.response || data.text || data.message;
+            addMessage('Celest', reply, true);
+            
+            // Show in thought bubble
+            const thoughtBubble = document.getElementById('thoughtBubble');
+            thoughtBubble.textContent = reply;
+            thoughtBubble.classList.add('visible');
+            
+            setTimeout(() => {
+                thoughtBubble.classList.remove('visible');
+            }, 3000);
+        } else {
+            useLocalResponse();
+        }
+    } catch (e) {
+        console.log('⚠️ OpenClaw HTTP error:', e.message);
         window.openclawConnected = false;
         useLocalResponse();
     }
