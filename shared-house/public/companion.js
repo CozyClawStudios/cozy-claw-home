@@ -198,56 +198,6 @@ async function pollBridgeResponses() {
             
             for (const resp of data.responses) {
                 // Create unique ID for this response
-                const responseId = resp.timestamp + '|' + resp.content.substring(0, 50);
-                
-                // Skip if already displayed
-                if (displayedResponseIds.has(responseId)) {
-                    continue;
-                }
-                
-                // Only show responses newer than our last seen
-                if (resp.timestamp > lastResponseTimestamp) {
-                    console.log('📝 Displaying response:', resp.content.substring(0, 50));
-                    receiveAgentMessage({
-                        text: resp.content,
-                        mood: resp.metadata?.mood || 'content',
-                        initiative: resp.metadata?.initiative || false,
-                        timestamp: resp.timestamp
-                    });
-                    displayedResponseIds.add(responseId);
-                    foundNew = true;
-                }
-                
-                // Track newest timestamp
-                if (resp.timestamp > newestTimestamp) {
-                    newestTimestamp = resp.timestamp;
-                }
-            }
-            
-            // Update last timestamp
-            if (foundNew) {
-                lastResponseTimestamp = newestTimestamp;
-            }
-            
-            // Clean up old IDs (keep last 100)
-            if (displayedResponseIds.size > 100) {
-                const idsArray = Array.from(displayedResponseIds);
-                displayedResponseIds.clear();
-                idsArray.slice(-100).forEach(id => displayedResponseIds.add(id));
-            }
-        }
-    } catch (err) {
-        // Silently fail - will retry on next poll
-    }
-}
-            let foundNew = false;
-            let newestTimestamp = lastResponseTimestamp;
-            
-            for (const resp of data.responses) {
-                // Create unique ID for this response
-                const responseId = resp.timestamp + '|' + resp.content.substring(0, 50);
-                
-                // Skip if already displayed
                 if (displayedResponseIds.has(responseId)) {
                     console.log('⏭️ Already displayed, skipping:', resp.content.substring(0, 30));
                     continue;

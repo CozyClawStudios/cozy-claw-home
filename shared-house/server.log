@@ -11,7 +11,7 @@
 🔊 Voice System initialized (MOCK MODE - no API key)
 🤖 Agent 'Claw' initialized
    Mood: calm
-   Activity: making_tea
+   Activity: reading
 🧠 Memory system initialized
 🔧 Tool framework initialized
 🔊 Voice System connected to Socket.IO
@@ -47,59 +47,19 @@
   GET  /api/decor/themes         - Get room themes
 
 🤖 Agent presence loop starting...
-🔌 Bridge: Client connected: vzELkaTEOFnh2gh7AAAC
-🔌 Companion client connected: vzELkaTEOFnh2gh7AAAC
-🔌 Bridge: Client connected: qTA-elaxV0JuTctbAAAD
-🔌 Companion client connected: qTA-elaxV0JuTctbAAAD
-📡 Client registered with persistent ID: client_zo9be2qzsi
-📨 Written to inbox.jsonl: maybe now
-📨 Companion message (forwarding to Celest): maybe now
-📤 Message queued and forwarded to OpenClaw: cec84022-e635-4a81-9ba9-a92dfe9f64c1
-🔌 Bridge: Client connected: uTbsegJKURbnPHCpAAAF
-🔌 Companion client connected: uTbsegJKURbnPHCpAAAF
-🤖 Main agent registered: uTbsegJKURbnPHCpAAAF
-🔌 Bridge: Client connected: Xs8YvWASahmyx9AlAAAH
-🔌 Companion client connected: Xs8YvWASahmyx9AlAAAH
-🤖 Main agent registered: Xs8YvWASahmyx9AlAAAH
+🔌 Bridge: Client connected: 6MPeVDowHbTdFJZuAAAB
+🔌 Companion client connected: 6MPeVDowHbTdFJZuAAAB
+🔌 Bridge: Client connected: UXQdYGUMt1ZbIUtGAAAD
+🔌 Companion client connected: UXQdYGUMt1ZbIUtGAAAD
+🤖 Main agent registered: UXQdYGUMt1ZbIUtGAAAD
 🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🔌 Bridge: Client disconnected: qTA-elaxV0JuTctbAAAD Reason: transport close
-🔌 Bridge: Client disconnected: qTA-elaxV0JuTctbAAAD
-🔌 Companion client disconnected: qTA-elaxV0JuTctbAAAD
-⏳ Session will remain active for 30 minutes: web:qTA-elaxV0JuTctbAAAD
-🔌 Bridge: Client disconnected: vzELkaTEOFnh2gh7AAAC Reason: transport close
-🔌 Bridge: Client disconnected: vzELkaTEOFnh2gh7AAAC
-🔌 Companion client disconnected: vzELkaTEOFnh2gh7AAAC
-⏳ Session will remain active for 30 minutes: web:vzELkaTEOFnh2gh7AAAC
-🔌 Bridge: Client connected: EA1yqXITivSFCFcyAAAK
-🔌 Companion client connected: EA1yqXITivSFCFcyAAAK
-🔌 Bridge: Client connected: 2_c-GsCYDQem8DcjAAAL
-🔌 Companion client connected: 2_c-GsCYDQem8DcjAAAL
-📡 Client registered with persistent ID: client_zo9be2qzsi
-📨 Written to inbox.jsonl: heyoskies
-📤 Forwarded to main agent session: bef399a4-3a94-42bb-a294-fca83963ac6c
-📨 Companion message (forwarding to Celest): heyoskies
-📤 Message queued and forwarded to OpenClaw: bef399a4-3a94-42bb-a294-fca83963ac6c
+🔌 Bridge: Client disconnected: 6MPeVDowHbTdFJZuAAAB Reason: transport close
+🔌 Bridge: Client disconnected: 6MPeVDowHbTdFJZuAAAB
+🔌 Companion client disconnected: 6MPeVDowHbTdFJZuAAAB
+⏳ Session will remain active for 30 minutes: web:6MPeVDowHbTdFJZuAAAB
+🔌 Bridge: Client connected: ICm-TqM7GKkCOTZnAAAF
+🔌 Companion client connected: ICm-TqM7GKkCOTZnAAAF
 🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-📥 Delivered to 2_c-GsCYDQem8DcjAAAL : Heyoskies to you too! 🎉 Testing real-ti
-Cleaning up stale session: uTbsegJKURbnPHCpAAAF
-🤖 Mood changed: calm → calm (activity)
-📨 Written to inbox.jsonl: i see not htesting
-📤 Forwarded to main agent session: 66cd7ed9-800f-41d2-adb8-c7aa28465db2
-📨 Companion message (forwarding to Celest): i see not htesting
-📤 Message queued and forwarded to OpenClaw: 66cd7ed9-800f-41d2-adb8-c7aa28465db2
-Cleaning up stale session: Xs8YvWASahmyx9AlAAAH
-🤖 Mood changed: calm → focused (activity)
-📥 Delivered to 2_c-GsCYDQem8DcjAAAL : I got your 'i see not htesting' — the br
-📨 Written to inbox.jsonl: okay buit how abot this one?
-📤 Forwarded to main agent session: 7b471d46-9c80-4ec2-85dd-d5393d0e01e2
-📨 Companion message (forwarding to Celest): okay buit how abot this one?
-📤 Message queued and forwarded to OpenClaw: 7b471d46-9c80-4ec2-85dd-d5393d0e01e2
-Cleaning up stale session: EA1yqXITivSFCFcyAAAK
-🤖 Mood changed: focused → focused (activity)
 🤖 Mood changed: focused → calm (activity)
 🤖 Mood changed: calm → focused (activity)
 🤖 Mood changed: focused → calm (activity)
