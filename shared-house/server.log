@@ -95,3 +95,25 @@ Cleaning up stale session: bqyv9df_cQgpeQEwAAAF
 Cleaning up stale session: tXyht5Wi-faPVCULAAAJ
 Cleaning up stale session: NC08CTIpHvcBYoeWAAAL
 🤖 Mood changed: calm → focused (activity)
+🔌 Bridge: Client disconnected: JkcYzfHKCE7a7IQ5AAAI Reason: transport close
+🔌 Bridge: Client disconnected: JkcYzfHKCE7a7IQ5AAAI
+🔌 Companion client disconnected: JkcYzfHKCE7a7IQ5AAAI
+⏳ Session will remain active for 30 minutes: web:JkcYzfHKCE7a7IQ5AAAI
+🔌 Bridge: Client disconnected: tXyht5Wi-faPVCULAAAJ Reason: transport close
+🔌 Bridge: Client disconnected: tXyht5Wi-faPVCULAAAJ
+🔌 Companion client disconnected: tXyht5Wi-faPVCULAAAJ
+⏳ Session will remain active for 30 minutes: web:tXyht5Wi-faPVCULAAAJ
+🔌 Bridge: Client connected: D5kPg3SpLd2QJNYMAAAO
+📚 Sending 2 recent responses to new connection: D5kPg3SpLd2QJNYMAAAO
+🔌 Companion client connected: D5kPg3SpLd2QJNYMAAAO
+📡 Client registered with persistent ID: client_zo9be2qzsi
+🔌 Bridge: Client connected: 080lqyJBWXyoNGduAAAP
+📚 Sending 2 recent responses to new connection: 080lqyJBWXyoNGduAAAP
+🔌 Companion client connected: 080lqyJBWXyoNGduAAAP
+🤖 Mood changed: focused → calm (activity)
+📨 Written to inbox.jsonl: Okay getting better :)
+📤 Forwarded to main agent session: 080320c1-ecde-4728-96a0-d005eeddeec9
+📨 Companion message (forwarding to Celest): Okay getting better :)
+📤 Message queued and forwarded to OpenClaw: 080320c1-ecde-4728-96a0-d005eeddeec9
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → calm (activity)

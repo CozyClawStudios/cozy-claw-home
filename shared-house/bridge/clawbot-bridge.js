@@ -438,6 +438,7 @@ class ClawBotBridge extends EventEmitter {
         this.recentResponses.push({
             sessionId,
             ...response,
+            isAgentResponse: true, // Mark as agent response (not user message)
             storedAt: Date.now()
         });
         
@@ -454,7 +455,8 @@ class ClawBotBridge extends EventEmitter {
     // Send recent responses to new connection (helps with session recovery)
     sendRecentResponses(socket) {
         const cutoff = Date.now() - 2 * 60 * 1000; // Last 2 minutes
-        const recent = this.recentResponses.filter(r => r.storedAt > cutoff);
+        // Only send actual agent responses, not user message echoes
+        const recent = this.recentResponses.filter(r => r.storedAt > cutoff && r.isAgentResponse);
         
         if (recent.length > 0) {
             console.log(`📚 Sending ${recent.length} recent responses to new connection:`, socket.id);
