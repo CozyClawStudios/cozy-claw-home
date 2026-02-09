@@ -761,7 +761,7 @@ function connectToOpenClaw() {
                 
                 // Handle connection challenge
                 if (msg.type === 'event' && msg.event === 'connect.challenge') {
-                    console.log('🔐 Responding to OpenClaw challenge...');
+                    console.log('🔐 Responding to OpenClaw challenge with token...');
                     
                     const response = {
                         type: 'event',
@@ -769,10 +769,11 @@ function connectToOpenClaw() {
                         payload: {
                             nonce: msg.payload?.nonce,
                             ts: msg.payload?.ts,
-                            accepted: true
+                            accepted: true,
+                            token: openclawToken
                         }
                     };
-                    console.log('📤 Sending challenge response:', JSON.stringify(response));
+                    console.log('📤 Sending challenge response with token');
                     openclawWs.send(JSON.stringify(response));
                     return;
                 }
