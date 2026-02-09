@@ -27,7 +27,7 @@ const EventEmitter = require('events');
 const AgentCore = require('./agent/core');
 const AgentMemory = require('./agent/memory');
 const ToolFramework = require('./agent/tools');
-const VoiceSystem = require('./agent/voice');
+// const VoiceSystem = require('./agent/voice'); // FUTURE: Voice system not ready yet
 
 // NEW: Bridge and Decor systems
 const ClawBotBridge = require('./bridge/clawbot-bridge');
@@ -256,8 +256,8 @@ class AgentSystem extends EventEmitter {
         super();
         this.db = db;
         this.tools = tools;
-        this.voice = new VoiceSystem();
-        this.core = new AgentCore(db, { voice: this.voice });
+        // this.voice = new VoiceSystem(); // FUTURE: Voice system
+        this.core = new AgentCore(db); // { voice: this.voice }
         this.memory = new AgentMemory(db);
         this.loopInterval = null;
         this.isRunning = false;
@@ -727,8 +727,8 @@ app.get('/api/economy/stats', async (req, res) => {
 });
 */
 
-// ==================== NEW: VOICE API ====================
-
+// ==================== FUTURE: VOICE API (Not Ready) ====================
+/*
 // Get voice system status
 app.get('/api/voice/status', (req, res) => {
     try {
@@ -824,6 +824,7 @@ app.post('/api/voice/alert', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+*/
 
 // Health check
 app.get('/health', (req, res) => {
@@ -832,7 +833,7 @@ app.get('/health', (req, res) => {
         mode: CONFIG.DEPLOYMENT_MODE,
         agent_running: agentSystem?.isRunning || false,
         bridge_active: !!clawbotBridge,
-        voice_enabled: agentCore?.voice ? !agentCore.voice.muted : false,
+        // voice_enabled: agentCore?.voice ? !agentCore.voice.muted : false, // FUTURE: Voice system
         connected_clients: clients.size,
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
@@ -911,15 +912,15 @@ async function start() {
             // console.log('  GET  /api/economy/weekly       - Weekly summary');
             // console.log('  GET  /api/economy/stats        - All-time stats');
             // console.log('');
-            console.log('🔊 Voice Endpoints:');
-            console.log('  GET  /api/voice/status         - Voice system status');
-            console.log('  POST /api/voice/speak          - Speak text (TTS)');
-            console.log('  POST /api/voice/stop           - Stop playback');
-            console.log('  POST /api/voice/volume         - Set volume (0-1)');
-            console.log('  POST /api/voice/toggle         - Toggle mute');
-            console.log('  POST /api/voice/narrate        - Activity narration');
-            console.log('  POST /api/voice/alert          - Trading alert');
-            console.log('');
+            // console.log('🔊 Voice Endpoints:'); // FUTURE: Voice system
+            // console.log('  GET  /api/voice/status         - Voice system status');
+            // console.log('  POST /api/voice/speak          - Speak text (TTS)');
+            // console.log('  POST /api/voice/stop           - Stop playback');
+            // console.log('  POST /api/voice/volume         - Set volume (0-1)');
+            // console.log('  POST /api/voice/toggle         - Toggle mute');
+            // console.log('  POST /api/voice/narrate        - Activity narration');
+            // console.log('  POST /api/voice/alert          - Trading alert');
+            // console.log('');
             
             // Start agent presence loop
             if (CONFIG.AGENT_PRESENCE_ENABLED) {
