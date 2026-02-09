@@ -752,9 +752,12 @@ function connectToOpenClaw() {
                 // Handle connection challenge
                 if (msg.type === 'event' && msg.event === 'connect.challenge') {
                     console.log('🔐 Responding to OpenClaw challenge...');
+                    console.log('   Challenge ID:', msg.id);
+                    console.log('   Challenge payload:', JSON.stringify(msg.payload));
+                    
                     const response = {
                         type: 'connect.challenge_response',
-                        id: msg.id || uuidv4(),
+                        id: msg.id || uuidv4(),  // Use challenge ID or generate new one
                         timestamp: Date.now(),
                         payload: {
                             nonce: msg.payload?.nonce,
