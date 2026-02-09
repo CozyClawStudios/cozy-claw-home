@@ -631,22 +631,23 @@
             border-top: 8px solid white;
         }
 
-        /* Chat Interface */
+        /* Chat Interface - Side panel, no overlay */
         .chat-container {
             position: fixed;
-            bottom: 60px;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(13,13,26,0.95) 20%);
-            padding: 20px 20px 10px;
+            bottom: 80px;
+            left: 20px;
+            width: 300px;
+            background: rgba(13,13,26,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
             z-index: 20;
+            backdrop-filter: blur(10px);
         }
 
         .chat-input-wrapper {
-            max-width: 600px;
-            margin: 0 auto;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
@@ -723,17 +724,14 @@
 
         /* Message history */
         .message-history {
-            max-width: 700px;
-            margin: 0 auto 100px;
-            max-height: 28vh;
+            max-height: 200px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding: 15px 20px;
+            gap: 8px;
+            padding: 0 0 10px 0;
             scroll-behavior: smooth;
-            width: 100%;
-            align-items: flex-start;
+            margin-bottom: 10px;
         }
 
         .message {
