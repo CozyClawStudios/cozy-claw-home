@@ -1091,13 +1091,117 @@ function init() {
     loadCelestRoom();
     loadSavedCustomColors();
     loadSavedWindowView();
+    loadCustomBackground();
     updateMemoryCount();
+    
+    // Start AI connection
+    onAIConnect();
     
     console.log('🏠 Cozy Claw Home initialized');
 }
 
 // Start when DOM is ready
 document.addEventListener('DOMContentLoaded', init);
+
+// ==================== BACKGROUND UPLOAD ====================
+
+function uploadBackground(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Image too large. Max 5MB.');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const room = document.querySelector('.room');
+        if (room) {
+            room.style.backgroundImage = `url(${e.target.result})`;
+            room.style.backgroundSize = 'cover';
+            room.style.backgroundPosition = 'center';
+            localStorage.setItem('customBackground', e.target.result);
+            addMessage('Celest', 'Love the new background! 🎨✨', true);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function resetBackground() {
+    const room = document.querySelector('.room');
+    if (room) {
+        room.style.backgroundImage = '';
+        room.style.background = 'linear-gradient(180deg, var(--wall-color, #3a3a55) 0%, var(--floor-color, #2d2d44) 100%)';
+        localStorage.removeItem('customBackground');
+        addMessage('Celest', 'Back to the classic look! 🏠', true);
+    }
+}
+
+function loadCustomBackground() {
+    const saved = localStorage.getItem('customBackground');
+    if (saved) {
+        const room = document.querySelector('.room');
+        if (room) {
+            room.style.backgroundImage = `url(${saved})`;
+            room.style.backgroundSize = 'cover';
+            room.style.backgroundPosition = 'center';
+        }
+    }
+}
+
+// ==================== AVATAR MOVEMENT ====================
+
+let avatarMovementInterval = null;
+
+function startAvatarMovement() {
+    const agent = document.querySelector('.agent');
+    if (!agent) return;
+    
+    // Random idle movements
+    avatarMovementInterval = setInterval(() => {
+        const movements = ['bounce', 'wiggle', 'look-around'];
+        const movement = movements[Math.floor(Math.random() * movements.length)];
+        
+        agent.classList.remove('bounce', 'wiggle', 'look-around');
+        void agent.offsetWidth; // Trigger reflow
+        agent.classList.add(movement);
+        
+        // Random small position shifts
+        const randomX = (Math.random() - 0.5) * 20;
+        const randomY = (Math.random() - 0.5) * 10;
+        agent.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        
+        // Reset after animation
+        setTimeout(() => {
+            agent.style.transform = 'translate(0, 0)';
+        }, 1000);
+    }, 5000 + Math.random() * 5000); // Every 5-10 seconds
+}
+
+function stopAvatarMovement() {
+    if (avatarMovementInterval) {
+        clearInterval(avatarMovementInterval);
+        avatarMovementInterval = null;
+    }
+}
+
+// ==================== AI CONNECTION RESPONSE ====================
+
+function onAIConnect() {
+    // AI responds when connection established
+    setTimeout(() => {
+        const hour = new Date().getHours();
+        let greeting = 'Good morning';
+        if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
+        else if (hour >= 17) greeting = 'Good evening';
+        
+        addMessage('Celest', `${greeting}! I'm here and ready to help! 💫`, true);
+    }, 1000);
+    
+    // Start avatar movement
+    startAvatarMovement();
+}
 
 // ==================== EXPORTS ====================
 window.app = app;
@@ -1114,3 +1218,6 @@ window.closeModalDirect = closeModalDirect;
 window.toggleSetting = toggleSetting;
 window.updateEnergy = updateEnergy;
 window.decorPanel = decorPanel;
+window.uploadBackground = uploadBackground;
+window.resetBackground = resetBackground;
+window.onAIConnect = onAIConnect;

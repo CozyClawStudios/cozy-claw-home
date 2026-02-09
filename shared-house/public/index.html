@@ -537,6 +537,36 @@
             50% { transform: rotate(30deg); }
         }
 
+        /* Avatar movement animations */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        @keyframes look-around {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .agent.bounce {
+            animation: bounce 0.5s ease;
+        }
+
+        .agent.wiggle {
+            animation: wiggle 0.5s ease;
+        }
+
+        .agent.look-around {
+            animation: look-around 0.8s ease;
+        }
+
         /* Activity indicators */
         .activity-indicator {
             position: absolute;
@@ -1388,6 +1418,37 @@
         </div>
     </div>
 
+    <!-- Background Upload Settings -->
+    <div class="setting-item" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
+        <div class="setting-label" style="margin-bottom: 10px;">
+            <span>🖼️ Custom Background</span>
+            <span class="setting-value" style="font-size: 0.7rem;">1920x1080 recommended</span>
+        </div>
+        <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(this)" style="display: none;">
+        <button onclick="document.getElementById('bgUpload').click()" style="
+            background: rgba(255,154,158,0.2);
+            border: 1px solid #ff9a9e;
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: #ff9a9e;
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+        ">Upload Background Image</button>
+        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 8px;">Max 5MB • JPG, PNG, WebP</p>
+        <button onclick="resetBackground()" style="
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            font-size: 0.85rem;
+            width: 100%;
+            margin-top: 10px;
+        ">Reset to Default</button>
+    </div>
+
     <!-- Footer -->
     <footer style="
         position: fixed;
@@ -1405,9 +1466,38 @@
     ">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 1.2rem;">🦞</span>
-            <span style="color: #ff9a9e; font-weight: 600;">Cozy Claw Home</span>
+            <div style="display: flex; flex-direction: column;">
+                <span style="color: #ff9a9e; font-weight: 600;">Cozy Claw Home</span>
+                <span style="color: rgba(255,255,255,0.5); font-size: 0.7rem;">v3.0.0-beta.1 ⚡ Early Access</span>
+            </div>
         </div>
         <div style="display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.6);">
+            <a href="https://www.youtube.com/@CozyClawStudios" target="_blank" style="
+                color: #FF0000;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                background: rgba(255, 0, 0, 0.1);
+                border-radius: 6px;
+                transition: all 0.3s;
+            " onmouseover="this.style.background='rgba(255, 0, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 0, 0, 0.1)'">
+                📺 YouTube
+            </a>
+            <a href="https://www.twitch.tv/CozyClawStudios" target="_blank" style="
+                color: #9146FF;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                background: rgba(145, 70, 255, 0.1);
+                border-radius: 6px;
+                transition: all 0.3s;
+            " onmouseover="this.style.background='rgba(145, 70, 255, 0.3)'" onmouseout="this.style.background='rgba(145, 70, 255, 0.1)'">
+                🎮 Twitch
+            </a>
             <a href="https://discord.gg/J5mxp39Rdj" target="_blank" style="
                 color: #5865F2;
                 text-decoration: none;
