@@ -28,6 +28,10 @@ class ClawBotBridge extends EventEmitter {
         // Main agent session ID (set when agent connects)
         this.mainAgentSession = null;
         
+        // Recent responses buffer (for session recovery after refresh)
+        this.recentResponses = [];
+        this.maxRecentResponses = 20;
+        
         // Stats
         this.stats = {
             messagesReceived: 0,
@@ -104,6 +108,9 @@ class ClawBotBridge extends EventEmitter {
     deliverResponse(sessionId, response) {
         if (!sessionId.startsWith('web:')) return;
         
+        // Always store in recent buffer for session recovery
+        this.storeRecentResponse(sessionId, response);
+        
         const socketId = sessionId.replace('web:', '');
         const socket = this.io.sockets.sockets.get(socketId);
         
@@ -138,6 +145,9 @@ class ClawBotBridge extends EventEmitter {
                 connectedAt: new Date().toISOString(),
                 lastActivity: Date.now()
             });
+            
+            // Send recent responses to help with session recovery after refresh
+            this.sendRecentResponses(socket);
             
             // Start response polling for this session
             this.startResponsePolling(socket);
@@ -217,8 +227,7 @@ class ClawBotBridge extends EventEmitter {
             // Also enqueue to message queue
             await this.queue.enqueue(message);
             
-            // Write to inbox.jsonl for Celest to poll
-            this.writeToInbox(message);
+            // Note: Already written to inbox.jsonl above (lines 191-198)
             
             // Notify UI that message is queued
             socket.emit('message:queued', {
@@ -345,6 +354,9 @@ class ClawBotBridge extends EventEmitter {
         const socketId = sessionId.replace('web:', '');
         const clientSocket = this.io.sockets.sockets.get(socketId);
         
+        // Store in recent buffer for session recovery
+        this.storeRecentResponse(sessionId, response);
+        
         if (clientSocket) {
             clientSocket.emit('agent:message', {
                 text: response.text,
@@ -372,6 +384,9 @@ class ClawBotBridge extends EventEmitter {
         
         if (!sessionId.startsWith('web:')) return;
         
+        // Store in recent buffer for session recovery
+        this.storeRecentResponse(sessionId, { text: content, ...metadata });
+        
         const socketId = sessionId.replace('web:', '');
         const socket = this.io.sockets.sockets.get(socketId);
         
@@ -387,6 +402,44 @@ class ClawBotBridge extends EventEmitter {
         }
         
         this.emit('response:delivered', { sessionId, response });
+    }
+    
+    // Store response in recent buffer for session recovery
+    storeRecentResponse(sessionId, response) {
+        this.recentResponses.push({
+            sessionId,
+            ...response,
+            storedAt: Date.now()
+        });
+        
+        // Keep only recent responses
+        if (this.recentResponses.length > this.maxRecentResponses) {
+            this.recentResponses.shift();
+        }
+        
+        // Also clean up old responses (older than 5 minutes)
+        const cutoff = Date.now() - 5 * 60 * 1000;
+        this.recentResponses = this.recentResponses.filter(r => r.storedAt > cutoff);
+    }
+    
+    // Send recent responses to new connection (helps with session recovery)
+    sendRecentResponses(socket) {
+        const cutoff = Date.now() - 2 * 60 * 1000; // Last 2 minutes
+        const recent = this.recentResponses.filter(r => r.storedAt > cutoff);
+        
+        if (recent.length > 0) {
+            console.log(`📚 Sending ${recent.length} recent responses to new connection:`, socket.id);
+            
+            for (const resp of recent) {
+                socket.emit('agent:message', {
+                    text: resp.text,
+                    mood: resp.mood || 'content',
+                    timestamp: resp.timestamp || new Date().toISOString(),
+                    fromRecentBuffer: true
+                });
+                this.stats.responsesDelivered++;
+            }
+        }
     }
     
     startResponsePolling(socket) {

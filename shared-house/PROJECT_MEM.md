@@ -226,7 +226,16 @@ adapter.on('message', async (msg) => {
 - [ ] Furniture interaction animations
 
 ## 🐛 Known Issues
-None currently
+
+### 2026-02-09 - FIXED: Message Duplication Bug
+- **Issue:** Messages were being written to inbox.jsonl twice
+- **Cause:** `handleUserMessage()` called `fs.appendFileSync()` inline AND called `this.writeToInbox()` which did the same thing
+- **Fix:** Removed the duplicate `this.writeToInbox()` call in bridge/clawbot-bridge.js line ~211
+
+### 2026-02-09 - FIXED: Main Agent Not Connected
+- **Issue:** Bridge showed `mainAgentConnected: false` and no responses were delivered
+- **Cause:** The bridge-connector.js wasn't running to register Celest as the main agent
+- **Fix:** Started bridge-connector.js as background process and created cron job to poll inbox every 10 seconds
 
 ## 📊 Stats
 - Total files created: 6
@@ -236,5 +245,5 @@ None currently
 - Grid size: 20x15 (300 cells)
 - Message queue capacity: 1000 messages
 
-## 🎉 Status: COMPLETE
-Both features fully implemented and integrated!
+## 🎉 Status: COMPLETE + BUGFIXED
+Both features fully implemented and integrated! Bridge now working properly.

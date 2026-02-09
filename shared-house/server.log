@@ -1,3 +1,7 @@
+
+> companion-house@3.0.0 start
+> node server.js
+
 🏠 Companion House - Personal AI Agent Platform
 📦 Deployment mode: local
 
@@ -43,79 +47,28 @@
   GET  /api/decor/themes         - Get room themes
 
 🤖 Agent presence loop starting...
-🔌 Bridge: Client connected: UuNwLGyiLYUlGczTAAAB
-🔌 Companion client connected: UuNwLGyiLYUlGczTAAAB
-🔌 Bridge: Client connected: 51UEbM8jUc0Znn1WAAAD
-🔌 Companion client connected: 51UEbM8jUc0Znn1WAAAD
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🔌 Bridge: Client disconnected: 51UEbM8jUc0Znn1WAAAD Reason: transport close
-🔌 Bridge: Client disconnected: 51UEbM8jUc0Znn1WAAAD
-🔌 Companion client disconnected: 51UEbM8jUc0Znn1WAAAD
-⏳ Session will remain active for 30 minutes: web:51UEbM8jUc0Znn1WAAAD
-🔌 Bridge: Client disconnected: UuNwLGyiLYUlGczTAAAB Reason: transport close
-🔌 Bridge: Client disconnected: UuNwLGyiLYUlGczTAAAB
-🔌 Companion client disconnected: UuNwLGyiLYUlGczTAAAB
-⏳ Session will remain active for 30 minutes: web:UuNwLGyiLYUlGczTAAAB
-🔌 Bridge: Client connected: xvdHTmIHatxrTuABAAAG
-🔌 Companion client connected: xvdHTmIHatxrTuABAAAG
-🔌 Bridge: Client connected: AztqKBv2tqprnQmwAAAH
-🔌 Companion client connected: AztqKBv2tqprnQmwAAAH
-📨 Written to inbox.jsonl: Hello
-📨 Companion message (forwarding to Celest): Hello
-📨 Written to inbox.jsonl: Hello
-📤 Message queued and forwarded to OpenClaw: 44d6c99d-d7b6-4c6b-9626-303fa235347a
+🔌 Bridge: Client connected: DshhPZRDcr1SyRYyAAAB
+🔌 Companion client connected: DshhPZRDcr1SyRYyAAAB
+🔌 Bridge: Client connected: wrgLj-kiXXAypj-NAAAD
+🔌 Companion client connected: wrgLj-kiXXAypj-NAAAD
+🤖 Main agent registered: wrgLj-kiXXAypj-NAAAD
+🔌 Bridge: Client connected: m4aRlEQnpERvsznBAAAF
+🔌 Companion client connected: m4aRlEQnpERvsznBAAAF
+🔌 Bridge: Client disconnected: wrgLj-kiXXAypj-NAAAD Reason: transport close
+🔌 Bridge: Client disconnected: wrgLj-kiXXAypj-NAAAD
+🤖 Main agent disconnected
+🔌 Companion client disconnected: wrgLj-kiXXAypj-NAAAD
+⏳ Session will remain active for 30 minutes: web:wrgLj-kiXXAypj-NAAAD
+📨 Written to inbox.jsonl: ALright so you are getting my meesages?
+📨 Companion message (forwarding to Celest): ALright so you are getting my meesages?
+📤 Message queued and forwarded to OpenClaw: c2f9e345-61af-4042-b34c-7698dc0db4b6
+🔌 Bridge: Client connected: 3DS-8IXCAVJWKPq5AAAH
+📚 Sending 2 recent responses to new connection: 3DS-8IXCAVJWKPq5AAAH
+🔌 Companion client connected: 3DS-8IXCAVJWKPq5AAAH
+🤖 Main agent registered: 3DS-8IXCAVJWKPq5AAAH
+📥 Delivered to DshhPZRDcr1SyRYyAAAB : Loud and clear, sir. 💼 Though your spel
 🤖 Mood changed: calm → focused (activity)
-📥 Delivered to AztqKBv2tqprnQmwAAAH : Hello sir! No subagent running — I'm han
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-Cleaning up stale session: xvdHTmIHatxrTuABAAAG
-Cleaning up stale session: AztqKBv2tqprnQmwAAAH
-🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
-📥 Delivered to AztqKBv2tqprnQmwAAAH : Hey! The 5-second cron is working — I go
+📨 Written to inbox.jsonl: Perfect!
+📤 Forwarded to main agent session: 0d25c44c-a324-4627-b513-02e886c6a812
 📨 Companion message (forwarding to Celest): Perfect!
-🤖 Mood changed: calm → focused (activity)
-🔌 Bridge: Client disconnected: AztqKBv2tqprnQmwAAAH Reason: transport close
-🔌 Bridge: Client disconnected: AztqKBv2tqprnQmwAAAH
-🔌 Companion client disconnected: AztqKBv2tqprnQmwAAAH
-⏳ Session will remain active for 30 minutes: web:AztqKBv2tqprnQmwAAAH
-🔌 Bridge: Client disconnected: xvdHTmIHatxrTuABAAAG Reason: transport close
-🔌 Bridge: Client disconnected: xvdHTmIHatxrTuABAAAG
-🔌 Companion client disconnected: xvdHTmIHatxrTuABAAAG
-⏳ Session will remain active for 30 minutes: web:xvdHTmIHatxrTuABAAAG
-🔌 Bridge: Client connected: xm2s_FhA-H5D9MJwAAAK
-🔌 Companion client connected: xm2s_FhA-H5D9MJwAAAK
-🔌 Bridge: Client connected: fayPAUa6YmqRjKgXAAAL
-🔌 Companion client connected: fayPAUa6YmqRjKgXAAAL
-📨 Written to inbox.jsonl: Hi Celest
-📨 Companion message (forwarding to Celest): Hi Celest
-📨 Written to inbox.jsonl: Hi Celest
-📤 Message queued and forwarded to OpenClaw: 49b0caa8-8abb-41be-b972-53c51dffc21e
-🤖 Mood changed: focused → calm (activity)
-📥 Delivered to fayPAUa6YmqRjKgXAAAL : Hey! I'm here — connection is working. T
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → calm (activity)
-🤖 Mood changed: calm → focused (activity)
-🔌 Bridge: Client disconnected: fayPAUa6YmqRjKgXAAAL Reason: transport close
-🔌 Bridge: Client disconnected: fayPAUa6YmqRjKgXAAAL
-🔌 Companion client disconnected: fayPAUa6YmqRjKgXAAAL
-⏳ Session will remain active for 30 minutes: web:fayPAUa6YmqRjKgXAAAL
-🔌 Bridge: Client disconnected: xm2s_FhA-H5D9MJwAAAK Reason: transport close
-🔌 Bridge: Client disconnected: xm2s_FhA-H5D9MJwAAAK
-🔌 Companion client disconnected: xm2s_FhA-H5D9MJwAAAK
-⏳ Session will remain active for 30 minutes: web:xm2s_FhA-H5D9MJwAAAK
-🔌 Bridge: Client connected: miDhzgqgt757gZXvAAAO
-🔌 Companion client connected: miDhzgqgt757gZXvAAAO
-🔌 Bridge: Client connected: s-40YX_5z0gxmT8MAAAP
-🔌 Companion client connected: s-40YX_5z0gxmT8MAAAP
-📨 Written to inbox.jsonl: Hi Celest!@
-📨 Companion message (forwarding to Celest): Hi Celest!@
-📨 Written to inbox.jsonl: Hi Celest!@
-📤 Message queued and forwarded to OpenClaw: cb265ee3-de91-4c35-834e-b3b42680ca47
+📤 Message queued and forwarded to OpenClaw: 0d25c44c-a324-4627-b513-02e886c6a812

@@ -34,7 +34,7 @@ function saveLastCheckTime(timestamp) {
     }
 }
 
-// Send alert to OpenClaw main session
+// Send alert by writing to notification file AND alerting main session
 function sendAlert(newMessages) {
     if (newMessages.length === 0) return;
     
@@ -44,33 +44,26 @@ function sendAlert(newMessages) {
     
     const alertText = `🚨 **Companion House: ${newMessages.length} new message(s)**\n\n${messageList}\n\nReply by writing to outbox.jsonl with format: {"sessionId":"...","text":"...","mood":"happy"}`;
     
-    const postData = JSON.stringify({ text: alertText });
+    // Write to alert file
+    const alertPath = '/home/zak/.openclaw/workspace/cozy-claw-studio/shared-house/.clawbot-alert.txt';
+    try {
+        fs.writeFileSync(alertPath, alertText);
+        console.log('✅ Alert written to:', alertPath);
+    } catch (err) {
+        console.error('❌ Failed to write alert:', err.message);
+    }
     
-    const options = {
-        hostname: 'localhost',
-        port: GATEWAY_PORT,
-        path: '/v1/sessions/agent:main:main/message',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(postData)
-        }
-    };
+    // ALSO send to main OpenClaw session via CLI
+    const { exec } = require('child_process');
+    const cmd = `openclaw sessions send --session-key "main" --message "${alertText.replace(/"/g, '\\"').substring(0, 500)}"`;
     
-    const req = http.request(options, (res) => {
-        if (res.statusCode === 200) {
-            console.log('✅ Alert sent to main session');
+    exec(cmd, { timeout: 10000 }, (err, stdout, stderr) => {
+        if (err) {
+            console.error('❌ Failed to send to main session:', err.message);
         } else {
-            console.error('❌ Failed to send alert:', res.statusCode);
+            console.log('✅ Alert sent to main OpenClaw session');
         }
     });
-    
-    req.on('error', (err) => {
-        console.error('❌ Alert error:', err.message);
-    });
-    
-    req.write(postData);
-    req.end();
 }
 
 // Main polling function
