@@ -46,10 +46,84 @@ class ClawBotBridge extends EventEmitter {
         // Set up Socket.IO handlers
         this.setupSocketHandlers();
         
+        // Start polling outbox.jsonl for Celest's responses (OpenClaw integration)
+        this.startOutboxPolling();
+        
         // Start heartbeat
         setInterval(() => this.heartbeat(), 30000);
         
         console.log('🌉 ClawBot Bridge initialized');
+    }
+    
+    // Poll outbox.jsonl for responses from Celest (main agent via file)
+    startOutboxPolling() {
+        const fs = require('fs');
+        const path = require('path');
+        const outboxPath = path.join(__dirname, '..', 'outbox.jsonl');
+        let lastSize = 0;
+        
+        setInterval(() => {
+            try {
+                if (!fs.existsSync(outboxPath)) return;
+                
+                const stats = fs.statSync(outboxPath);
+                if (stats.size === lastSize) return; // No changes
+                lastSize = stats.size;
+                
+                const content = fs.readFileSync(outboxPath, 'utf8');
+                const lines = content.split('\n').filter(Boolean);
+                
+                for (const line of lines) {
+                    try {
+                        const resp = JSON.parse(line);
+                        if (resp.sessionId && resp.text) {
+                            // Deliver to the correct session
+                            this.deliverResponse(resp.sessionId, {
+                                text: resp.text,
+                                mood: resp.mood || 'content',
+                                timestamp: resp.timestamp || new Date().toISOString()
+                            });
+                        }
+                    } catch (err) {
+                        console.error('Failed to parse outbox entry:', err.message);
+                    }
+                }
+                
+                // Clear outbox after processing
+                fs.writeFileSync(outboxPath, '');
+                
+            } catch (err) {
+                console.error('Outbox poll error:', err.message);
+            }
+        }, 500); // Poll every 500ms
+        
+        console.log('📁 Outbox polling started (Celest responses)');
+    }
+    
+    // Deliver response to a specific session
+    deliverResponse(sessionId, response) {
+        if (!sessionId.startsWith('web:')) return;
+        
+        const socketId = sessionId.replace('web:', '');
+        const socket = this.io.sockets.sockets.get(socketId);
+        
+        if (socket) {
+            socket.emit('agent:message', {
+                text: response.text,
+                mood: response.mood || 'content',
+                timestamp: response.timestamp,
+                initiative: false
+            });
+            this.stats.responsesDelivered++;
+            console.log('📥 Delivered to', socketId, ':', response.text.substring(0, 40));
+        } else {
+            // Socket disconnected, store in queue for later
+            this.queue.storeResponse(sessionId, {
+                type: 'agent_response',
+                content: response.text,
+                metadata: response
+            });
+        }
     }
     
     setupSocketHandlers() {
@@ -83,8 +157,14 @@ class ClawBotBridge extends EventEmitter {
                 await this.handleAgentDirectResponse(socket, data);
             });
             
+            // Handle errors
+            socket.on('error', (err) => {
+                console.error('❌ Bridge: Socket error:', socket.id, err.message);
+            });
+            
             // Handle disconnection
-            socket.on('disconnect', () => {
+            socket.on('disconnect', (reason) => {
+                console.log('🔌 Bridge: Client disconnected:', socket.id, 'Reason:', reason);
                 this.handleDisconnect(socket);
             });
         });
@@ -110,23 +190,35 @@ class ClawBotBridge extends EventEmitter {
         };
         
         try {
-            // Always forward to file queue for Celest to pick up
-            this.forwardToOpenClaw(message);
+            // CRITICAL: Always write to inbox.jsonl for Celest to pick up
+            const fs = require('fs');
+            const path = require('path');
+            const inboxPath = path.join(__dirname, '..', 'inbox.jsonl');
+            const inboxEntry = {
+                type: 'companion_message',
+                id: message.id,
+                content: message.content,
+                sessionId: message.sessionId,
+                timestamp: new Date().toISOString(),
+                source: 'cozy-claw-home'
+            };
+            fs.appendFileSync(inboxPath, JSON.stringify(inboxEntry) + '\n');
+            console.log('📨 Written to inbox.jsonl:', message.content.substring(0, 40));
             
-            // Method 1: Direct forward to main agent session (if connected)
+            // Also forward to main agent via Socket.IO if connected
             if (this.mainAgentSession) {
                 const agentSocket = this.io.sockets.sockets.get(this.mainAgentSession);
                 if (agentSocket) {
                     agentSocket.emit('clawbot:message', message);
                     console.log('📤 Forwarded to main agent session:', message.id);
-                    
-                    // Also store in queue for persistence
-                    await this.queue.enqueue(message);
                 }
-            } else {
-                // Method 2: Queue for agent to pick up
-                await this.queue.enqueue(message);
             }
+            
+            // Also enqueue to message queue
+            await this.queue.enqueue(message);
+            
+            // Write to inbox.jsonl for Celest to poll
+            this.writeToInbox(message);
             
             // Notify UI that message is queued
             socket.emit('message:queued', {
@@ -162,7 +254,7 @@ class ClawBotBridge extends EventEmitter {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer companion-house-secret',
+                'Authorization': 'Bearer deeb04453b8bea4ac88c28a0a3e8f1a876254cf87d454dc0',
                 'Content-Length': Buffer.byteLength(postData)
             }
         };
@@ -207,6 +299,29 @@ class ClawBotBridge extends EventEmitter {
             console.log('📁 Fallback to file queue:', message.content.substring(0, 40));
         } catch (err) {
             console.error('❌ Failed to queue:', err.message);
+        }
+    }
+    
+    // Write message to inbox.jsonl for Celest to poll
+    writeToInbox(message) {
+        const fs = require('fs');
+        const path = require('path');
+        const inboxPath = path.join(__dirname, '..', 'inbox.jsonl');
+        
+        const entry = {
+            type: 'companion_message',
+            id: message.id,
+            content: message.content,
+            sessionId: message.sessionId,
+            timestamp: new Date().toISOString(),
+            source: 'cozy-claw-home'
+        };
+        
+        try {
+            fs.appendFileSync(inboxPath, JSON.stringify(entry) + '\n');
+            console.log('📨 Written to inbox.jsonl:', message.content.substring(0, 40));
+        } catch (err) {
+            console.error('❌ Failed to write to inbox:', err.message);
         }
     }
     
@@ -278,6 +393,9 @@ class ClawBotBridge extends EventEmitter {
         const session = this.sessions.get(socket.id);
         if (!session) return;
         
+        // Track delivered response IDs to prevent duplicates
+        const deliveredIds = new Set();
+        
         // Poll for new responses every 500ms
         let lastCheck = new Date(0);
         
@@ -289,6 +407,10 @@ class ClawBotBridge extends EventEmitter {
             
             const responses = await this.queue.getResponses(session.sessionId, lastCheck);
             for (const resp of responses) {
+                // Skip if already delivered
+                if (deliveredIds.has(resp.id)) continue;
+                deliveredIds.add(resp.id);
+                
                 if (resp.type === 'agent_response') {
                     socket.emit('agent:message', {
                         text: resp.content,
@@ -380,17 +502,27 @@ class ClawBotBridge extends EventEmitter {
     }
     
     async apiWebhook(req, res) {
-        // Webhook for external agents
+        // Webhook for external agents (Celest sending responses back)
         try {
             const { type = 'message', data } = req.body;
             
             switch (type) {
                 case 'message':
                     // External agent sending a message to user
+                    // First deliver directly to WebSocket if session is active
+                    if (data.sessionId && data.text) {
+                        this.deliverResponse(data.sessionId, {
+                            text: data.text,
+                            mood: data.mood || 'content',
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                    
+                    // Also store in queue for persistence
                     await this.queue.storeResponse(data.sessionId, {
                         type: 'agent_response',
                         content: data.text,
-                        metadata: data.metadata
+                        metadata: data.metadata || { mood: data.mood || 'content' }
                     });
                     break;
                     
@@ -411,9 +543,25 @@ class ClawBotBridge extends EventEmitter {
     }
     
     apiGetStatus(req, res) {
+        // Check if outbox has recent activity (indicates Celest is responding)
+        const fs = require('fs');
+        const path = require('path');
+        const outboxPath = path.join(__dirname, '..', 'outbox.jsonl');
+        let outboxActive = false;
+        
+        try {
+            if (fs.existsSync(outboxPath)) {
+                const stats = fs.statSync(outboxPath);
+                const ageMs = Date.now() - stats.mtime.getTime();
+                outboxActive = ageMs < 60000; // Active if modified in last minute
+            }
+        } catch (err) {
+            // Ignore
+        }
+        
         res.json({
             status: 'active',
-            mainAgentConnected: !!this.mainAgentSession,
+            mainAgentConnected: !!this.mainAgentSession || outboxActive,
             activeSessions: this.sessions.size,
             stats: this.stats,
             queue: this.queue.getStats()

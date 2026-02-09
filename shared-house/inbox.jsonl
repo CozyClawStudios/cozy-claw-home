@@ -1,32 +1,55 @@
-{"type":"companion_message","id":"01c23f2a-5982-46c5-8b0c-64dd13c6ce7c","content":"i","sessionId":"web:Bi9sFtk5k3XCys9XAAAV","timestamp":"2026-02-09T06:57:19.981Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"12d856af-f456-45df-8699-b156b8134ca5","content":"Hi","sessionId":"web:N-XdfPETIVIieZpiAAAF","timestamp":"2026-02-09T06:57:51.765Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"32bd7853-3d79-43c2-ad80-b409880e422f","content":"testing","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T06:58:28.649Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"0186d136-5c0c-471c-b692-78db9ea2c663","content":"hello","sessionId":"web:_zg3IWmvm4Ifhw3HAAAL","timestamp":"2026-02-09T06:59:48.404Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"7d6a82df-3e63-461b-9ace-8f26df1c1255","content":"hello","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T07:00:39.036Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"6ec976ed-ebdb-459c-b9bd-ce4289005096","content":"hello","sessionId":"web:awv-lqJzMvSkgGs0AAAN","timestamp":"2026-02-09T07:02:39.625Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"81b55de7-3e1e-4a0e-ba07-2e6bd05e4983","content":"asdasd","sessionId":"web:8XFPgfKjBug9SkFWAAAV","timestamp":"2026-02-09T07:03:22.912Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"2afa99a8-b6b5-4507-b2dc-bb673706e519","content":"hello","sessionId":"web:VKWrMU5JTydPkqbaAAAX","timestamp":"2026-02-09T07:04:43.968Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"37bf1396-9cee-4cf4-a9b9-affc7102c95c","content":"hello","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:05:49.800Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"b8fb8de9-d4c0-4125-ab00-db79ce2139c7","content":"yes!","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:06:02.222Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"43174c30-edaf-4026-9451-e62ff5360fca","content":"HI Celest","sessionId":"web:b9NRy-1x4rhB9VM6AAAb","timestamp":"2026-02-09T07:06:37.997Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"0186d136-5c0c-471c-b692-78db9ea2c663","content":"hello","sessionId":"web:_zg3IWmvm4Ifhw3HAAAL","timestamp":"2026-02-09T07:09:25.136Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"12d856af-f456-45df-8699-b156b8134ca5","content":"Hi","sessionId":"web:N-XdfPETIVIieZpiAAAF","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"2afa99a8-b6b5-4507-b2dc-bb673706e519","content":"hello","sessionId":"web:VKWrMU5JTydPkqbaAAAX","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"32bd7853-3d79-43c2-ad80-b409880e422f","content":"testing","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T07:09:25.137Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"37bf1396-9cee-4cf4-a9b9-affc7102c95c","content":"hello","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:09:25.138Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"43174c30-edaf-4026-9451-e62ff5360fca","content":"HI Celest","sessionId":"web:b9NRy-1x4rhB9VM6AAAb","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"6ec976ed-ebdb-459c-b9bd-ce4289005096","content":"hello","sessionId":"web:awv-lqJzMvSkgGs0AAAN","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"7d6a82df-3e63-461b-9ace-8f26df1c1255","content":"hello","sessionId":"web:bS0lFi9dA14RVkTsAAAH","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"81b55de7-3e1e-4a0e-ba07-2e6bd05e4983","content":"asdasd","sessionId":"web:8XFPgfKjBug9SkFWAAAV","timestamp":"2026-02-09T07:09:25.139Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"b8fb8de9-d4c0-4125-ab00-db79ce2139c7","content":"yes!","sessionId":"web:g0a4r-Ujj6rcqAeCAAAZ","timestamp":"2026-02-09T07:09:25.140Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"18328fe2-1916-4884-adb0-ed792066b48b","content":"hi celest","sessionId":"web:GUe7BlYO8Uey6yjKAAAH","timestamp":"2026-02-09T07:09:44.420Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"18328fe2-1916-4884-adb0-ed792066b48b","content":"hi celest","sessionId":"web:GUe7BlYO8Uey6yjKAAAH","timestamp":"2026-02-09T07:21:01.128Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"75dfa84e-6e7e-4409-8a22-e97e58dab583","content":"direct test","sessionId":"api:default","timestamp":"2026-02-09T07:55:13.970Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"9f94cd1a-65bb-4f81-86a4-8e804906f333","content":"test after restart","sessionId":"api:default","timestamp":"2026-02-09T07:56:16.518Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"950507bd-3caf-44be-9d43-3d6b61719a07","content":"test forwarding","sessionId":"api:default","timestamp":"2026-02-09T07:57:19.112Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"6fdbf53c-1532-4dde-9225-e31203af191e","content":"auth test","sessionId":"api:default","timestamp":"2026-02-09T07:58:56.830Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"38fc0044-60d8-4773-b6d7-31685343e5d0","content":"spawn test","sessionId":"api:default","timestamp":"2026-02-09T08:02:14.170Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"4520df3f-9012-4061-9b53-60afb39ab463","content":"path test","sessionId":"api:default","timestamp":"2026-02-09T08:04:44.657Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"3ca1891b-319b-4fc9-959f-8fd487f93e83","content":"telegram webhook test","sessionId":"api:default","timestamp":"2026-02-09T08:11:42.104Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"96f143aa-1fb2-4da6-81d8-39db44ea5f17","content":"api test","sessionId":"api:default","timestamp":"2026-02-09T08:17:10.097Z","source":"cozy-claw-home"}
-{"type":"companion_message","id":"2f70a887-e221-40c3-b207-c71c8b21ff52","content":"webhook test from api","sessionId":"api:default","timestamp":"2026-02-09T08:44:48.746Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"04e7d216-8f0c-4b21-91d4-f42d4929bf2e","content":"Hi!","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:08:58.103Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"04e7d216-8f0c-4b21-91d4-f42d4929bf2e","content":"Hi!","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:08:58.104Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c7f79bf1-13c0-4d2f-b8e6-eb9c436949a8","content":"testt","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:09:19.407Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c7f79bf1-13c0-4d2f-b8e6-eb9c436949a8","content":"testt","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:09:19.408Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8e27d163-58ff-441d-9bbc-c71d047bd8d4","content":"hello","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:11:04.351Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8e27d163-58ff-441d-9bbc-c71d047bd8d4","content":"hello","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:11:04.352Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"5614ae1b-74a0-44fb-aaba-01b5aa5703c5","content":"what are you doing?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:14.163Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"5614ae1b-74a0-44fb-aaba-01b5aa5703c5","content":"what are you doing?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:14.164Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c87786ad-3f8a-4d71-9d58-18e0f4e00266","content":"thanks celest, you are geat.","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:36.749Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c87786ad-3f8a-4d71-9d58-18e0f4e00266","content":"thanks celest, you are geat.","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:36.750Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"7f2ca121-ee4b-4532-afb8-66060ffe066b","content":"can you decorate it?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:55.490Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"7f2ca121-ee4b-4532-afb8-66060ffe066b","content":"can you decorate it?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:14:55.491Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"01dc6ed8-6075-4e81-8b5f-5aebebe2792e","content":"now?","sessionId":"web:GvOwS4iKBAqTsIl1AAAR","timestamp":"2026-02-09T19:20:08.400Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"04e7d216-8f0c-4b21-91d4-f42d4929bf2e","content":"Hi!","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:20:08.402Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"5508a9ce-fc93-46b6-a7c5-0b200442bb2f","content":"hi celest","sessionId":"web:o-V89cGAG9C2wl4rAAAV","timestamp":"2026-02-09T19:20:08.402Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"5614ae1b-74a0-44fb-aaba-01b5aa5703c5","content":"what are you doing?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:20:08.403Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"7f2ca121-ee4b-4532-afb8-66060ffe066b","content":"can you decorate it?","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:20:08.403Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"889771dc-f325-488f-8ce3-152f38ccea41","content":"Celest are you tehre?","sessionId":"web:DPZKtTtngW9whGuAAAAN","timestamp":"2026-02-09T19:20:08.403Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"89a4af9d-64c2-4ad6-9233-f3b8d56ea10c","content":"nice","sessionId":"web:M70gMTpCRLMVOHSWAAAJ","timestamp":"2026-02-09T19:20:08.403Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8e27d163-58ff-441d-9bbc-c71d047bd8d4","content":"hello","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:20:08.404Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"aa41bf81-c4be-409a-9169-f65346706eb4","content":"Hi Celest!","sessionId":"web:o-V89cGAG9C2wl4rAAAV","timestamp":"2026-02-09T19:20:08.404Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c7f79bf1-13c0-4d2f-b8e6-eb9c436949a8","content":"testt","sessionId":"web:6t9zjjordMfVSXjaAAAJ","timestamp":"2026-02-09T19:20:08.404Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"c87786ad-3f8a-4d71-9d58-18e0f4e00266","content":"thanks celest, you are geat.","sessionId":"web:9N5xB2RUgEjH1XHrAAAN","timestamp":"2026-02-09T19:20:08.404Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"eb233abe-4e68-46f4-bb1f-62d6c96cebe6","content":"Hi!","sessionId":"web:DPZKtTtngW9whGuAAAAN","timestamp":"2026-02-09T19:20:08.405Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"ff48d438-3ed1-46e7-8cba-29ba201a784f","content":"HI Celest!","sessionId":"web:RUZWKm_IA6qXAgYnAAAR","timestamp":"2026-02-09T19:20:08.405Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"f89c5715-39dc-42e9-a271-8ddf3ae40dc0","content":"Celest, how are you today?!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:20.736Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"f89c5715-39dc-42e9-a271-8ddf3ae40dc0","content":"Celest, how are you today?!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:20.737Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"862c017c-7b75-47f6-9559-7bdfca0f4916","content":"Perfect!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:33.828Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"862c017c-7b75-47f6-9559-7bdfca0f4916","content":"Perfect!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:33.829Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"df1f0c45-d353-4fbb-8232-8edd0f53f1f4","content":"thanks","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:45.547Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"df1f0c45-d353-4fbb-8232-8edd0f53f1f4","content":"thanks","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:45.548Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8f290c0e-2c05-4a33-93a1-44c2006632f7","content":"are you?","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:52.353Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8f290c0e-2c05-4a33-93a1-44c2006632f7","content":"are you?","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:20:52.354Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"862c017c-7b75-47f6-9559-7bdfca0f4916","content":"Perfect!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:23:32.424Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"8f290c0e-2c05-4a33-93a1-44c2006632f7","content":"are you?","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:23:32.425Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"df1f0c45-d353-4fbb-8232-8edd0f53f1f4","content":"thanks","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:23:32.426Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"f89c5715-39dc-42e9-a271-8ddf3ae40dc0","content":"Celest, how are you today?!","sessionId":"web:nKYkBP6AONxo9I3EAAAJ","timestamp":"2026-02-09T19:23:32.426Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"6b1b4a94-d652-40f5-85f0-7ccb17de45b7","content":"hallo","sessionId":"web:mMnrPWgZkFlfzej7AAAJ","timestamp":"2026-02-09T19:23:50.847Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"6b1b4a94-d652-40f5-85f0-7ccb17de45b7","content":"hallo","sessionId":"web:mMnrPWgZkFlfzej7AAAJ","timestamp":"2026-02-09T19:23:50.848Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"46b7fcf8-78d1-423c-8f37-0a9c54515e74","content":"heyo","sessionId":"web:h9Lh8l2WICMdPhuVAAAB","timestamp":"2026-02-09T19:27:08.770Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"46b7fcf8-78d1-423c-8f37-0a9c54515e74","content":"heyo","sessionId":"web:h9Lh8l2WICMdPhuVAAAB","timestamp":"2026-02-09T19:27:08.771Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"922aeb09-1548-4405-bd89-438cc84c70b8","content":"Good","sessionId":"web:h9Lh8l2WICMdPhuVAAAB","timestamp":"2026-02-09T19:28:35.946Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"922aeb09-1548-4405-bd89-438cc84c70b8","content":"Good","sessionId":"web:h9Lh8l2WICMdPhuVAAAB","timestamp":"2026-02-09T19:28:35.947Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"87f4cb65-cdcb-4cb9-8770-07fd6b3f2ce0","content":"hi!","sessionId":"web:HXyPBtENhDj1mzk-AAAF","timestamp":"2026-02-09T20:05:37.902Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"87f4cb65-cdcb-4cb9-8770-07fd6b3f2ce0","content":"hi!","sessionId":"web:HXyPBtENhDj1mzk-AAAF","timestamp":"2026-02-09T20:05:37.904Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"d282d4c9-b9a7-4251-a3dc-5255bab452a5","content":"Celest are you there?","sessionId":"web:HXyPBtENhDj1mzk-AAAF","timestamp":"2026-02-09T20:05:50.661Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"d282d4c9-b9a7-4251-a3dc-5255bab452a5","content":"Celest are you there?","sessionId":"web:HXyPBtENhDj1mzk-AAAF","timestamp":"2026-02-09T20:05:50.661Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"69e1eb7c-3b8c-4a7a-b388-9b8f1e113df0","content":"Heyo!","sessionId":"web:X1Ga3B42VARYNYvpAAAH","timestamp":"2026-02-09T20:14:07.572Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"69e1eb7c-3b8c-4a7a-b388-9b8f1e113df0","content":"Heyo!","sessionId":"web:X1Ga3B42VARYNYvpAAAH","timestamp":"2026-02-09T20:14:07.573Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"44d6c99d-d7b6-4c6b-9626-303fa235347a","content":"Hello","sessionId":"web:AztqKBv2tqprnQmwAAAH","timestamp":"2026-02-09T20:19:20.332Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"44d6c99d-d7b6-4c6b-9626-303fa235347a","content":"Hello","sessionId":"web:AztqKBv2tqprnQmwAAAH","timestamp":"2026-02-09T20:19:20.334Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"49b0caa8-8abb-41be-b972-53c51dffc21e","content":"Hi Celest","sessionId":"web:fayPAUa6YmqRjKgXAAAL","timestamp":"2026-02-09T20:27:15.544Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"49b0caa8-8abb-41be-b972-53c51dffc21e","content":"Hi Celest","sessionId":"web:fayPAUa6YmqRjKgXAAAL","timestamp":"2026-02-09T20:27:15.545Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"cb265ee3-de91-4c35-834e-b3b42680ca47","content":"Hi Celest!@","sessionId":"web:s-40YX_5z0gxmT8MAAAP","timestamp":"2026-02-09T20:29:57.291Z","source":"cozy-claw-home"}
+{"type":"companion_message","id":"cb265ee3-de91-4c35-834e-b3b42680ca47","content":"Hi Celest!@","sessionId":"web:s-40YX_5z0gxmT8MAAAP","timestamp":"2026-02-09T20:29:57.291Z","source":"cozy-claw-home"}

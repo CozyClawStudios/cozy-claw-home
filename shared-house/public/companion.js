@@ -17,7 +17,7 @@ const state = {
     },
     messages: [],
     settings: {
-        voiceEnabled: true,
+        voiceEnabled: false,  // Disabled by default
         initiativeEnabled: true,
         energy: 2
     },
@@ -70,7 +70,13 @@ function enterHouse() {
 // ==================== SOCKET CONNECTION ====================
 
 function connectSocket() {
-    const socket = io();
+    console.log('🔄 Connecting socket with v2 config...');
+    const socket = io({
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000
+    });
     
     socket.on('connect', () => {
         console.log('✅ Connected to companion server');
@@ -151,28 +157,64 @@ async function fetchBridgeStatus() {
     }
 }
 
+// Track last response timestamp AND displayed IDs to prevent duplicates
+let lastResponseTimestamp = new Date(0).toISOString();
+const displayedResponseIds = new Set();
+
 // NEW: Poll for bridge responses
 async function pollBridgeResponses() {
-    // Always poll, not just when pending flag is set
     try {
         const sessionId = state.socket?.id ? `web:${state.socket.id}` : 'web:default';
         
-        console.log('📡 Polling for responses...', sessionId);
-        const response = await fetch(`/api/clawbot/responses?sessionId=${sessionId}`);
+        console.log('📡 Polling for responses...', sessionId, 'since', lastResponseTimestamp);
+        const response = await fetch(`/api/clawbot/responses?sessionId=${sessionId}&since=${encodeURIComponent(lastResponseTimestamp)}`);
         const data = await response.json();
         
         if (data.responses?.length > 0) {
             console.log('📥 Received', data.responses.length, 'responses from bridge');
+            let foundNew = false;
+            let newestTimestamp = lastResponseTimestamp;
+            
             for (const resp of data.responses) {
-                if (resp.type === 'agent_response') {
-                    console.log('📝 Displaying response:', resp.content.substring(0, 50));
+                // Create unique ID for this response
+                const responseId = resp.timestamp + '|' + resp.content.substring(0, 50);
+                
+                // Skip if already displayed
+                if (displayedResponseIds.has(responseId)) {
+                    console.log('⏭️ Already displayed, skipping:', resp.content.substring(0, 30));
+                    continue;
+                }
+                
+                // Only show responses newer than our last seen
+                if (resp.timestamp > lastResponseTimestamp) {
+                    console.log('📝 Displaying NEW response:', resp.content.substring(0, 50));
                     receiveAgentMessage({
                         text: resp.content,
                         mood: resp.metadata?.mood || 'content',
                         initiative: resp.metadata?.initiative || false,
                         timestamp: resp.timestamp
                     });
+                    displayedResponseIds.add(responseId);
+                    foundNew = true;
                 }
+                
+                // Track newest timestamp
+                if (resp.timestamp > newestTimestamp) {
+                    newestTimestamp = resp.timestamp;
+                }
+            }
+            
+            // Update last timestamp
+            if (foundNew) {
+                lastResponseTimestamp = newestTimestamp;
+                console.log('✅ Updated lastResponseTimestamp to:', lastResponseTimestamp);
+            }
+            
+            // Clean up old IDs to prevent memory bloat (keep last 50)
+            if (displayedResponseIds.size > 50) {
+                const idsArray = Array.from(displayedResponseIds);
+                displayedResponseIds.clear();
+                idsArray.slice(-50).forEach(id => displayedResponseIds.add(id));
             }
         }
     } catch (err) {
@@ -287,7 +329,8 @@ async function sendMessage() {
     input.value = '';
     
     // NEW: Send via bridge
-    if (state.socket) {
+    console.log('Sending message. Socket exists:', !!state.socket, 'Connected:', state.socket?.connected);
+    if (state.socket && state.socket.connected) {
         state.socket.emit('user:message', { 
             message: text,
             clientInfo: {
@@ -295,13 +338,36 @@ async function sendMessage() {
                 timestamp: Date.now()
             }
         });
+        console.log('✅ Message emitted to socket');
         
         // Show pending indicator
         showThought('Thinking...', 10000);
+    } else {
+        console.error('❌ Cannot send: socket not connected');
+        showThought('Not connected — try refreshing');
     }
 }
 
+// Track delivered response IDs to prevent duplicates
+const deliveredResponseIds = new Set();
+
 function receiveAgentMessage(message) {
+    // Create a unique ID for this message
+    const messageId = message.text + (message.timestamp || Date.now());
+    
+    // Skip if already delivered
+    if (deliveredResponseIds.has(messageId)) {
+        console.log('⚠️ Duplicate response prevented:', message.text.substring(0, 30));
+        return;
+    }
+    deliveredResponseIds.add(messageId);
+    
+    // Limit set size to prevent memory leaks
+    if (deliveredResponseIds.size > 100) {
+        const firstKey = deliveredResponseIds.values().next().value;
+        deliveredResponseIds.delete(firstKey);
+    }
+    
     addMessage({
         role: 'agent',
         content: message.text,

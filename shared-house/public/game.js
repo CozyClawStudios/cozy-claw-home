@@ -161,7 +161,8 @@ const app = {
     settings: {
         voiceEnabled: true,
         initiativeEnabled: true,
-        energy: 2
+        energy: 2,
+        voiceEnabled: false  // Disabled by default
     },
     celest: {
         mood: 'happy',
@@ -235,7 +236,72 @@ function startTutorialHighlight() {
 
 // ==================== CHAT SYSTEM ====================
 
+// Track recently added messages to prevent duplicates
+const recentMessages = new Set();
+const MAX_RECENT_MESSAGES = 20;
+
 function addMessage(sender, text, isAgent = false) {
+    // Handle companion.js format: addMessage({role, content, timestamp, mood})
+    if (typeof sender === 'object' && sender !== null) {
+        const msg = sender;
+        
+        // Create unique ID for this message
+        const messageId = msg.content + '|' + (msg.role || 'user');
+        
+        // Check if recently added
+        if (recentMessages.has(messageId)) {
+            console.log('⏭️ Duplicate message blocked:', msg.content.substring(0, 30));
+            return;
+        }
+        recentMessages.add(messageId);
+        
+        // Clean up old entries
+        if (recentMessages.size > MAX_RECENT_MESSAGES) {
+            const firstKey = recentMessages.values().next().value;
+            recentMessages.delete(firstKey);
+        }
+        
+        const history = document.getElementById('messageHistory');
+        if (!history) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.role === 'agent' ? 'agent' : 'user'}`;
+        
+        const time = msg.timestamp ? msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        messageDiv.innerHTML = `
+            <div>${msg.content}</div>
+            <div class="message-time">${msg.role === 'agent' ? 'Celest' : 'You'} • ${time}</div>
+        `;
+        
+        history.appendChild(messageDiv);
+        history.scrollTop = history.scrollHeight;
+        
+        // Update memory count
+        if (msg.role === 'agent') {
+            app.memories.push({ sender: 'Celest', text: msg.content, time: Date.now() });
+            updateMemoryCount();
+        }
+        return;
+    }
+    
+    // Create unique ID for text format
+    const messageId = text + '|' + (isAgent ? 'agent' : 'user') + '|' + sender;
+    
+    // Check if recently added
+    if (recentMessages.has(messageId)) {
+        console.log('⏭️ Duplicate message blocked:', text.substring(0, 30));
+        return;
+    }
+    recentMessages.add(messageId);
+    
+    // Clean up old entries
+    if (recentMessages.size > MAX_RECENT_MESSAGES) {
+        const firstKey = recentMessages.values().next().value;
+        recentMessages.delete(firstKey);
+    }
+    
+    // Original game.js format: addMessage(sender, text, isAgent)
     const history = document.getElementById('messageHistory');
     if (!history) return;
     
@@ -259,20 +325,49 @@ function addMessage(sender, text, isAgent = false) {
     }
 }
 
+// Prevent duplicate sends
+let isSending = false;
+let lastSendTime = 0;
+
 function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     
     if (!text) return;
     
+    // Prevent duplicate sends - block if already sending or within 500ms
+    const now = Date.now();
+    if (isSending || (now - lastSendTime) < 500) {
+        console.log('⚠️ Message send blocked (already sending or too soon)');
+        return;
+    }
+    
+    isSending = true;
+    lastSendTime = now;
+    
     addMessage('You', text, false);
     input.value = '';
     
-    // Check if OpenClaw is connected
-    if (window.openclawConnected && window.sendToOpenClaw) {
-        // Send to OpenClaw for real AI response
-        window.sendToOpenClaw(text);
+    // NEW: Always use the bridge (companion.js handles the connection)
+    if (window.socket && window.socket.connected) {
+        console.log('📤 Sending via bridge:', text);
+        window.socket.emit('user:message', { 
+            message: text,
+            clientInfo: {
+                userAgent: navigator.userAgent,
+                timestamp: Date.now()
+            }
+        });
+        
+        // Show thinking indicator
+        const thoughtBubble = document.getElementById('thoughtBubble');
+        thoughtBubble.textContent = 'Thinking...';
+        thoughtBubble.classList.add('visible');
+        
+        // Reset sending flag after 2 seconds (longer to prevent rapid duplicates)
+        setTimeout(() => { isSending = false; }, 2000);
     } else {
+        console.log('⚠️ Socket not connected, using local fallback');
         // Use local fallback loop
         setTimeout(() => {
             const responses = [
@@ -295,6 +390,9 @@ function sendMessage() {
                 thoughtBubble.classList.remove('visible');
             }, 3000);
         }, 1000);
+        
+        // Reset sending flag after a short delay
+        setTimeout(() => { isSending = false; }, 100);
     }
 }
 
@@ -1475,3 +1573,18 @@ window.decorPanel = decorPanel;
 window.uploadBackground = uploadBackground;
 window.resetBackground = resetBackground;
 window.onAIConnect = onAIConnect;
+
+// ==================== INITIALIZATION ====================
+// Set up event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    const sendBtn = document.getElementById('sendBtn');
+    const chatInput = document.getElementById('chatInput');
+    
+    if (sendBtn) {
+        sendBtn.addEventListener('click', sendMessage);
+    }
+    
+    if (chatInput) {
+        chatInput.addEventListener('keypress', handleKeyPress);
+    }
+});

@@ -11,6 +11,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Cozy Home">
 
+    <!-- Prevent caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <title>Cozy Claw Home 🏠</title>
     <style>
         * {
@@ -1349,8 +1354,8 @@
         <div class="message-history" id="messageHistory"></div>
         <div class="chat-input-wrapper">
             <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</button>
-            <input type="text" class="chat-input" id="chatInput" placeholder="Talk to Celest..." onkeypress="handleKeyPress(event)">
-            <button class="chat-btn" onclick="sendMessage()">➤</button>
+            <input type="text" class="chat-input" id="chatInput" placeholder="Talk to Celest...">
+            <button class="chat-btn" id="sendBtn">➤</button>
         </div>
     </div>
 
@@ -1401,7 +1406,7 @@
             <div class="setting-item">
                 <div class="toggle">
                     <span>Voice Responses</span>
-                    <div class="toggle-switch active" id="voiceToggle" onclick="toggleSetting('voice')"></div>
+                    <div class="toggle-switch" id="voiceToggle" onclick="toggleSetting('voice')"></div>
                 </div>
             </div>
 
@@ -1500,6 +1505,8 @@
         align-items: center;
         z-index: 100;
         font-size: 0.8rem;
+        flex-wrap: wrap;
+        gap: 10px;
     ">
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 1.2rem;">🦞</span>
@@ -1508,8 +1515,8 @@
                 <span style="color: rgba(255,255,255,0.5); font-size: 0.7rem;">v3.0.0-beta.1 ⚡ Early Access</span>
             </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.6);">
-            <a href="https://www.youtube.com/@CozyClawStudios" target="_blank" style="
+        <div style="display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.6); flex-wrap: wrap;">
+            <a href="https://www.youtube.com/@Zakypew" target="_blank" style="
                 color: #FF0000;
                 text-decoration: none;
                 display: flex;
@@ -1519,10 +1526,11 @@
                 background: rgba(255, 0, 0, 0.1);
                 border-radius: 6px;
                 transition: all 0.3s;
+                font-size: 0.75rem;
             " onmouseover="this.style.background='rgba(255, 0, 0, 0.3)'" onmouseout="this.style.background='rgba(255, 0, 0, 0.1)'">
                 📺 YouTube
             </a>
-            <a href="https://www.twitch.tv/CozyClawStudios" target="_blank" style="
+            <a href="https://www.twitch.tv/Zakypews" target="_blank" style="
                 color: #9146FF;
                 text-decoration: none;
                 display: flex;
@@ -1532,37 +1540,58 @@
                 background: rgba(145, 70, 255, 0.1);
                 border-radius: 6px;
                 transition: all 0.3s;
+                font-size: 0.75rem;
             " onmouseover="this.style.background='rgba(145, 70, 255, 0.3)'" onmouseout="this.style.background='rgba(145, 70, 255, 0.1)'">
                 🎮 Twitch
             </a>
-            <a href="https://discord.gg/J5mxp39Rdj" target="_blank" style="
-                color: #5865F2;
+            <a href="https://x.com/Zakypews" target="_blank" style="
+                color: #1DA1F2;
                 text-decoration: none;
                 display: flex;
                 align-items: center;
                 gap: 5px;
                 padding: 4px 10px;
-                background: rgba(88, 101, 242, 0.1);
+                background: rgba(29, 161, 242, 0.1);
                 border-radius: 6px;
                 transition: all 0.3s;
-            " onmouseover="this.style.background='rgba(88, 101, 242, 0.3)'" onmouseout="this.style.background='rgba(88, 101, 242, 0.1)'">
-                💬 Discord
+                font-size: 0.75rem;
+            " onmouseover="this.style.background='rgba(29, 161, 242, 0.3)'" onmouseout="this.style.background='rgba(29, 161, 242, 0.1)'">
+                🐦 Zak
             </a>
-            <span>💡 Tip:</span>
-            <code onclick="navigator.clipboard.writeText(this.textContent); this.style.background='#4ade80'; setTimeout(()=>this.style.background='',500)" style="
-                background: rgba(255,255,255,0.1);
+            <a href="https://x.com/CelestClaw95514" target="_blank" style="
+                color: #ff9a9e;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 5px;
                 padding: 4px 10px;
+                background: rgba(255, 154, 158, 0.1);
                 border-radius: 6px;
-                cursor: pointer;
-                font-family: monospace;
                 transition: all 0.3s;
-                user-select: all;
-            " title="Click to copy">0x771CF735dBa3c8a3aF366f7D72F7673c2189C674</code>
+                font-size: 0.75rem;
+            " onmouseover="this.style.background='rgba(255, 154, 158, 0.3)'" onmouseout="this.style.background='rgba(255, 154, 158, 0.1)'">
+                💼 Celest
+            </a>
+            <a href="https://paypal.me/ZakHarris" target="_blank" style="
+                color: #0070BA;
+                text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                background: rgba(0, 112, 186, 0.1);
+                border-radius: 6px;
+                transition: all 0.3s;
+                font-size: 0.75rem;
+                font-weight: 600;
+            " onmouseover="this.style.background='rgba(0, 112, 186, 0.3)'" onmouseout="this.style.background='rgba(0, 112, 186, 0.1)'">
+                💙 Donate
+            </a>
         </div>
     </footer>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="companion.js"></script>
-    <script src="game.js"></script>
+    <script src="companion.js?v=13"></script>
+    <script src="game.js?v=13"></script>
 </body>
 </html>

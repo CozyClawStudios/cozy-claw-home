@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Companion House Test</title>
+</head>
+<body>
+    <h1>Bridge Diagnostic</h1>
+    <div id="status">Loading...</div>
+    <div id="socket"></div>
+    <div id="test"></div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const status = document.getElementById('status');
+        const socketDiv = document.getElementById('socket');
+        const testDiv = document.getElementById('test');
+
+        // Test 1: Check if server responds
+        fetch('http://localhost:3000/api/clawbot/status')
+            .then(r => r.json())
+            .then(data => {
+                status.innerHTML = '<b>✅ Server:</b> ' + JSON.stringify(data);
+            })
+            .catch(e => {
+                status.innerHTML = '<b>❌ Server error:</b> ' + e.message;
+            });
+
+        // Test 2: Socket connection
+        const socket = io('http://localhost:3000');
+        
+        socket.on('connect', () => {
+            socketDiv.innerHTML = '<b>✅ Socket connected:</b> ID = ' + socket.id;
+            
+            // Test 3: Send test message
+            socket.emit('user:message', { message: 'diagnostic test' });
+            testDiv.innerHTML = '<b>📤 Sent:</b> diagnostic test (check server logs)';
+        });
+
+        socket.on('disconnect', () => {
+            socketDiv.innerHTML = '<b>❌ Socket disconnected</b>';
+        });
+
+        socket.on('agent:message', (msg) => {
+            testDiv.innerHTML += '<br><b>📥 Received:</b> ' + JSON.stringify(msg);
+        });
+
+        socket.on('message:queued', (data) => {
+            testDiv.innerHTML += '<br><b>✅ Message queued:</b> ' + data.messageId;
+        });
+    </script>
+</body>
+</html>

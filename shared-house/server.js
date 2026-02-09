@@ -31,6 +31,7 @@ const VoiceSystem = require('./agent/voice');
 
 // NEW: Bridge and Decor systems
 const ClawBotBridge = require('./bridge/clawbot-bridge');
+const CompanionSubAgentBridge = require('./bridge/companion-subagent-bridge');
 const DecorDatabase = require('./decor/decor-database');
 
 const app = express();
@@ -239,7 +240,8 @@ const database = new Database();
 const io = new Server(server, {
     cors: { origin: '*' },
     pingTimeout: 60000,
-    pingInterval: 25000
+    pingInterval: 25000,
+    transports: ['websocket', 'polling']
 });
 
 // Track connected clients
@@ -384,6 +386,12 @@ class AgentSystem extends EventEmitter {
     }
     
     async initiateConversation(type, context = {}) {
+        // SKIP initiative messages when OpenClaw is connected (live agent handling responses)
+        if (clawbotBridge && clawbotBridge.mainAgentSession) {
+            console.log('🤖 Initiative message suppressed (OpenClaw connected):', type);
+            return;
+        }
+        
         const message = await this.core.generateInitiativeMessage(type, context);
         
         if (message) {
@@ -948,6 +956,16 @@ async function start() {
         // Initialize ClawBot Bridge
         clawbotBridge = new ClawBotBridge(io, database);
         await clawbotBridge.init();
+        
+        // Make clawbotBridge available globally for other bridges to check
+        global.clawbotBridge = clawbotBridge;
+        
+        // Initialize Companion Sub-Agent Bridge (30-min sessions)
+        const companionBridge = new CompanionSubAgentBridge(io);
+        companionBridge.init();
+        
+        // Make companion bridge available globally for status checks
+        global.companionBridge = companionBridge;
         
         console.log('');
         
