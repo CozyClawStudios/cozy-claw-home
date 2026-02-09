@@ -751,16 +751,7 @@ function connectToOpenClaw() {
         
         openclawWs.on('open', () => {
             console.log('✅ Connected to OpenClaw WebSocket');
-            
-            // Send authentication immediately on connect
-            if (openclawToken) {
-                console.log('🔐 Sending auth token...');
-                openclawWs.send(JSON.stringify({
-                    type: 'auth',
-                    token: openclawToken,
-                    source: 'cozy-claw-home'
-                }));
-            }
+            // Wait for challenge - do not send auth here
         });
         
         openclawWs.on('message', (data) => {
