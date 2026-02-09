@@ -7,9 +7,20 @@
 
 // ==================== STATE ====================
 
+// Generate or retrieve persistent client ID
+function getClientId() {
+    let clientId = localStorage.getItem('companionClientId');
+    if (!clientId) {
+        clientId = 'client_' + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('companionClientId', clientId);
+    }
+    return clientId;
+}
+
 const state = {
     socket: null,
     connected: false,
+    clientId: getClientId(), // Persistent across sessions
     agent: {
         mood: 'content',
         activity: 'relaxing',
@@ -82,6 +93,10 @@ function connectSocket() {
         console.log('✅ Connected to companion server');
         state.connected = true;
         updateConnectionStatus();
+        
+        // Send persistent client ID to server
+        socket.emit('client:register', { clientId: state.clientId });
+        console.log('📡 Registered client ID:', state.clientId);
         
         // NEW: Request bridge status
         fetchBridgeStatus();

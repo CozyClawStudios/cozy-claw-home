@@ -245,8 +245,8 @@ function addMessage(sender, text, isAgent = false) {
     if (typeof sender === 'object' && sender !== null) {
         const msg = sender;
         
-        // Create unique ID for this message
-        const messageId = msg.content + '|' + (msg.role || 'user');
+        // Create unique ID for this message (include timestamp to allow same text after time passes)
+        const messageId = msg.content + '|' + (msg.role || 'user') + '|' + Date.now();
         
         // Check if recently added
         if (recentMessages.has(messageId)) {

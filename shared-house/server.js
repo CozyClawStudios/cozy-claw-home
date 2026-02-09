@@ -387,8 +387,22 @@ class AgentSystem extends EventEmitter {
     
     async initiateConversation(type, context = {}) {
         // SKIP initiative messages when OpenClaw is connected (live agent handling responses)
-        if (clawbotBridge && clawbotBridge.mainAgentSession) {
+        // Check: main agent session OR recent responses (indicates active conversation)
+        const isOpenClawConnected = global.clawbotBridge && (
+            global.clawbotBridge.mainAgentSession || 
+            (global.clawbotBridge.recentResponses && global.clawbotBridge.recentResponses.length > 0)
+        );
+        
+        if (isOpenClawConnected) {
             console.log('🤖 Initiative message suppressed (OpenClaw connected):', type);
+            return;
+        }
+        
+        // ALSO SKIP if user was active recently (last 2 minutes) - prevents interrupting
+        const lastActivity = global.lastUserActivity || 0;
+        const timeSinceActivity = Date.now() - lastActivity;
+        if (timeSinceActivity < 2 * 60 * 1000) {
+            console.log('🤖 Initiative message suppressed (user active recently):', type);
             return;
         }
         

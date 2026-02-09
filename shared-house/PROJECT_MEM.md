@@ -231,11 +231,18 @@ adapter.on('message', async (msg) => {
 - **Issue:** Messages were being written to inbox.jsonl twice
 - **Cause:** `handleUserMessage()` called `fs.appendFileSync()` inline AND called `this.writeToInbox()` which did the same thing
 - **Fix:** Removed the duplicate `this.writeToInbox()` call in bridge/clawbot-bridge.js line ~211
+- **Commit:** 1d998cc
 
 ### 2026-02-09 - FIXED: Main Agent Not Connected
 - **Issue:** Bridge showed `mainAgentConnected: false` and no responses were delivered
 - **Cause:** The bridge-connector.js wasn't running to register Celest as the main agent
 - **Fix:** Started bridge-connector.js as background process and created cron job to poll inbox every 10 seconds
+
+### 2026-02-09 - FIXED: Session Recovery After Refresh
+- **Issue:** Responses lost when user refreshed page (new socket ID = orphaned responses)
+- **Cause:** No mechanism to recover responses sent to disconnected sessions
+- **Fix:** Added `recentResponses` buffer that stores last 20 responses for 5 minutes, auto-delivers to new connections
+- **Commit:** 1d998cc
 
 ## 📊 Stats
 - Total files created: 6

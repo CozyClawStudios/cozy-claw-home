@@ -32,6 +32,9 @@ class ClawBotBridge extends EventEmitter {
         this.recentResponses = [];
         this.maxRecentResponses = 20;
         
+        // Pending responses by clientId (for session persistence)
+        this.pendingByClientId = new Map();
+        
         // Stats
         this.stats = {
             messagesReceived: 0,
@@ -130,6 +133,16 @@ class ClawBotBridge extends EventEmitter {
                 content: response.text,
                 metadata: response
             });
+            
+            // Also store by clientId if we know it (for cross-session delivery)
+            const session = this.sessions.get(socketId);
+            if (session?.clientId) {
+                if (!this.pendingByClientId.has(session.clientId)) {
+                    this.pendingByClientId.set(session.clientId, []);
+                }
+                this.pendingByClientId.get(session.clientId).push(response);
+                console.log('📦 Stored response for clientId:', session.clientId);
+            }
         }
     }
     
@@ -142,8 +155,21 @@ class ClawBotBridge extends EventEmitter {
             this.sessions.set(socket.id, {
                 id: socket.id,
                 sessionId,
+                clientId: null, // Will be set on client:register
                 connectedAt: new Date().toISOString(),
                 lastActivity: Date.now()
+            });
+            
+            // Handle client registration with persistent ID
+            socket.on('client:register', (data) => {
+                const session = this.sessions.get(socket.id);
+                if (session && data.clientId) {
+                    session.clientId = data.clientId;
+                    console.log('📡 Client registered with persistent ID:', data.clientId);
+                    
+                    // Send any responses waiting for this client
+                    this.sendPendingResponsesForClient(data.clientId, socket);
+                }
             });
             
             // Send recent responses to help with session recovery after refresh
@@ -186,6 +212,9 @@ class ClawBotBridge extends EventEmitter {
         
         session.lastActivity = Date.now();
         this.stats.messagesReceived++;
+        
+        // Track global user activity to suppress idle chatter
+        global.lastUserActivity = Date.now();
         
         const message = {
             id: uuidv4(),
@@ -439,6 +468,27 @@ class ClawBotBridge extends EventEmitter {
                 });
                 this.stats.responsesDelivered++;
             }
+        }
+    }
+    
+    // Send pending responses for a specific client (after they reconnect with same clientId)
+    sendPendingResponsesForClient(clientId, socket) {
+        const pending = this.pendingByClientId.get(clientId);
+        if (pending && pending.length > 0) {
+            console.log(`📦 Sending ${pending.length} pending responses to client ${clientId}:`, socket.id);
+            
+            for (const resp of pending) {
+                socket.emit('agent:message', {
+                    text: resp.text,
+                    mood: resp.mood || 'content',
+                    timestamp: resp.timestamp || new Date().toISOString(),
+                    fromPendingBuffer: true
+                });
+                this.stats.responsesDelivered++;
+            }
+            
+            // Clear pending after sending
+            this.pendingByClientId.delete(clientId);
         }
     }
     
