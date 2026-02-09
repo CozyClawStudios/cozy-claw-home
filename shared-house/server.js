@@ -764,7 +764,8 @@ function connectToOpenClaw() {
                     console.log('🔐 Responding to OpenClaw challenge...');
                     
                     const response = {
-                        type: 'connect.challenge_response',
+                        type: 'event',
+                        event: 'connect.challenge_response',
                         payload: {
                             nonce: msg.payload?.nonce,
                             ts: msg.payload?.ts,
