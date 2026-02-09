@@ -181,22 +181,65 @@ async function fetchBridgeStatus() {
 let lastResponseTimestamp = new Date(0).toISOString();
 const displayedResponseIds = new Set();
 
-// NEW: Poll for bridge responses
+// NEW: Poll for bridge responses (HTTP polling - reliable 1-second delay)
 async function pollBridgeResponses() {
     try {
         const sessionId = state.socket?.id ? `web:${state.socket.id}` : 'web:default';
         
-        // Skip polling if socket is connected (responses come via Socket.IO)
-        if (state.socket?.connected) {
-            // Socket.IO handles responses directly, HTTP polling is backup only
-            return;
-        }
-        
+        // ALWAYS use HTTP polling for reliable message delivery
+        // Socket.IO is too unreliable for display
         const response = await fetch(`/api/clawbot/responses?sessionId=${sessionId}&since=${encodeURIComponent(lastResponseTimestamp)}`);
         const data = await response.json();
         
         if (data.responses?.length > 0) {
-            console.log('📥 Received', data.responses.length, 'responses from bridge (HTTP fallback)');
+            console.log('📥 Received', data.responses.length, 'responses via HTTP polling');
+            let foundNew = false;
+            let newestTimestamp = lastResponseTimestamp;
+            
+            for (const resp of data.responses) {
+                // Create unique ID for this response
+                const responseId = resp.timestamp + '|' + resp.content.substring(0, 50);
+                
+                // Skip if already displayed
+                if (displayedResponseIds.has(responseId)) {
+                    continue;
+                }
+                
+                // Only show responses newer than our last seen
+                if (resp.timestamp > lastResponseTimestamp) {
+                    console.log('📝 Displaying response:', resp.content.substring(0, 50));
+                    receiveAgentMessage({
+                        text: resp.content,
+                        mood: resp.metadata?.mood || 'content',
+                        initiative: resp.metadata?.initiative || false,
+                        timestamp: resp.timestamp
+                    });
+                    displayedResponseIds.add(responseId);
+                    foundNew = true;
+                }
+                
+                // Track newest timestamp
+                if (resp.timestamp > newestTimestamp) {
+                    newestTimestamp = resp.timestamp;
+                }
+            }
+            
+            // Update last timestamp
+            if (foundNew) {
+                lastResponseTimestamp = newestTimestamp;
+            }
+            
+            // Clean up old IDs (keep last 100)
+            if (displayedResponseIds.size > 100) {
+                const idsArray = Array.from(displayedResponseIds);
+                displayedResponseIds.clear();
+                idsArray.slice(-100).forEach(id => displayedResponseIds.add(id));
+            }
+        }
+    } catch (err) {
+        // Silently fail - will retry on next poll
+    }
+}
             let foundNew = false;
             let newestTimestamp = lastResponseTimestamp;
             
