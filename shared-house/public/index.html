@@ -723,29 +723,31 @@
 
         /* Message history */
         .message-history {
-            max-width: 600px;
-            margin: 0 auto 90px;
-            max-height: 30vh;
+            max-width: 700px;
+            margin: 0 auto 100px;
+            max-height: 28vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            padding: 10px 15px;
+            gap: 12px;
+            padding: 15px 20px;
             scroll-behavior: smooth;
             width: 100%;
+            align-items: flex-start;
         }
 
         .message {
             padding: 12px 16px;
             border-radius: 18px;
-            max-width: 85%;
+            max-width: 80%;
+            min-width: 200px;
             font-size: 0.95rem;
             animation: message-in 0.3s ease;
             word-wrap: break-word;
             overflow-wrap: break-word;
-            min-width: 0;
             line-height: 1.4;
             box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         @keyframes message-in {
@@ -1419,38 +1421,38 @@
                 </div>
                 <input type="range" min="1" max="3" value="2" oninput="updateEnergy(this.value)">
             </div>
+            
+            <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 15px; padding-top: 15px;">
+                <div class="setting-label" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>🖼️ Room Background</span>
+                    <span style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">1920x1080 recommended</span>
+                </div>
+                <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(this)" style="display: none;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="document.getElementById('bgUpload').click()" style="
+                        flex: 1;
+                        background: rgba(255,154,158,0.2);
+                        border: 1px solid #ff9a9e;
+                        padding: 10px 16px;
+                        border-radius: 8px;
+                        color: #ff9a9e;
+                        cursor: pointer;
+                        font-size: 0.85rem;
+                    ">📁 Upload Image</button>
+                    <button onclick="resetBackground()" style="
+                        flex: 1;
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid rgba(255,255,255,0.2);
+                        padding: 10px 16px;
+                        border-radius: 8px;
+                        color: rgba(255,255,255,0.6);
+                        cursor: pointer;
+                        font-size: 0.85rem;
+                    ">↩️ Reset</button>
+                </div>
+                <p style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 8px; margin-bottom: 0;">Max 5MB • JPG, PNG, WebP supported</p>
+            </div>
         </div>
-    </div>
-
-    <!-- Background Upload Settings -->
-    <div class="setting-item" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px;">
-        <div class="setting-label" style="margin-bottom: 10px;">
-            <span>🖼️ Custom Background</span>
-            <span class="setting-value" style="font-size: 0.7rem;">1920x1080 recommended</span>
-        </div>
-        <input type="file" id="bgUpload" accept="image/*" onchange="uploadBackground(this)" style="display: none;">
-        <button onclick="document.getElementById('bgUpload').click()" style="
-            background: rgba(255,154,158,0.2);
-            border: 1px solid #ff9a9e;
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: #ff9a9e;
-            cursor: pointer;
-            font-size: 0.85rem;
-            width: 100%;
-        ">Upload Background Image</button>
-        <p style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 8px;">Max 5MB • JPG, PNG, WebP</p>
-        <button onclick="resetBackground()" style="
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 8px;
-            color: rgba(255,255,255,0.6);
-            cursor: pointer;
-            font-size: 0.85rem;
-            width: 100%;
-            margin-top: 10px;
-        ">Reset to Default</button>
     </div>
 
     <!-- Footer -->
