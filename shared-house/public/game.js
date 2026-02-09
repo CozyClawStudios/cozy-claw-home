@@ -74,7 +74,7 @@ window.sendToOpenClaw = async function(text) {
         
         if (data && (data.response || data.text || data.message)) {
             const reply = data.response || data.text || data.message;
-            addMessage('Celest', reply, true);
+            gameAddMessage('Celest', reply, true);
             
             // Show in thought bubble
             const thoughtBubble = document.getElementById('thoughtBubble');
@@ -105,7 +105,7 @@ function useLocalResponse() {
             "This is so cozy! 🏠"
         ];
         const response = responses[Math.floor(Math.random() * responses.length)];
-        addMessage('Celest', response, true);
+        gameAddMessage('Celest', response, true);
         
         // Show in thought bubble too
         const thoughtBubble = document.getElementById('thoughtBubble');
@@ -133,7 +133,7 @@ function initSocketIO() {
         socket.on('agent:message', (data) => {
             console.log('💬 Received from agent:', data);
             if (data && data.text) {
-                addMessage('Celest', data.text, true);
+                gameAddMessage('Celest', data.text, true);
                 
                 // Show in thought bubble
                 const thoughtBubble = document.getElementById('thoughtBubble');
@@ -210,7 +210,7 @@ function showWelcomeMessage() {
     thoughtBubble.classList.add('visible');
     
     // Also add to chat history
-    addMessage('Celest', message, true);
+    gameAddMessage('Celest', message, true);
     
     // Hide after 5 seconds
     setTimeout(() => {
@@ -240,8 +240,14 @@ function startTutorialHighlight() {
 const recentMessages = new Set();
 const MAX_RECENT_MESSAGES = 20;
 
-function addMessage(sender, text, isAgent = false) {
-    // Handle companion.js format: addMessage({role, content, timestamp, mood})
+// Game-specific addMessage - delegates to companion.js version if it exists
+function gameAddMessage(sender, text, isAgent = false) {
+    // If companion.js addMessage exists, use it for object format
+    if (typeof window.companionAddMessage === 'function' && typeof sender === 'object') {
+        return window.companionAddMessage(sender);
+    }
+    
+    // Handle object format (from companion.js style calls)
     if (typeof sender === 'object' && sender !== null) {
         const msg = sender;
         
@@ -345,7 +351,7 @@ function sendMessage() {
     isSending = true;
     lastSendTime = now;
     
-    addMessage('You', text, false);
+    gameAddMessage('You', text, false);
     input.value = '';
     
     // NEW: Always use the bridge (companion.js handles the connection)
@@ -379,7 +385,7 @@ function sendMessage() {
                 "This is so cozy! 🏠"
             ];
             const response = responses[Math.floor(Math.random() * responses.length)];
-            addMessage('Celest', response, true);
+            gameAddMessage('Celest', response, true);
             
             // Show in thought bubble too
             const thoughtBubble = document.getElementById('thoughtBubble');
@@ -628,13 +634,13 @@ function toggleOpenClaw() {
     
     if (newEnabled) {
         connectToOpenClaw();
-        addMessage('Celest', 'Connecting to OpenClaw... 🔗', true);
+        gameAddMessage('Celest', 'Connecting to OpenClaw... 🔗', true);
     } else {
         if (openclawSocket) {
             openclawSocket.close();
         }
         window.openclawConnected = false;
-        addMessage('Celest', 'Switched to local mode 📴', true);
+        gameAddMessage('Celest', 'Switched to local mode 📴', true);
     }
 }
 
@@ -673,9 +679,9 @@ function reconnectOpenClaw() {
     
     if (enabled && url) {
         connectToOpenClaw();
-        addMessage('Celest', 'Reconnecting to OpenClaw... 🔄', true);
+        gameAddMessage('Celest', 'Reconnecting to OpenClaw... 🔄', true);
     } else {
-        addMessage('Celest', 'Using local responses 📴', true);
+        gameAddMessage('Celest', 'Using local responses 📴', true);
     }
 }
 
@@ -993,7 +999,7 @@ const decorPanel = {
         this.close();
         
         // Celest reacts
-        addMessage('Celest', `Ooh, that ${name} looks nice! ✨`, true);
+        gameAddMessage('Celest', `Ooh, that ${name} looks nice! ✨`, true);
     }
 };
 
@@ -1030,7 +1036,7 @@ function setRoomTheme(themeName) {
         'nature': 'Bringing the outdoors in! I feel refreshed! 🌿',
         'futuristic': 'Whoa, feels like we\'re in space! 🚀'
     };
-    addMessage('Celest', reactions[themeName] || 'Looking good! ✨', true);
+    gameAddMessage('Celest', reactions[themeName] || 'Looking good! ✨', true);
 }
 
 // ==================== CUSTOM COLORS ====================
@@ -1054,12 +1060,12 @@ function setCustomFloorColor(color) {
 // AI can set colors too
 function aiSetWallColor(color) {
     setCustomWallColor(color);
-    addMessage('Celest', `I changed the wall color! What do you think? 🎨`, true);
+    gameAddMessage('Celest', `I changed the wall color! What do you think? 🎨`, true);
 }
 
 function aiSetFloorColor(color) {
     setCustomFloorColor(color);
-    addMessage('Celest', `New floor color! Looking fresh! ✨`, true);
+    gameAddMessage('Celest', `New floor color! Looking fresh! ✨`, true);
 }
 
 // ==================== WINDOW VIEW ====================
@@ -1082,7 +1088,7 @@ function setWindowView(viewName) {
         localStorage.setItem('windowView', viewName);
         
         const view = windowViews[viewName];
-        addMessage('Celest', `Nice ${view.name}! ${view.emoji}✨`, true);
+        gameAddMessage('Celest', `Nice ${view.name}! ${view.emoji}✨`, true);
         return true;
     }
     return false;
@@ -1092,7 +1098,7 @@ function setWindowView(viewName) {
 function aiSetWindowView(viewName) {
     if (setWindowView(viewName)) {
         const view = windowViews[viewName];
-        addMessage('Celest', `I changed the window to ${view.name}! ${view.emoji}`, true);
+        gameAddMessage('Celest', `I changed the window to ${view.name}! ${view.emoji}`, true);
         return true;
     }
     return false;
@@ -1133,7 +1139,7 @@ const itemComments = {
 function interactWithItem(name, emoji) {
     const comments = itemComments[name] || ['Nice!', 'Love it!', 'Cool! ✨', 'Great choice!'];
     const randomComment = comments[Math.floor(Math.random() * comments.length)];
-    addMessage('Celest', `${emoji} ${randomComment}`, true);
+    gameAddMessage('Celest', `${emoji} ${randomComment}`, true);
 }
 
 // AI can interact with items
@@ -1301,14 +1307,14 @@ function switchRoom(roomId) {
     updateCelestVisibility();
     
     // Celest reacts
-    addMessage('Celest', `Welcome to the ${roomData.name}! ${roomData.icon}✨`, true);
+    gameAddMessage('Celest', `Welcome to the ${roomData.name}! ${roomData.icon}✨`, true);
 }
 
 // AI can switch rooms
 function aiSwitchRoom(roomId) {
     if (rooms[roomId]) {
         switchRoom(roomId);
-        addMessage('Celest', `I'll meet you in the ${rooms[roomId].name}!`, true);
+        gameAddMessage('Celest', `I'll meet you in the ${rooms[roomId].name}!`, true);
         return true;
     }
     return false;
@@ -1371,7 +1377,7 @@ function moveCelestToRoom(roomId) {
     // If user is in the same room, Celest announces herself
     if (celestRoomId === currentRoomId) {
         const roomName = rooms[roomId].name;
-        addMessage('Celest', `Hey! I'm in the ${roomName} now! 🦞`, true);
+        gameAddMessage('Celest', `Hey! I'm in the ${roomName} now! 🦞`, true);
     }
     
     return true;
@@ -1383,7 +1389,7 @@ function celestJoinUser() {
         celestRoomId = currentRoomId;
         localStorage.setItem('celestRoom', currentRoomId);
         updateCelestVisibility();
-        addMessage('Celest', `Here I am! What are we doing? ✨`, true);
+        gameAddMessage('Celest', `Here I am! What are we doing? ✨`, true);
         return true;
     }
     return false;
@@ -1471,7 +1477,7 @@ function uploadBackground(input) {
             room.style.backgroundSize = 'cover';
             room.style.backgroundPosition = 'center';
             localStorage.setItem('customBackground', e.target.result);
-            addMessage('Celest', 'Love the new background! 🎨✨', true);
+            gameAddMessage('Celest', 'Love the new background! 🎨✨', true);
         }
     };
     reader.readAsDataURL(file);
@@ -1483,7 +1489,7 @@ function resetBackground() {
         room.style.backgroundImage = '';
         room.style.background = 'linear-gradient(180deg, var(--wall-color, #3a3a55) 0%, var(--floor-color, #2d2d44) 100%)';
         localStorage.removeItem('customBackground');
-        addMessage('Celest', 'Back to the classic look! 🏠', true);
+        gameAddMessage('Celest', 'Back to the classic look! 🏠', true);
     }
 }
 
@@ -1545,7 +1551,7 @@ function onAIConnect() {
         if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
         else if (hour >= 17) greeting = 'Good evening';
         
-        addMessage('Celest', `${greeting}! I'm here and ready to help! 💫`, true);
+        gameAddMessage('Celest', `${greeting}! I'm here and ready to help! 💫`, true);
     }, 1000);
     
     // Start avatar movement

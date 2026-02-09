@@ -412,15 +412,23 @@ function receiveAgentMessage(message) {
 function addMessage(msg) {
     state.messages.push(msg);
     
+    // Also call game.js version if it exists (for proper UI display)
+    if (typeof gameAddMessage === 'function') {
+        gameAddMessage(msg);
+        return;
+    }
+    
     const historyEl = document.getElementById('messageHistory');
+    if (!historyEl) return;
+    
     const messageEl = document.createElement('div');
     messageEl.className = `message ${msg.role}`;
     
-    const time = msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const time = msg.timestamp ? msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
     messageEl.innerHTML = `
         <div>${escapeHtml(msg.content)}</div>
-        <div class="message-time">${time}</div>
+        <div class="message-time">${msg.role === 'agent' ? 'Celest' : 'You'} • ${time}</div>
     `;
     
     historyEl.appendChild(messageEl);
@@ -431,6 +439,9 @@ function addMessage(msg) {
         historyEl.removeChild(historyEl.firstChild);
     }
 }
+
+// Expose for game.js to use
+window.companionAddMessage = addMessage;
 
 function escapeHtml(text) {
     const div = document.createElement('div');
