@@ -146,7 +146,7 @@ class ClawBotBridge extends EventEmitter {
         }
     }
     
-    // Forward message to Celest via file queue
+    // Forward message to Celest via file queue (webhooks require gateway restart)
     forwardToOpenClaw(message) {
         const fs = require('fs');
         const path = require('path');
@@ -165,7 +165,7 @@ class ClawBotBridge extends EventEmitter {
         
         try {
             fs.appendFileSync(queueFile, JSON.stringify(entry) + '\n');
-            console.log('✅ Queued for Celest:', message.content.substring(0, 40));
+            console.log('✅ Queued for Celest (tell her "check game"):', message.content.substring(0, 40));
         } catch (err) {
             console.error('❌ Failed to queue:', err.message);
         }
