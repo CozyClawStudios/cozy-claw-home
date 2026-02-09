@@ -27,6 +27,7 @@ const EventEmitter = require('events');
 const AgentCore = require('./agent/core');
 const AgentMemory = require('./agent/memory');
 const ToolFramework = require('./agent/tools');
+const VoiceSystem = require('./agent/voice');
 
 // NEW: Bridge and Decor systems
 const ClawBotBridge = require('./bridge/clawbot-bridge');
@@ -247,6 +248,7 @@ const clients = new Map();
 // ==================== BRIDGE SETUP ====================
 let clawbotBridge;
 
+
 // ==================== AGENT SYSTEM ====================
 
 class AgentSystem extends EventEmitter {
@@ -254,14 +256,15 @@ class AgentSystem extends EventEmitter {
         super();
         this.db = db;
         this.tools = tools;
-        this.core = new AgentCore(db);
+        this.voice = new VoiceSystem();
+        this.core = new AgentCore(db, { voice: this.voice });
         this.memory = new AgentMemory(db);
         this.loopInterval = null;
         this.isRunning = false;
     }
     
-    async init() {
-        await this.core.init();
+    async init(io) {
+        await this.core.init(io);
         await this.memory.init();
         await this.tools.init();
         
@@ -288,6 +291,11 @@ class AgentSystem extends EventEmitter {
         setInterval(async () => {
             await this.checkToolAlerts();
         }, 60000);
+
+        // DISABLED: Economy milestones
+        // setInterval(async () => {
+        //     await this.checkEconomyMilestones();
+        // }, 5 * 60 * 1000);
     }
     
     async tick() {
@@ -386,6 +394,11 @@ class AgentSystem extends EventEmitter {
             
             this.emit('initiative', { type, message });
         }
+    }
+
+    // DISABLED: Economy milestones
+    async checkEconomyMilestones() {
+        return; // Feature disabled
     }
     
     stop() {
@@ -684,6 +697,134 @@ app.get('/api/decor/stats', async (req, res) => {
     }
 });
 
+/*
+// Get current economy data (for dashboard)
+app.get('/api/economy', async (req, res) => {
+    try {
+        res.json(summary);
+    } catch (err) {
+        console.error('Economy API error:', err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get weekly economy summary
+app.get('/api/economy/weekly', async (req, res) => {
+    try {
+        res.json(summary);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get all-time stats
+app.get('/api/economy/stats', async (req, res) => {
+    try {
+        res.json(stats);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+*/
+
+// ==================== NEW: VOICE API ====================
+
+// Get voice system status
+app.get('/api/voice/status', (req, res) => {
+    try {
+        const status = agentCore.getVoiceStatus();
+        res.json(status);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Speak text immediately
+app.post('/api/voice/speak', async (req, res) => {
+    try {
+        const { text, priority = 'normal' } = req.body;
+        if (!text) {
+            return res.status(400).json({ error: 'Text is required' });
+        }
+        
+        if (priority === 'high') {
+            await agentCore.voice.speak(text);
+        } else {
+            await agentCore.voice.queueText(text);
+        }
+        
+        res.json({ success: true, queued: priority !== 'high' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Stop voice playback
+app.post('/api/voice/stop', async (req, res) => {
+    try {
+        const { clearQueue = true } = req.body;
+        await agentCore.stopVoice(clearQueue);
+        res.json({ success: true, clearQueue });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Set voice volume
+app.post('/api/voice/volume', async (req, res) => {
+    try {
+        const { volume } = req.body;
+        if (typeof volume !== 'number' || volume < 0 || volume > 1) {
+            return res.status(400).json({ error: 'Volume must be between 0 and 1' });
+        }
+        
+        const newVolume = await agentCore.setVoiceVolume(volume);
+        res.json({ success: true, volume: newVolume });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Toggle voice mute
+app.post('/api/voice/toggle', async (req, res) => {
+    try {
+        const result = await agentCore.toggleVoice();
+        res.json({ success: true, ...result });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Trigger activity narration
+app.post('/api/voice/narrate', async (req, res) => {
+    try {
+        const { activity } = req.body;
+        if (!activity) {
+            return res.status(400).json({ error: 'Activity type is required' });
+        }
+        
+        await agentCore.narrateActivity(activity);
+        res.json({ success: true, activity });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Announce trading alert
+app.post('/api/voice/alert', async (req, res) => {
+    try {
+        const { type, context = {} } = req.body;
+        if (!type) {
+            return res.status(400).json({ error: 'Alert type is required' });
+        }
+        
+        await agentCore.announceTradingAlert(type, context);
+        res.json({ success: true, type });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Health check
 app.get('/health', (req, res) => {
     res.json({
@@ -691,6 +832,7 @@ app.get('/health', (req, res) => {
         mode: CONFIG.DEPLOYMENT_MODE,
         agent_running: agentSystem?.isRunning || false,
         bridge_active: !!clawbotBridge,
+        voice_enabled: agentCore?.voice ? !agentCore.voice.muted : false,
         connected_clients: clients.size,
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
@@ -716,13 +858,15 @@ async function start() {
         // Initialize decor database
         await decorDB.init();
         
+        // Initialize economy tracker - DISABLED
+        
         // Initialize agent components
         agentCore = new AgentCore(database);
         agentMemory = new AgentMemory(database);
         toolFramework = new ToolFramework(database);
         
         agentSystem = new AgentSystem(database, toolFramework);
-        await agentSystem.init();
+        await agentSystem.init(io);
         
         // Make globally available
         global.agentCore = agentCore;
@@ -738,7 +882,7 @@ async function start() {
         // Start server
         server.listen(CONFIG.PORT, () => {
             console.log('');
-            console.log(`🌐 Server running at http://localhost:${CONFIG.PORT}`);
+            console.log('🌐 Server running at http://localhost:' + CONFIG.PORT);
             console.log('');
             console.log('📡 API Endpoints:');
             console.log('  GET  /api/agent/state          - Agent current state');
@@ -760,6 +904,21 @@ async function start() {
             console.log('  POST /api/decor/place          - Place an item');
             console.log('  POST /api/decor/move           - Move an item');
             console.log('  GET  /api/decor/themes         - Get room themes');
+            console.log('');
+            // DISABLED: Economy Endpoints
+            // console.log('💰 Economy Endpoints:');
+            // console.log('  GET  /api/economy              - Today\'s economy data');
+            // console.log('  GET  /api/economy/weekly       - Weekly summary');
+            // console.log('  GET  /api/economy/stats        - All-time stats');
+            // console.log('');
+            console.log('🔊 Voice Endpoints:');
+            console.log('  GET  /api/voice/status         - Voice system status');
+            console.log('  POST /api/voice/speak          - Speak text (TTS)');
+            console.log('  POST /api/voice/stop           - Stop playback');
+            console.log('  POST /api/voice/volume         - Set volume (0-1)');
+            console.log('  POST /api/voice/toggle         - Toggle mute');
+            console.log('  POST /api/voice/narrate        - Activity narration');
+            console.log('  POST /api/voice/alert          - Trading alert');
             console.log('');
             
             // Start agent presence loop
