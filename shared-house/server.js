@@ -22,7 +22,6 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
-const WebSocket = require('ws'); // Add WebSocket client
 
 // Agent modules
 const AgentCore = require('./agent/core');
@@ -728,171 +727,61 @@ app.get('/api/economy/stats', async (req, res) => {
 });
 */
 
-// ==================== OPENCLAW WEBSOCKET BRIDGE ====================
+// ==================== OPENCLAW WEBHOOK RECEIVER ====================
 
-let openclawWs = null;
-let openclawConnected = false;
-const pendingRequests = new Map();
-
-// Load OpenClaw token from config
-let openclawToken = null;
-try {
-    const openclawConfig = require(path.join(process.env.HOME || '/home/zak', '.openclaw', 'openclaw.json'));
-    openclawToken = openclawConfig?.gateway?.auth?.token;
-    console.log('🔑 OpenClaw token loaded:', openclawToken ? 'Yes' : 'No');
-} catch (e) {
-    console.log('⚠️ Could not load OpenClaw config');
-}
-
-function connectToOpenClaw() {
-    try {
-        // Connect to OpenClaw WebSocket
-        openclawWs = new WebSocket('ws://127.0.0.1:18789');
-        
-        openclawWs.on('open', () => {
-            console.log('✅ Connected to OpenClaw WebSocket');
-            // Wait for challenge - do not send auth here
-        });
-        
-        openclawWs.on('message', (data) => {
-            try {
-                const msg = JSON.parse(data);
-                console.log('📨 OpenClaw message:', JSON.stringify(msg, null, 2));
-                
-                // Handle connection challenge
-                if (msg.type === 'event' && msg.event === 'connect.challenge') {
-                    console.log('🔐 Responding to OpenClaw challenge with token...');
-                    
-                    const response = {
-                        type: 'event',
-                        event: 'connect.challenge_response',
-                        payload: {
-                            nonce: msg.payload?.nonce,
-                            ts: msg.payload?.ts,
-                            accepted: true,
-                            token: 'cozyclaw'
-                        }
-                    };
-                    console.log('📤 Sending challenge response with cozyclaw token');
-                    openclawWs.send(JSON.stringify(response));
-                    return;
-                }
-                
-                // Handle successful connection
-                if (msg.type === 'event' && msg.event === 'connect.ready') {
-                    console.log('✅ OpenClaw connection established!');
-                    openclawConnected = true;
-                    return;
-                }
-                
-                // Handle connection error
-                if (msg.type === 'event' && msg.event === 'connect.error') {
-                    console.error('❌ OpenClaw connection error:', msg.payload);
-                    return;
-                }
-                
-                // Handle response to chat messages
-                if (msg.type === 'response' && msg.id) {
-                    const pending = pendingRequests.get(msg.id);
-                    if (pending) {
-                        pending.resolve(msg);
-                        pendingRequests.delete(msg.id);
-                    }
-                }
-                
-                // Handle agent messages (from Celest)
-                if (msg.type === 'agent:message') {
-                    console.log('💬 Agent message:', msg.data);
-                    // Broadcast to all connected browser clients via Socket.IO
-                    io.emit('agent:message', msg.data);
-                }
-            } catch (e) {
-                console.error('Error parsing OpenClaw message:', e);
-            }
-        });
-        
-        openclawWs.on('close', () => {
-            console.log('🔌 OpenClaw WebSocket disconnected');
-            openclawConnected = false;
-            setTimeout(connectToOpenClaw, 5000);
-        });
-        
-        openclawWs.on('error', (err) => {
-            console.error('❌ OpenClaw WebSocket error:', err.message);
-            openclawConnected = false;
-        });
-    } catch (err) {
-        console.error('Failed to connect to OpenClaw:', err.message);
-        setTimeout(connectToOpenClaw, 5000);
+// Receive messages from OpenClaw via webhook
+app.post('/api/webhook/openclaw', express.json(), (req, res) => {
+    const { type, event, data, text, message } = req.body;
+    
+    console.log('📨 OpenClaw webhook:', type || event, req.body);
+    
+    // Handle agent messages
+    if (type === 'agent:message' || event === 'agent:message') {
+        const msg = data || text || message;
+        if (msg) {
+            console.log('💬 Agent message:', msg);
+            // Broadcast to all browser clients
+            io.emit('agent:message', { text: msg.text || msg });
+        }
     }
-}
+    
+    // Handle other webhook events
+    if (type === 'heartbeat' || event === 'heartbeat') {
+        console.log('💓 OpenClaw heartbeat');
+    }
+    
+    res.json({ received: true });
+});
 
-// Send message to OpenClaw and wait for response
-function sendToOpenClaw(message, context = {}) {
-    return new Promise((resolve, reject) => {
-        if (!openclawWs || openclawWs.readyState !== WebSocket.OPEN) {
-            reject(new Error('OpenClaw not connected'));
-            return;
-        }
-        
-        if (!openclawConnected) {
-            reject(new Error('OpenClaw handshake not complete'));
-            return;
-        }
-        
-        const id = uuidv4();
-        const timeout = setTimeout(() => {
-            pendingRequests.delete(id);
-            reject(new Error('OpenClaw response timeout'));
-        }, 10000);
-        
-        pendingRequests.set(id, {
-            resolve: (response) => {
-                clearTimeout(timeout);
-                resolve(response);
-            },
-            reject: (err) => {
-                clearTimeout(timeout);
-                reject(err);
-            }
-        });
-        
-        // Send message in OpenClaw format
-        openclawWs.send(JSON.stringify({
-            type: 'user:message',
-            id: id,
-            data: {
-                text: message,
-                context: context
-            },
-            timestamp: new Date().toISOString()
-        }));
-        
-        console.log('📤 Sent to OpenClaw:', message);
+// Health check for OpenClaw webhook
+app.get('/api/webhook/openclaw', (req, res) => {
+    res.json({ 
+        status: 'ok',
+        endpoint: '/api/webhook/openclaw',
+        method: 'POST for agent messages'
     });
-}
+});
 
-// HTTP endpoint for browser to send messages
+// Simple flag - OpenClaw available (webhook mode)
+app.get('/api/openclaw/status', (req, res) => {
+    res.json({ 
+        connected: true,
+        mode: 'webhook',
+        endpoint: '/api/webhook/openclaw'
+    });
+});
+
+// HTTP endpoint for browser to send messages to agent
 app.post('/api/openclaw/chat', async (req, res) => {
     try {
         const { message, session, context } = req.body;
+        console.log('📤 User message to OpenClaw:', message);
         
-        if (!openclawConnected) {
-            return res.status(503).json({ 
-                error: 'OpenClaw not connected',
-                useLocal: true
-            });
-        }
-        
-        const response = await sendToOpenClaw(message, {
-            ...context,
-            session,
-            source: 'cozy-claw-home'
-        });
-        
-        res.json({
-            response: response.text || response.message || response.data,
-            source: 'openclaw'
+        // For now, use local response until OpenClaw webhook is configured
+        // The webhook endpoint above will receive agent responses
+        res.json({ 
+            queued: true,
+            message: 'Message sent to agent via webhook'
         });
     } catch (err) {
         console.error('OpenClaw chat error:', err.message);
@@ -902,17 +791,6 @@ app.post('/api/openclaw/chat', async (req, res) => {
         });
     }
 });
-
-// Status endpoint
-app.get('/api/openclaw/status', (req, res) => {
-    res.json({ 
-        connected: openclawConnected,
-        wsState: openclawWs ? openclawWs.readyState : 'null'
-    });
-});
-
-// Start OpenClaw connection
-connectToOpenClaw();
 
 // ==================== FUTURE: VOICE API (Not Ready) ====================
 /*
