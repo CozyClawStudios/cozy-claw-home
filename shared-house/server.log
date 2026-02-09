@@ -47,19 +47,52 @@
   GET  /api/decor/themes         - Get room themes
 
 🤖 Agent presence loop starting...
-🔌 Bridge: Client connected: 6MPeVDowHbTdFJZuAAAB
-🔌 Companion client connected: 6MPeVDowHbTdFJZuAAAB
-🔌 Bridge: Client connected: UXQdYGUMt1ZbIUtGAAAD
-🔌 Companion client connected: UXQdYGUMt1ZbIUtGAAAD
-🤖 Main agent registered: UXQdYGUMt1ZbIUtGAAAD
+🔌 Bridge: Client connected: a5UPYmqrQBU6WVURAAAB
+🔌 Companion client connected: a5UPYmqrQBU6WVURAAAB
+🔌 Bridge: Client connected: _M3L12o_KqFluo6tAAAD
+🔌 Companion client connected: _M3L12o_KqFluo6tAAAD
+🤖 Main agent registered: _M3L12o_KqFluo6tAAAD
+🤖 Mood changed: calm → focused (activity)
+🤖 Mood changed: focused → calm (activity)
+🔌 Bridge: Client disconnected: a5UPYmqrQBU6WVURAAAB Reason: transport close
+🔌 Bridge: Client disconnected: a5UPYmqrQBU6WVURAAAB
+🔌 Companion client disconnected: a5UPYmqrQBU6WVURAAAB
+⏳ Session will remain active for 30 minutes: web:a5UPYmqrQBU6WVURAAAB
+🔌 Bridge: Client connected: G4zjZzRtM--BlZw1AAAG
+🔌 Companion client connected: G4zjZzRtM--BlZw1AAAG
+🔌 Bridge: Client connected: AJUODc8hMUjGoTAGAAAH
+🔌 Companion client connected: AJUODc8hMUjGoTAGAAAH
+📡 Client registered with persistent ID: client_zo9be2qzsi
 🤖 Mood changed: calm → calm (activity)
-🔌 Bridge: Client disconnected: 6MPeVDowHbTdFJZuAAAB Reason: transport close
-🔌 Bridge: Client disconnected: 6MPeVDowHbTdFJZuAAAB
-🔌 Companion client disconnected: 6MPeVDowHbTdFJZuAAAB
-⏳ Session will remain active for 30 minutes: web:6MPeVDowHbTdFJZuAAAB
-🔌 Bridge: Client connected: ICm-TqM7GKkCOTZnAAAF
-🔌 Companion client connected: ICm-TqM7GKkCOTZnAAAF
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+🤖 Mood changed: calm → calm (activity)
+📨 Written to inbox.jsonl: hey girlll
+📤 Forwarded to main agent session: 733d4c80-4000-4d62-8719-825ac89ba9dc
+📨 Companion message (forwarding to Celest): hey girlll
+📤 Message queued and forwarded to OpenClaw: 733d4c80-4000-4d62-8719-825ac89ba9dc
+🤖 Mood changed: calm → calm (activity)
+Cleaning up stale session: _M3L12o_KqFluo6tAAAD
 🤖 Mood changed: calm → focused (activity)
+🔌 Bridge: Client disconnected: G4zjZzRtM--BlZw1AAAG Reason: transport close
+🔌 Bridge: Client disconnected: G4zjZzRtM--BlZw1AAAG
+🔌 Companion client disconnected: G4zjZzRtM--BlZw1AAAG
+⏳ Session will remain active for 30 minutes: web:G4zjZzRtM--BlZw1AAAG
+🔌 Bridge: Client disconnected: AJUODc8hMUjGoTAGAAAH Reason: transport close
+🔌 Bridge: Client disconnected: AJUODc8hMUjGoTAGAAAH
+🔌 Companion client disconnected: AJUODc8hMUjGoTAGAAAH
+⏳ Session will remain active for 30 minutes: web:AJUODc8hMUjGoTAGAAAH
+🔌 Bridge: Client connected: ROm9CzDHAeJ26DOvAAAK
+🔌 Companion client connected: ROm9CzDHAeJ26DOvAAAK
+🔌 Bridge: Client connected: ejAYvmfBZYrK9K2UAAAL
+🔌 Companion client connected: ejAYvmfBZYrK9K2UAAAL
+📡 Client registered with persistent ID: client_zo9be2qzsi
+📨 Written to inbox.jsonl: asd
+📤 Forwarded to main agent session: 2caaa755-b1a5-40ee-86a1-c5d85217933c
+📨 Companion message (forwarding to Celest): asd
+📤 Message queued and forwarded to OpenClaw: 2caaa755-b1a5-40ee-86a1-c5d85217933c
 🤖 Mood changed: focused → calm (activity)
+🤖 Mood changed: calm → calm (activity)
 🤖 Mood changed: calm → focused (activity)
-🤖 Mood changed: focused → calm (activity)
+📥 Delivered to ejAYvmfBZYrK9K2UAAAL : Got your 'asd'! Testing if HTTP polling 
+🤖 Mood changed: focused → focused (activity)
