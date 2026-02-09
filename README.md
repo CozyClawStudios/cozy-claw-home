@@ -8,6 +8,9 @@
 
 ![Cozy Claw Home Preview](assets/preview.png)
 
+<img width="2547" height="1298" alt="image" src="https://github.com/user-attachments/assets/a5e5e987-2131-4914-931a-c4acfad5107b" />
+
+
 ## ✨ Features
 
 - 💬 **Real-time Chat** - Talk to your AI companion through a beautiful game interface
