@@ -762,7 +762,6 @@ function connectToOpenClaw() {
                 }));
             }
         });
-        });
         
         openclawWs.on('message', (data) => {
             try {
