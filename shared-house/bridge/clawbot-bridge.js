@@ -147,21 +147,28 @@ class ClawBotBridge extends EventEmitter {
         }
     }
     
-    // Forward message to OpenClaw via HTTP webhook
+    // Forward message to OpenClaw via CLI
     forwardToOpenClaw(message) {
-        const http = require('http');
         const { exec } = require('child_process');
         
-        // Use openclaw CLI to send to main session
-        const escapedMessage = message.content.replace(/"/g, '\\"').replace(/\n/g, ' ');
-        const cmd = `openclaw sessions send --session-key "agent:main:main" --message "[Companion House] ${escapedMessage}"`;
+        // Escape the message for shell
+        const escapedMessage = message.content
+            .replace(/\\/g, '\\\\')
+            .replace(/"/g, '\\"')
+            .replace(/\n/g, ' ');
         
-        exec(cmd, { timeout: 10000 }, (err, stdout, stderr) => {
+        // Use openclaw to send to main agent session
+        const cmd = `cd /home/zak/.openclaw/workspace && echo "${escapedMessage}" > .clawbot-msg && openclaw sessions send --session-key "agent:main:main" --message "[Companion House] ${escapedMessage}"`;
+        
+        exec(cmd, { 
+            timeout: 15000,
+            env: { ...process.env, PATH: '/usr/local/bin:/usr/bin:/bin:/home/zak/.nvm/versions/node/v25.5.0/bin' }
+        }, (err, stdout, stderr) => {
             if (err) {
-                console.error('❌ Failed to forward to OpenClaw:', err.message);
-            } else {
-                console.log('✅ Forwarded to OpenClaw:', message.content.substring(0, 40));
+                console.error('❌ Failed to forward:', err.message);
+                return;
             }
+            console.log('✅ Forwarded to Celest:', message.content.substring(0, 40));
         });
     }
     
@@ -298,6 +305,9 @@ class ClawBotBridge extends EventEmitter {
                 sessionId,
                 metadata
             });
+            
+            // Forward to OpenClaw
+            this.forwardToOpenClaw({ content: message, id: msg.id, sessionId });
             
             res.json({
                 success: true,
