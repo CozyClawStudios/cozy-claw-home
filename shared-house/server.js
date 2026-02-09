@@ -22,6 +22,7 @@ const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
 const EventEmitter = require('events');
+const WebSocket = require('ws'); // Add WebSocket client
 
 // Agent modules
 const AgentCore = require('./agent/core');
@@ -727,58 +728,139 @@ app.get('/api/economy/stats', async (req, res) => {
 });
 */
 
-// ==================== OPENCLAW PROXY (Bypass CORS) ====================
+// ==================== OPENCLAW WEBSOCKET BRIDGE ====================
 
-// Proxy status check - just check if OpenClaw is reachable
-app.get('/api/openclaw/status', async (req, res) => {
+let openclawWs = null;
+let openclawConnected = false;
+const pendingRequests = new Map();
+
+function connectToOpenClaw() {
     try {
-        // Just check if OpenClaw responds at all
-        const response = await fetch('http://127.0.0.1:18789/', { 
-            method: 'HEAD',
-            timeout: 2000
+        // Connect to OpenClaw WebSocket
+        openclawWs = new WebSocket('ws://127.0.0.1:18789');
+        
+        openclawWs.on('open', () => {
+            console.log('✅ Connected to OpenClaw WebSocket');
+            openclawConnected = true;
+            
+            // Send authentication if needed
+            openclawWs.send(JSON.stringify({
+                type: 'auth',
+                source: 'cozy-claw-home'
+            }));
         });
-        res.json({ connected: response.ok || response.status === 200 });
+        
+        openclawWs.on('message', (data) => {
+            try {
+                const response = JSON.parse(data);
+                console.log('📨 OpenClaw response:', response);
+                
+                // Handle response
+                if (response.type === 'response' && response.id) {
+                    const pending = pendingRequests.get(response.id);
+                    if (pending) {
+                        pending.resolve(response);
+                        pendingRequests.delete(response.id);
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing OpenClaw message:', e);
+            }
+        });
+        
+        openclawWs.on('close', () => {
+            console.log('🔌 OpenClaw WebSocket disconnected');
+            openclawConnected = false;
+            // Reconnect after 5 seconds
+            setTimeout(connectToOpenClaw, 5000);
+        });
+        
+        openclawWs.on('error', (err) => {
+            console.error('❌ OpenClaw WebSocket error:', err.message);
+            openclawConnected = false;
+        });
     } catch (err) {
-        res.json({ connected: false, error: err.message });
+        console.error('Failed to connect to OpenClaw:', err.message);
+        setTimeout(connectToOpenClaw, 5000);
     }
-});
+}
 
-// Proxy chat messages to OpenClaw
+// Send message to OpenClaw and wait for response
+function sendToOpenClaw(message, context = {}) {
+    return new Promise((resolve, reject) => {
+        if (!openclawWs || openclawWs.readyState !== WebSocket.OPEN) {
+            reject(new Error('OpenClaw not connected'));
+            return;
+        }
+        
+        const id = uuidv4();
+        const timeout = setTimeout(() => {
+            pendingRequests.delete(id);
+            reject(new Error('OpenClaw response timeout'));
+        }, 10000);
+        
+        pendingRequests.set(id, {
+            resolve: (response) => {
+                clearTimeout(timeout);
+                resolve(response);
+            },
+            reject: (err) => {
+                clearTimeout(timeout);
+                reject(err);
+            }
+        });
+        
+        openclawWs.send(JSON.stringify({
+            type: 'message',
+            id: id,
+            text: message,
+            context: context,
+            timestamp: new Date().toISOString()
+        }));
+    });
+}
+
+// HTTP endpoint for browser to send messages
 app.post('/api/openclaw/chat', async (req, res) => {
     try {
         const { message, session, context } = req.body;
         
-        // Try multiple OpenClaw endpoints
-        const endpoints = [
-            'http://127.0.0.1:18789/api/webhook',
-            'http://127.0.0.1:18789/api/v1/chat',
-            'http://127.0.0.1:18789/api/chat'
-        ];
-        
-        for (const endpoint of endpoints) {
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message, session, context })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    return res.json(data);
-                }
-            } catch (e) {
-                // Try next endpoint
-            }
+        if (!openclawConnected) {
+            return res.status(503).json({ 
+                error: 'OpenClaw not connected',
+                useLocal: true
+            });
         }
         
-        // If all fail, return error
-        res.status(502).json({ error: 'OpenClaw not responding on any endpoint' });
+        const response = await sendToOpenClaw(message, {
+            ...context,
+            session,
+            source: 'cozy-claw-home'
+        });
+        
+        res.json({
+            response: response.text || response.message || response.data,
+            source: 'openclaw'
+        });
     } catch (err) {
-        console.error('OpenClaw proxy error:', err);
-        res.status(502).json({ error: err.message });
+        console.error('OpenClaw chat error:', err.message);
+        res.status(502).json({ 
+            error: err.message,
+            useLocal: true
+        });
     }
 });
+
+// Status endpoint
+app.get('/api/openclaw/status', (req, res) => {
+    res.json({ 
+        connected: openclawConnected,
+        wsState: openclawWs ? openclawWs.readyState : 'null'
+    });
+});
+
+// Start OpenClaw connection
+connectToOpenClaw();
 
 // ==================== FUTURE: VOICE API (Not Ready) ====================
 /*
