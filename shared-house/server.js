@@ -729,12 +729,15 @@ app.get('/api/economy/stats', async (req, res) => {
 
 // ==================== OPENCLAW PROXY (Bypass CORS) ====================
 
-// Proxy status check
+// Proxy status check - just check if OpenClaw is reachable
 app.get('/api/openclaw/status', async (req, res) => {
     try {
-        const response = await fetch('http://127.0.0.1:18789/api/status');
-        const data = await response.json();
-        res.json({ connected: true, data });
+        // Just check if OpenClaw responds at all
+        const response = await fetch('http://127.0.0.1:18789/', { 
+            method: 'HEAD',
+            timeout: 2000
+        });
+        res.json({ connected: response.ok || response.status === 200 });
     } catch (err) {
         res.json({ connected: false, error: err.message });
     }
@@ -745,31 +748,32 @@ app.post('/api/openclaw/chat', async (req, res) => {
     try {
         const { message, session, context } = req.body;
         
-        // Forward to OpenClaw
-        const response = await fetch('http://127.0.0.1:18789/api/v1/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, session, context })
-        });
+        // Try multiple OpenClaw endpoints
+        const endpoints = [
+            'http://127.0.0.1:18789/api/webhook',
+            'http://127.0.0.1:18789/api/v1/chat',
+            'http://127.0.0.1:18789/api/chat'
+        ];
         
-        if (!response.ok) {
-            // Try alternative endpoint
-            const altResponse = await fetch('http://127.0.0.1:18789/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message, session, context })
-            });
-            
-            if (!altResponse.ok) {
-                return res.status(502).json({ error: 'OpenClaw not responding' });
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, session, context })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    return res.json(data);
+                }
+            } catch (e) {
+                // Try next endpoint
             }
-            
-            const altData = await altResponse.json();
-            return res.json(altData);
         }
         
-        const data = await response.json();
-        res.json(data);
+        // If all fail, return error
+        res.status(502).json({ error: 'OpenClaw not responding on any endpoint' });
     } catch (err) {
         console.error('OpenClaw proxy error:', err);
         res.status(502).json({ error: err.message });
