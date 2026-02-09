@@ -734,6 +734,16 @@ let openclawWs = null;
 let openclawConnected = false;
 const pendingRequests = new Map();
 
+// Load OpenClaw token from config
+let openclawToken = null;
+try {
+    const openclawConfig = require(path.join(process.env.HOME || '/home/zak', '.openclaw', 'openclaw.json'));
+    openclawToken = openclawConfig?.gateway?.auth?.token;
+    console.log('🔑 OpenClaw token loaded:', openclawToken ? 'Yes' : 'No');
+} catch (e) {
+    console.log('⚠️ Could not load OpenClaw config');
+}
+
 function connectToOpenClaw() {
     try {
         // Connect to OpenClaw WebSocket
@@ -741,7 +751,17 @@ function connectToOpenClaw() {
         
         openclawWs.on('open', () => {
             console.log('✅ Connected to OpenClaw WebSocket');
-            // Wait for challenge before marking as connected
+            
+            // Send authentication immediately on connect
+            if (openclawToken) {
+                console.log('🔐 Sending auth token...');
+                openclawWs.send(JSON.stringify({
+                    type: 'auth',
+                    token: openclawToken,
+                    source: 'cozy-claw-home'
+                }));
+            }
+        });
         });
         
         openclawWs.on('message', (data) => {
